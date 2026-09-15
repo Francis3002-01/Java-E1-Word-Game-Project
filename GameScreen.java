@@ -343,23 +343,14 @@ public class GameScreen {
 
 
         // Repeat every second
-        timeline.setCycleCount(
-                Timeline.INDEFINITE
-        );
-
-
+        timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
 
 
     // Update score and words found
     private void updateLabels() {
-
-        scoreLabel.setText(
-                "Score: " +
-                gameLogic.getScore()
-        );
-
+        scoreLabel.setText("Score: " +gameLogic.getScore());
 
         wordsLabel.setText(
                 "Words Found: " +
@@ -368,50 +359,35 @@ public class GameScreen {
                 gameLogic.getGoal()
         );
 
-
         updateTimer();
     }
 
-
     // Update timer display
     private void updateTimer() {
-
-        timerLabel.setText(
-                "Time: " +
-                gameLogic.getRemainingTime()
-        );
+        timerLabel.setText("Time: " +gameLogic.getRemainingTime());
     }
-
 
     // End the game
     private void endGame(boolean cleared) {
 
         // Stop the timer
         if (timeline != null) {
-
             timeline.stop();
         }
 
 
         // Disable gameplay controls
         submitButton.setDisable(true);
-
         answerField.setDisable(true);
 
-
         if (cleared) {
+            messageLabel.setText("LEVEL CLEARED!");
 
-            messageLabel.setText(
-                    "LEVEL CLEARED!"
-            );
-
-        } else {
-
-            messageLabel.setText(
-                    "TIME'S UP!"
-            );
+        } 
+        
+        else {
+            messageLabel.setText("TIME'S UP!");
         }
-
 
         // Calculate final score
         int finalScore =
@@ -419,11 +395,7 @@ public class GameScreen {
 
 
         // Create final score label
-        Label finalScoreLabel =
-                new Label(
-                        "Final Score: " +
-                        finalScore
-                );
+        Label finalScoreLabel = new Label("Final Score: " +finalScore);
 
         finalScoreLabel.setFont(
                 Font.font("Serif", 28)

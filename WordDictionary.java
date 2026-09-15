@@ -22,7 +22,6 @@ public class WordDictionary {
         "owl",
         "ray",
         "sun",
-        "wand",
 
         // 4-letter words
         "arch",
@@ -37,7 +36,6 @@ public class WordDictionary {
         "dawn",
         "dear",
         "door",
-        "dragon",
         "dust",
         "earth",
         "fire",
@@ -66,7 +64,6 @@ public class WordDictionary {
         "demon",
         "fairy",
         "ghost",
-        "magic",
         "manor",
         "realm",
         "robed",

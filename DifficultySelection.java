@@ -90,22 +90,24 @@ public class DifficultySelection {
         backButton.setPrefHeight(40);
         backButton.setFont(Font.font("Arial", 16));
 
+        apprenticeButton.setOnAction(event -> {
+        System.out.println("APPRENTICE CLICKED");
 
-        Runnable apprenticeAction = () -> {
-            GameScreen gameScreen = new GameScreen(stage, "Apprentice");
-            gameScreen.show();
-        };
+        GameScreen gameScreen =
+                new GameScreen(stage, "Apprentice");
 
-        Runnable sorcererAction = () -> {
-            GameScreen gameScreen = new GameScreen(stage, "Sorcerer");
-            gameScreen.show();
-        };
+        gameScreen.show();
+        });
 
-        apprenticeButton.setOnAction(event -> apprenticeAction.run());
-        apprenticeSection.setOnMouseClicked(event -> apprenticeAction.run());
+        sorcererButton.setOnAction(event -> {
+        System.out.println("SORCERER CLICKED");
 
-        sorcererButton.setOnAction(event -> sorcererAction.run());
-        sorcererSection.setOnMouseClicked(event -> sorcererAction.run());
+        GameScreen gameScreen =
+                new GameScreen(stage, "Sorcerer");
+
+        gameScreen.show();
+        });
+        
 
         backButton.setOnAction(event -> {
             MainMenu mainMenu = new MainMenu(stage);
