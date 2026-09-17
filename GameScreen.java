@@ -18,6 +18,7 @@ public class GameScreen {
     private String difficulty;
 
     private GameLogic gameLogic;
+    private String playerName;
     private WordManager wordManager;
 
     private Label difficultyLabel;
@@ -34,7 +35,7 @@ public class GameScreen {
 
 
     // Constructor
-    public GameScreen(Stage stage, String difficulty) {
+    /*public GameScreen(Stage stage, String difficulty) {
 
         this.stage = stage;
         this.difficulty = difficulty;
@@ -42,8 +43,16 @@ public class GameScreen {
         // Create the game classes
         gameLogic = new GameLogic(difficulty);
         wordManager = new WordManager(difficulty);
-    }
+    }*/
+ 
+    public GameScreen(Stage stage,String difficulty,String playerName) {
+        this.stage = stage;
+        this.difficulty = difficulty;
+        this.playerName = playerName;
 
+        gameLogic = new GameLogic(difficulty);
+        wordManager = new WordManager(difficulty);
+     }
 
     // Show the game screen
     public void show() {
@@ -139,27 +148,21 @@ public class GameScreen {
 
 
         // Message label
-        messageLabel = new Label(
-                "Unscramble the word!"
-        );
+        messageLabel = new Label("Unscramble the word!");
 
-        messageLabel.setFont(
-                Font.font("Arial", 16)
-        );
+        messageLabel.setFont(Font.font("Arial", 16));
 
         messageLabel.setTextFill(Color.LIGHTGRAY);
 
 
         // Submit button action
         submitButton.setOnAction(event -> {
-
             checkAnswer();
         });
 
 
         // Allow ENTER key to submit
         answerField.setOnAction(event -> {
-
             checkAnswer();
         });
 
@@ -186,26 +189,16 @@ public class GameScreen {
 
 
         // Background
-        layout.setStyle(
-                "-fx-background-color: #17233C;"
-        );
-
+        layout.setStyle("-fx-background-color: #17233C;");
 
         // Create scene
-        Scene scene = new Scene(
-                layout,
-                900,
-                600
-        );
-
+        Scene scene = new Scene(layout,900,600);
 
         // Set scene
         stage.setScene(scene);
 
-
         // Start countdown
         startTimer();
-
 
         // Automatically focus the answer field
         answerField.requestFocus();
@@ -215,12 +208,9 @@ public class GameScreen {
     // Generate a new scrambled word
     private void generateNewWord() {
 
-        String scrambledWord =
-                wordManager.generateNewWord();
+        String scrambledWord = wordManager.generateNewWord();
 
-        scrambledWordLabel.setText(
-                scrambledWord
-        );
+        scrambledWordLabel.setText(scrambledWord);
 
         answerField.clear();
 
@@ -245,11 +235,7 @@ public class GameScreen {
 
         // Empty answer
         if (guess.isEmpty()) {
-
-            messageLabel.setText(
-                    "Please enter a word."
-            );
-
+            messageLabel.setText("Please enter a word.");
             return;
         }
 
@@ -390,8 +376,19 @@ public class GameScreen {
         }
 
         // Calculate final score
-        int finalScore =
-                gameLogic.calculateFinalScore();
+        int finalScore = gameLogic.calculateFinalScore();
+
+        PlayerScore playerScore =
+        new PlayerScore(
+                playerName,
+                difficulty,
+                finalScore
+        );
+
+        ScoreManager scoreManager =
+                new ScoreManager();
+
+        scoreManager.saveScore(playerScore);
 
 
         // Create final score label
@@ -407,16 +404,11 @@ public class GameScreen {
 
 
         // Create buttons
-        Button playAgainButton =
-                new Button("PLAY AGAIN");
-
+        Button playAgainButton = new Button("PLAY AGAIN");
         playAgainButton.setPrefWidth(180);
-
         playAgainButton.setPrefHeight(40);
 
-
-        Button menuButton =
-                new Button("MAIN MENU");
+        Button menuButton = new Button("MAIN MENU");
 
         menuButton.setPrefWidth(180);
 
@@ -424,31 +416,46 @@ public class GameScreen {
 
 
         // Play again
-        playAgainButton.setOnAction(event -> {
+        /*playAgainButton.setOnAction(event -> {
 
             GameScreen gameScreen =
-                    new GameScreen(
-                            stage,
-                            difficulty
-                    );
-
-            gameScreen.show();
-        });
+        new GameScreen(
+                stage,
+                difficulty,
+                playerName
+        );
 
 
         // Return to menu
         menuButton.setOnAction(event -> {
-
-            MainMenu mainMenu =
-                    new MainMenu(stage);
-
+            MainMenu mainMenu = new MainMenu(stage);
             mainMenu.show();
+        });*/
+
+        // Play again
+        playAgainButton.setOnAction(event -> {
+
+        GameScreen gameScreen =
+                new GameScreen(
+                        stage,
+                        difficulty,
+                        playerName
+                );
+
+        gameScreen.show();
         });
 
+        // Return to menu
+        menuButton.setOnAction(event -> {
+
+        MainMenu mainMenu =
+                new MainMenu(stage);
+
+        mainMenu.show();
+        });
 
         // Add final score and buttons
-        VBox layout =
-                (VBox) stage.getScene().getRoot();
+        VBox layout = (VBox) stage.getScene().getRoot();
 
         layout.getChildren().addAll(
                 finalScoreLabel,
