@@ -56,7 +56,7 @@ public class DifficultySelection {
         apprenticeSection.setAlignment(Pos.CENTER);
         apprenticeSection.setPrefWidth(320);
         apprenticeSection.setStyle(
-                "-fx-background-color: #233A5E; " +
+                "-fx-background-color: #4a8f5c; " +
                 "-fx-border-color: #8EC5FF; " +
                 "-fx-border-radius: 12; " +
                 "-fx-background-radius: 12; " +
