@@ -2,7 +2,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -22,17 +21,6 @@ public class DifficultySelection {
         Label title = new Label("SELECT DIFFICULTY");
         title.setFont(Font.font("Serif", 36));
         title.setTextFill(Color.WHITE);
-
-        Label nameLabel = new Label("PLAYER NAME");
-        nameLabel.setFont(Font.font("Arial", 18));
-        nameLabel.setTextFill(Color.WHITE);
-
-        TextField nameField = new TextField();
-        nameField.setPromptText("Enter your name");
-        nameField.setMaxWidth(300);
-        nameField.setPrefHeight(40);
-        nameField.setFont(Font.font("Arial", 16));
-
 
         // Apprentice section
         Label apprenticeInfo = new Label(
@@ -55,6 +43,7 @@ public class DifficultySelection {
         VBox apprenticeSection = new VBox(8);
         apprenticeSection.setAlignment(Pos.CENTER);
         apprenticeSection.setPrefWidth(320);
+
         apprenticeSection.setStyle(
                 "-fx-background-color: #4a8f5c; " +
                 "-fx-border-color: #8EC5FF; " +
@@ -62,7 +51,11 @@ public class DifficultySelection {
                 "-fx-background-radius: 12; " +
                 "-fx-padding: 18;"
         );
-        apprenticeSection.getChildren().addAll(apprenticeInfo, apprenticeButton);
+
+        apprenticeSection.getChildren().addAll(
+                apprenticeInfo,
+                apprenticeButton
+        );
 
         // Sorcerer section
         Label sorcererInfo = new Label(
@@ -85,6 +78,7 @@ public class DifficultySelection {
         VBox sorcererSection = new VBox(8);
         sorcererSection.setAlignment(Pos.CENTER);
         sorcererSection.setPrefWidth(320);
+
         sorcererSection.setStyle(
                 "-fx-background-color: #233A5E; " +
                 "-fx-border-color: #8EC5FF; " +
@@ -92,8 +86,31 @@ public class DifficultySelection {
                 "-fx-background-radius: 12; " +
                 "-fx-padding: 18;"
         );
-        sorcererSection.getChildren().addAll(sorcererInfo, sorcererButton);
 
+        sorcererSection.getChildren().addAll(
+                sorcererInfo,
+                sorcererButton
+        );
+
+        // Apprentice button
+        apprenticeButton.setOnAction(event -> {
+            System.out.println("APPRENTICE CLICKED");
+
+            GameScreen gameScreen =
+                    new GameScreen(stage, "Apprentice");
+
+            gameScreen.show();
+        });
+
+        // Sorcerer button
+        sorcererButton.setOnAction(event -> {
+            System.out.println("SORCERER CLICKED");
+
+            GameScreen gameScreen =
+                    new GameScreen(stage, "Sorcerer");
+
+            gameScreen.show();
+        });
 
         // Back button
         Button backButton = new Button("BACK");
@@ -101,88 +118,21 @@ public class DifficultySelection {
         backButton.setPrefHeight(40);
         backButton.setFont(Font.font("Arial", 16));
 
-        /*apprenticeButton.setOnAction(event -> {
-        System.out.println("APPRENTICE CLICKED");
-
-        GameScreen gameScreen =
-                new GameScreen(stage, "Apprentice");
-
-        gameScreen.show();
-        });*/
-
-        apprenticeButton.setOnAction(event -> {
-
-        String playerName = nameField.getText().trim();
-
-        if (playerName.isEmpty()) {
-                return;
-        }
-
-        System.out.println("APPRENTICE CLICKED");
-
-        GameScreen gameScreen =
-                new GameScreen(
-                        stage,
-                        "Apprentice",
-                        playerName
-                );
-
-        gameScreen.show();
-        });
-
-        /*sorcererButton.setOnAction(event -> {
-        System.out.println("SORCERER CLICKED");
-
-        GameScreen gameScreen =
-                new GameScreen(stage, "Sorcerer");
-
-        gameScreen.show();
-        });*/
-
-        sorcererButton.setOnAction(event -> {
-
-        String playerName = nameField.getText().trim();
-
-        if (playerName.isEmpty()) {
-                return;
-        }
-
-        System.out.println("SORCERER CLICKED");
-
-        GameScreen gameScreen =
-                new GameScreen(
-                        stage,
-                        "Sorcerer",
-                        playerName
-                );
-
-        gameScreen.show();
-        });
-        
-
         backButton.setOnAction(event -> {
             MainMenu mainMenu = new MainMenu(stage);
             mainMenu.show();
         });
 
+        // Layout
         VBox layout = new VBox(20);
         layout.setAlignment(Pos.CENTER);
 
-        /*layout.getChildren().addAll(
+        layout.getChildren().addAll(
                 title,
-                apprenticeSection,
-                sorcererSection,
-                backButton
-        );*/
-                layout.getChildren().addAll(
-                title,
-                nameLabel,
-                nameField,
                 apprenticeSection,
                 sorcererSection,
                 backButton
         );
-
 
         // Background
         layout.setStyle("-fx-background-color: #17233C;");

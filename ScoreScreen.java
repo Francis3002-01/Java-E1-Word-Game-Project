@@ -2,13 +2,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
-import java.util.List;
 
 public class ScoreScreen {
 
@@ -18,104 +15,84 @@ public class ScoreScreen {
         this.stage = stage;
     }
 
-
     // Show the score screen
     public void show() {
 
         // Title
         Label title = new Label("HIGH SCORES");
-
         title.setFont(Font.font("Serif", 36));
-
         title.setTextFill(Color.WHITE);
 
-        // Score list
-        ListView<String> scoreList = new ListView<>();
-        scoreList.setPrefWidth(600);
-        scoreList.setPrefHeight(350);
-
-
-        // Load saved scores
+        // Score manager
         ScoreManager scoreManager = new ScoreManager();
 
-        List<PlayerScore> scores = scoreManager.loadScores();
+        // Get high scores
+        PlayerScore apprenticeScore = scoreManager.getHighScore("Apprentice");
 
+        PlayerScore sorcererScore = scoreManager.getHighScore("Sorcerer");
 
-        // Check if there are saved scores
-        if (scores.isEmpty()) {
-            scoreList.getItems().add("No scores yet.");
+        // Apprentice
+        Label apprenticeLabel = new Label();
+
+        apprenticeLabel.setFont(Font.font("Arial", 22));
+
+        apprenticeLabel.setTextFill(Color.WHITE);
+
+        if (apprenticeScore != null) {
+            apprenticeLabel.setText("APPRENTICE\n"+ apprenticeScore.getScore());
+        } 
+        
+        else {
+            apprenticeLabel.setText("APPRENTICE\n"+ "No score yet");
+        }
+
+        // Sorcerer
+        Label sorcererLabel = new Label();
+
+        sorcererLabel.setFont(Font.font("Arial", 22));
+
+        sorcererLabel.setTextFill(Color.WHITE);
+
+        if (sorcererScore != null) {
+            sorcererLabel.setText("SORCERER\n"+ sorcererScore.getScore());
 
         } 
         
         else {
-            // Display each score
-            int rank = 1;
-
-            for (PlayerScore playerScore : scores) {
-
-                String scoreText =
-                        rank +
-                        ". " +
-                        playerScore.getPlayerName() +
-                        " | " +
-                        playerScore.getDifficulty() +
-                        " | Score: " +
-                        playerScore.getScore();
-
-                scoreList.getItems().add(
-                        scoreText
-                );
-
-                rank++;
-            }
+            sorcererLabel.setText("SORCERER\n"+ "No score yet");
         }
 
-
         // Back button
-        Button backButton = new Button("BACK");
+        Button backButton =new Button("BACK");
+
         backButton.setPrefWidth(180);
         backButton.setPrefHeight(45);
+
         backButton.setFont(Font.font("Arial", 16));
 
-        // Back button action
         backButton.setOnAction(event -> {
-            MainMenu mainMenu = new MainMenu(stage);
+            MainMenu mainMenu =new MainMenu(stage);
             mainMenu.show();
         });
 
-
         // Layout
-        VBox layout =
-                new VBox(20);
+        VBox layout =new VBox(30);
 
-        layout.setAlignment(
-                Pos.CENTER
-        );
-
+        layout.setAlignment(Pos.CENTER);
 
         layout.getChildren().addAll(
                 title,
-                scoreList,
+                apprenticeLabel,
+                sorcererLabel,
                 backButton
         );
 
-
         // Background
-        layout.setStyle(
-                "-fx-background-color: #17233C;"
-        );
+        layout.setStyle("-fx-background-color: #17233C;");
 
+        // Scene
+        Scene scene = new Scene(layout,900,600);
 
-        // Create scene
-        Scene scene =
-                new Scene(
-                        layout,
-                        900,
-                        600
-                );
-
-
-        // Set scene
         stage.setScene(scene);
     }
 }

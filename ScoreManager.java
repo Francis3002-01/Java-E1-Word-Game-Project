@@ -4,70 +4,90 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 public class ScoreManager {
 
     private static final String FILE_NAME = "scores.txt";
 
-
-    // Save a new score
+    // Save score only if it is a new high score
     public void saveScore(PlayerScore playerScore) {
 
-        try {
+        PlayerScore currentHighScore =
+                getHighScore(playerScore.getDifficulty());
 
-            BufferedWriter writer =
-                    new BufferedWriter(
-                            new FileWriter(
-                                    FILE_NAME,
-                                    true
-                            )
+        // Only save if there is no existing score
+        // or the new score is higher
+        if (currentHighScore == null ||
+                playerScore.getScore() >
+                currentHighScore.getScore()) {
+
+            try {
+
+                // Load existing high scores
+                PlayerScore apprenticeScore =
+                        getHighScore("Apprentice");
+
+                PlayerScore sorcererScore =
+                        getHighScore("Sorcerer");
+
+                // Replace the appropriate high score
+                if (playerScore.getDifficulty()
+                        .equals("Apprentice")) {
+
+                    apprenticeScore = playerScore;
+
+                } else if (playerScore.getDifficulty()
+                        .equals("Sorcerer")) {
+
+                    sorcererScore = playerScore;
+                }
+
+                BufferedWriter writer =
+                        new BufferedWriter(
+                                new FileWriter(FILE_NAME)
+                        );
+
+                if (apprenticeScore != null) {
+
+                    writer.write(
+                            "Apprentice|"
+                            + apprenticeScore.getScore()
                     );
 
+                    writer.newLine();
+                }
 
-            writer.write(
-                    playerScore.getPlayerName()
-                    + "|"
-                    + playerScore.getDifficulty()
-                    + "|"
-                    + playerScore.getScore()
-            );
+                if (sorcererScore != null) {
 
+                    writer.write(
+                            "Sorcerer|"
+                            + sorcererScore.getScore()
+                    );
 
-            writer.newLine();
+                    writer.newLine();
+                }
 
-            writer.close();
+                writer.close();
 
-        } catch (IOException e) {
+            } catch (IOException e) {
 
-            System.out.println(
-                    "Error saving score: "
-                    + e.getMessage()
-            );
+                System.out.println(
+                        "Error saving score: "
+                        + e.getMessage()
+                );
+            }
         }
     }
 
-
-    // Load all saved scores
-    public List<PlayerScore> loadScores() {
-
-        List<PlayerScore> scores =
-                new ArrayList<>();
-
+    // Get the high score for a specific difficulty
+    public PlayerScore getHighScore(String difficulty) {
 
         File file =
                 new File(FILE_NAME);
 
-
-        // If the file does not exist,
-        // return an empty list
         if (!file.exists()) {
-
-            return scores;
+            return null;
         }
-
 
         try {
 
@@ -76,52 +96,34 @@ public class ScoreManager {
                             new FileReader(file)
                     );
 
-
             String line;
-
 
             while ((line = reader.readLine()) != null) {
 
                 String[] parts =
                         line.split("\\|");
 
-
-                // Make sure the line has
-                // player name, difficulty, and score
-                if (parts.length == 3) {
-
-                    String playerName =
-                            parts[0];
-
-                    String difficulty =
-                            parts[1];
+                if (parts.length == 2 &&
+                        parts[0].equals(difficulty)) {
 
                     int score =
-                            Integer.parseInt(
-                                    parts[2]
-                            );
+                            Integer.parseInt(parts[1]);
 
+                    reader.close();
 
-                    PlayerScore playerScore =
-                            new PlayerScore(
-                                    playerName,
-                                    difficulty,
-                                    score
-                            );
-
-
-                    scores.add(playerScore);
+                    return new PlayerScore(
+                            difficulty,
+                            score
+                    );
                 }
             }
 
-
             reader.close();
-
 
         } catch (IOException e) {
 
             System.out.println(
-                    "Error loading scores: "
+                    "Error loading score: "
                     + e.getMessage()
             );
 
@@ -132,15 +134,6 @@ public class ScoreManager {
             );
         }
 
-
-        // Sort highest score first
-        scores.sort(
-                Comparator.comparingInt(
-                        PlayerScore::getScore
-                ).reversed()
-        );
-
-
-        return scores;
+        return null;
     }
 }

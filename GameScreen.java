@@ -18,7 +18,7 @@ public class GameScreen {
     private String difficulty;
 
     private GameLogic gameLogic;
-    private String playerName;
+    //private String playerName;
     private WordManager wordManager;
 
     private Label difficultyLabel;
@@ -45,10 +45,9 @@ public class GameScreen {
         wordManager = new WordManager(difficulty);
     }*/
  
-    public GameScreen(Stage stage,String difficulty,String playerName) {
+    public GameScreen(Stage stage,String difficulty) {
         this.stage = stage;
         this.difficulty = difficulty;
-        this.playerName = playerName;
 
         gameLogic = new GameLogic(difficulty);
         wordManager = new WordManager(difficulty);
@@ -110,9 +109,7 @@ public class GameScreen {
         // Scrambled word label
         scrambledWordLabel = new Label();
 
-        scrambledWordLabel.setFont(
-                Font.font("Serif", 42)
-        );
+        scrambledWordLabel.setFont(Font.font("Serif", 42));
 
         scrambledWordLabel.setTextFill(Color.WHITE);
 
@@ -120,32 +117,21 @@ public class GameScreen {
         // Answer input
         answerField = new TextField();
 
-        answerField.setPromptText(
-                "Enter your answer"
-        );
+        answerField.setPromptText("Enter your answer");
 
         answerField.setMaxWidth(300);
 
         answerField.setPrefHeight(45);
 
-        answerField.setFont(
-                Font.font("Arial", 18)
-        );
+        answerField.setFont(Font.font("Arial", 18));
 
 
         // Submit button
-        submitButton = new Button(
-                "SUBMIT"
-        );
+        submitButton = new Button("SUBMIT");
 
         submitButton.setPrefWidth(200);
-
         submitButton.setPrefHeight(45);
-
-        submitButton.setFont(
-                Font.font("Arial", 18)
-        );
-
+        submitButton.setFont(Font.font("Arial", 18));
 
         // Message label
         messageLabel = new Label("Unscramble the word!");
@@ -207,13 +193,9 @@ public class GameScreen {
 
     // Generate a new scrambled word
     private void generateNewWord() {
-
         String scrambledWord = wordManager.generateNewWord();
-
         scrambledWordLabel.setText(scrambledWord);
-
         answerField.clear();
-
         answerField.requestFocus();
     }
 
@@ -251,11 +233,7 @@ public class GameScreen {
         if (valid) {
 
             // Process correct answer
-            int points =
-                    gameLogic.processCorrectGuess(
-                            guess
-                    );
-
+            int points = gameLogic.processCorrectGuess(guess);
 
             messageLabel.setText(
                     "Correct! +" +
@@ -263,28 +241,24 @@ public class GameScreen {
                     " points! +10 seconds!"
             );
 
-
             // Update screen
             updateLabels();
 
-
             // Check if level is cleared
             if (gameLogic.hasClearedLevel()) {
-
                 endGame(true);
-
                 return;
             }
-
 
             // Generate another word
             generateNewWord();
 
-        } else {
+        } 
+        
+        else {
 
             // Process wrong answer
-            int penalty =
-                    gameLogic.processWrongGuess();
+            int penalty = gameLogic.processWrongGuess();
 
 
             messageLabel.setText(
@@ -380,13 +354,11 @@ public class GameScreen {
 
         PlayerScore playerScore =
         new PlayerScore(
-                playerName,
                 difficulty,
                 finalScore
         );
 
-        ScoreManager scoreManager =
-                new ScoreManager();
+        ScoreManager scoreManager = new ScoreManager();
 
         scoreManager.saveScore(playerScore);
 
@@ -394,14 +366,9 @@ public class GameScreen {
         // Create final score label
         Label finalScoreLabel = new Label("Final Score: " +finalScore);
 
-        finalScoreLabel.setFont(
-                Font.font("Serif", 28)
-        );
+        finalScoreLabel.setFont(Font.font("Serif", 28));
 
-        finalScoreLabel.setTextFill(
-                Color.WHITE
-        );
-
+        finalScoreLabel.setTextFill(Color.WHITE);
 
         // Create buttons
         Button playAgainButton = new Button("PLAY AGAIN");
@@ -438,8 +405,7 @@ public class GameScreen {
         GameScreen gameScreen =
                 new GameScreen(
                         stage,
-                        difficulty,
-                        playerName
+                        difficulty
                 );
 
         gameScreen.show();
