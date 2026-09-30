@@ -488,7 +488,7 @@ public class GameScreen {
                 wizardImageView,
                 idleSheet,
                 6,
-                500
+                150
             );
 
 
@@ -508,7 +508,7 @@ public class GameScreen {
                 wizardImageView,
                 attackSheet,
                 8,
-                500
+                200
             );
 
 
@@ -528,7 +528,7 @@ public class GameScreen {
                 wizardImageView,
                 hitSheet,
                 4,
-                500
+                200
             );
 
 
@@ -618,7 +618,7 @@ public class GameScreen {
             enemyImageView,
             idleSheet,
             currentEnemy.getIdleFrames(),
-            500
+            200
         );
 
 
@@ -638,7 +638,7 @@ public class GameScreen {
             enemyImageView,
             attackSheet,
             currentEnemy.getAttackFrames(),
-            500
+            100
         );
 
 
