@@ -1,24 +1,45 @@
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorInput;
+import javafx.scene.effect.DropShadow;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
 import javafx.scene.paint.Color;
+
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
 import javafx.stage.Stage;
+
 import javafx.util.Duration;
+
 
 public class GameScreen {
 
@@ -28,6 +49,7 @@ public class GameScreen {
     private GameLogic gameLogic;
     private WordManager wordManager;
     private EnemyManager enemyManager;
+
 
     // =========================
     // UI ELEMENTS
@@ -43,11 +65,21 @@ public class GameScreen {
     private TextField answerField;
     private Button submitButton;
 
+
+    // =========================
+    // ANIMATED INPUT
+    // =========================
+
+    private StackPane answerInputContainer;
+    private HBox animatedLetters;
+
+
     // =========================
     // GAME TIMER
     // =========================
 
     private Timeline timeline;
+
 
     // =========================
     // WIZARD
@@ -58,6 +90,7 @@ public class GameScreen {
     private SpriteAnimator wizardIdleAnimator;
     private SpriteAnimator wizardAttackAnimator;
     private SpriteAnimator wizardHitAnimator;
+
 
     // =========================
     // ENEMY
@@ -70,11 +103,13 @@ public class GameScreen {
 
     private Enemy currentEnemy;
 
+
     // =========================
     // BATTLE AREA
     // =========================
 
     private HBox battleArea;
+
 
     // =========================
     // STATE
@@ -82,7 +117,26 @@ public class GameScreen {
 
     private boolean animationPlaying = false;
 
-    public GameScreen(Stage stage, String difficulty) {
+
+    // =========================
+    // ANIMATION SETTINGS
+    // =========================
+
+    private static final int WIZARD_ATTACK_FRAME_DURATION = 200;
+
+    private static final int ENEMY_ATTACK_FRAME_DURATION = 100;
+
+    private static final int HIT_TRIGGER_FRAMES = 2;
+
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
+
+    public GameScreen(
+        Stage stage,
+        String difficulty
+    ) {
 
         this.stage = stage;
         this.difficulty = difficulty;
@@ -91,6 +145,7 @@ public class GameScreen {
         wordManager = new WordManager(difficulty);
         enemyManager = new EnemyManager();
     }
+
 
     // =========================================================
     // SHOW GAME SCREEN
@@ -110,20 +165,26 @@ public class GameScreen {
             Font.font("Serif", 24)
         );
 
-        difficultyLabel.setTextFill(Color.WHITE);
+        difficultyLabel.setTextFill(
+            Color.WHITE
+        );
 
 
         // -------------------------
         // SCORE
         // -------------------------
 
-        scoreLabel = new Label("Score: 0");
+        scoreLabel = new Label(
+            "Score: 0"
+        );
 
         scoreLabel.setFont(
             Font.font("Arial", 18)
         );
 
-        scoreLabel.setTextFill(Color.WHITE);
+        scoreLabel.setTextFill(
+            Color.WHITE
+        );
 
 
         // -------------------------
@@ -139,7 +200,9 @@ public class GameScreen {
             Font.font("Arial", 18)
         );
 
-        wordsLabel.setTextFill(Color.WHITE);
+        wordsLabel.setTextFill(
+            Color.WHITE
+        );
 
 
         // -------------------------
@@ -155,7 +218,9 @@ public class GameScreen {
             Font.font("Arial", 18)
         );
 
-        timerLabel.setTextFill(Color.WHITE);
+        timerLabel.setTextFill(
+            Color.WHITE
+        );
 
 
         // -------------------------
@@ -168,7 +233,9 @@ public class GameScreen {
             Font.font("Serif", 42)
         );
 
-        scrambledWordLabel.setTextFill(Color.WHITE);
+        scrambledWordLabel.setTextFill(
+            Color.WHITE
+        );
 
 
         // -------------------------
@@ -191,18 +258,81 @@ public class GameScreen {
 
 
         // -------------------------
+        // ANIMATED LETTER DISPLAY
+        // -------------------------
+
+        animatedLetters = new HBox(3);
+
+        animatedLetters.setAlignment(
+            Pos.CENTER
+        );
+
+        animatedLetters.setMouseTransparent(
+            true
+        );
+
+
+        // -------------------------
+        // INPUT CONTAINER
+        // -------------------------
+
+        answerInputContainer = new StackPane();
+
+        answerInputContainer.setMaxWidth(300);
+
+        answerInputContainer.setPrefHeight(45);
+
+
+        // Dark transparent TextField.
+
+        answerField.setStyle(
+            "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+            "-fx-background-insets: 0;" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-color: rgba(255, 255, 255, 0.25);" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 8;" +
+            "-fx-text-fill: transparent;" +
+            "-fx-prompt-text-fill: rgba(255, 255, 255, 0.45);" +
+            "-fx-highlight-fill: transparent;" +
+            "-fx-highlight-text-fill: transparent;" +
+            "-fx-cursor: text;"
+        );
+
+
+        // Put animated letters above TextField.
+
+        answerInputContainer.getChildren().addAll(
+            answerField,
+            animatedLetters
+        );
+
+
+        // -------------------------
         // SUBMIT BUTTON
         // -------------------------
 
-        submitButton = new Button("SUBMIT");
+        submitButton = new Button(
+            "CAST SPELL"
+        );
 
         submitButton.setPrefWidth(200);
 
         submitButton.setPrefHeight(45);
 
         submitButton.setFont(
-            Font.font("Arial", 18)
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                16
+            )
         );
+
+        submitButton.setTextFill(
+            Color.web("#F5E6C8")
+        );
+
+        setSubmitButtonNormalStyle();
 
 
         // -------------------------
@@ -227,16 +357,48 @@ public class GameScreen {
         // -------------------------
 
         submitButton.setOnAction(event -> {
+
             checkAnswer();
+
         });
 
+
         answerField.setOnAction(event -> {
+
             checkAnswer();
+
+        });
+
+
+        submitButton.setOnMouseEntered(event -> {
+
+            setSubmitButtonHoverStyle();
+
+        });
+
+
+        submitButton.setOnMouseExited(event -> {
+
+            setSubmitButtonNormalStyle();
+
         });
 
 
         // -------------------------
-        // CREATE CHARACTER ANIMATIONS
+        // INPUT LISTENER
+        // -------------------------
+
+        answerField.textProperty().addListener(
+            (observable, oldValue, newValue) -> {
+
+                updateAnimatedInput(newValue);
+
+            }
+        );
+
+
+        // -------------------------
+        // CHARACTER ANIMATIONS
         // -------------------------
 
         setupWizardAnimations();
@@ -245,7 +407,7 @@ public class GameScreen {
 
 
         // -------------------------
-        // GENERATE FIRST WORD
+        // FIRST WORD
         // -------------------------
 
         generateNewWord();
@@ -269,14 +431,32 @@ public class GameScreen {
         );
 
         battleArea.setPadding(
-            new Insets(10, 50, 10, 50)
+            new Insets(
+                10,
+                50,
+                10,
+                50
+            )
         );
 
         Region battleSpacer = new Region();
 
-        HBox.setHgrow(
-            battleSpacer,
-            Priority.ALWAYS
+        // Dynamically control the distance between wizard and enemy
+        battleArea.widthProperty().addListener(
+            (observable, oldWidth, newWidth) -> {
+
+                double gap = newWidth.doubleValue() * 0.12;
+
+                // Minimum gap
+                gap = Math.max(gap, 70);
+
+                // Maximum gap
+                gap = Math.min(gap, 160);
+
+                battleSpacer.setPrefWidth(gap);
+                battleSpacer.setMinWidth(gap);
+                battleSpacer.setMaxWidth(gap);
+            }
         );
 
         battleArea.getChildren().addAll(
@@ -284,7 +464,6 @@ public class GameScreen {
             battleSpacer,
             enemyImageView
         );
-
 
         // -------------------------
         // CENTER LAYOUT
@@ -296,11 +475,12 @@ public class GameScreen {
             Pos.CENTER
         );
 
+
         centerLayout.getChildren().addAll(
             difficultyLabel,
             battleArea,
             scrambledWordLabel,
-            answerField,
+            answerInputContainer,
             submitButton,
             messageLabel
         );
@@ -328,12 +508,19 @@ public class GameScreen {
         );
 
         bottomBar.setPadding(
-            new Insets(15, 20, 15, 20)
+            new Insets(
+                15,
+                20,
+                15,
+                20
+            )
         );
+
 
         bottomBar.getChildren().add(
             createQuitButton()
         );
+
 
         root.setBottom(bottomBar);
 
@@ -357,6 +544,7 @@ public class GameScreen {
             600
         );
 
+
         stage.setScene(scene);
 
 
@@ -372,6 +560,42 @@ public class GameScreen {
         // -------------------------
 
         answerField.requestFocus();
+    }
+
+
+    // =========================================================
+    // SUBMIT BUTTON NORMAL STYLE
+    // =========================================================
+
+    private void setSubmitButtonNormalStyle() {
+
+        submitButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-padding: 10 28 10 28;" +
+            "-fx-cursor: hand;"
+        );
+    }
+
+
+    // =========================================================
+    // SUBMIT BUTTON HOVER STYLE
+    // =========================================================
+
+    private void setSubmitButtonHoverStyle() {
+
+        submitButton.setStyle(
+            "-fx-background-color: #503451;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #D6B878;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-padding: 10 28 10 28;" +
+            "-fx-cursor: hand;"
+        );
     }
 
 
@@ -441,14 +665,21 @@ public class GameScreen {
         );
 
         hud.setPadding(
-            new Insets(20, 30, 20, 30)
+            new Insets(
+                20,
+                30,
+                20,
+                30
+            )
         );
+
 
         hud.getChildren().addAll(
             scoreBox,
             spacer,
             rightHUD
         );
+
 
         return hud;
     }
@@ -479,7 +710,6 @@ public class GameScreen {
 
         wizardImageView.setPreserveRatio(true);
 
-        // Wizard faces right.
         wizardImageView.setScaleX(1);
 
 
@@ -508,7 +738,7 @@ public class GameScreen {
                 wizardImageView,
                 attackSheet,
                 8,
-                200
+                WIZARD_ATTACK_FRAME_DURATION
             );
 
 
@@ -532,7 +762,7 @@ public class GameScreen {
             );
 
 
-        // Start idle animation.
+        // Start idle.
 
         wizardIdleAnimator.playLoop();
     }
@@ -544,108 +774,107 @@ public class GameScreen {
 
     private void setupEnemy() {
 
-    // Stop the previous enemy animations.
+        // Stop previous animations.
 
-    if (enemyIdleAnimator != null) {
-        enemyIdleAnimator.stop();
-    }
+        if (enemyIdleAnimator != null) {
+            enemyIdleAnimator.stop();
+        }
 
-    if (enemyAttackAnimator != null) {
-        enemyAttackAnimator.stop();
-    }
-
-
-    // Determine which enemy should appear.
-
-    if (
-        gameLogic.getWordsFound() + 1
-        >= gameLogic.getGoal()
-    ) {
-
-        // Last word = boss
-
-        currentEnemy =
-            enemyManager.getBoss();
-
-    } else {
-
-        // Normal word = random enemy
-
-        currentEnemy =
-            enemyManager.getRandomEnemy();
-    }
+        if (enemyAttackAnimator != null) {
+            enemyAttackAnimator.stop();
+        }
 
 
-    // =====================================================
-    // CREATE IMAGE VIEW ONLY ONCE
-    // =====================================================
+        // Determine enemy.
 
-    if (enemyImageView == null) {
+        if (
+            gameLogic.getWordsFound() + 1
+            >= gameLogic.getGoal()
+        ) {
 
-        enemyImageView = new ImageView();
+            currentEnemy =
+                enemyManager.getBoss();
 
-        enemyImageView.setFitWidth(192);
+        } else {
 
-        enemyImageView.setFitHeight(192);
-
-        enemyImageView.setPreserveRatio(true);
-
-        // Enemy sprites face right by default.
-        // Flip them so they face the wizard.
-
-        enemyImageView.setScaleX(-1);
-    }
+            currentEnemy =
+                enemyManager.getRandomEnemy();
+        }
 
 
-    // Make the new enemy visible.
+        // -------------------------
+        // CREATE IMAGE VIEW
+        // -------------------------
 
-    enemyImageView.setVisible(true);
+        if (enemyImageView == null) {
+
+            enemyImageView =
+                new ImageView();
+
+            enemyImageView.setFitWidth(192);
+
+            enemyImageView.setFitHeight(192);
+
+            enemyImageView.setPreserveRatio(true);
+
+            // Face wizard.
+
+            enemyImageView.setScaleX(-1);
+        }
 
 
-    // =====================================================
-    // LOAD IDLE SPRITE
-    // =====================================================
-
-    Image idleSheet = new Image(
-        new java.io.File(
-            currentEnemy.getIdlePath()
-        ).toURI().toString()
-    );
+        enemyImageView.setVisible(true);
 
 
-    enemyIdleAnimator =
-        new SpriteAnimator(
-            enemyImageView,
-            idleSheet,
-            currentEnemy.getIdleFrames(),
-            200
+        // Remove any previous effect.
+
+        enemyImageView.setEffect(null);
+
+
+        // -------------------------
+        // IDLE
+        // -------------------------
+
+        Image idleSheet = new Image(
+            new java.io.File(
+                currentEnemy.getIdlePath()
+            ).toURI().toString()
         );
 
 
-    // =====================================================
-    // LOAD ATTACK SPRITE
-    // =====================================================
-
-    Image attackSheet = new Image(
-        new java.io.File(
-            currentEnemy.getAttackPath()
-        ).toURI().toString()
-    );
+        enemyIdleAnimator =
+            new SpriteAnimator(
+                enemyImageView,
+                idleSheet,
+                currentEnemy.getIdleFrames(),
+                200
+            );
 
 
-    enemyAttackAnimator =
-        new SpriteAnimator(
-            enemyImageView,
-            attackSheet,
-            currentEnemy.getAttackFrames(),
-            100
+        // -------------------------
+        // ATTACK
+        // -------------------------
+
+        Image attackSheet = new Image(
+            new java.io.File(
+                currentEnemy.getAttackPath()
+            ).toURI().toString()
         );
 
 
-    // Start the new enemy's idle animation.
+        enemyAttackAnimator =
+            new SpriteAnimator(
+                enemyImageView,
+                attackSheet,
+                currentEnemy.getAttackFrames(),
+                ENEMY_ATTACK_FRAME_DURATION
+            );
 
-    enemyIdleAnimator.playLoop();
-}
+
+        // Start idle.
+
+        enemyIdleAnimator.playLoop();
+    }
 
 
     // =========================================================
@@ -665,12 +894,12 @@ public class GameScreen {
         }
 
 
-        // Create a new enemy.
+        // Create new enemy.
 
         setupEnemy();
 
 
-        // Generate the word.
+        // Generate word.
 
         String scrambledWord =
             wordManager.generateNewWord();
@@ -688,7 +917,7 @@ public class GameScreen {
         answerField.requestFocus();
 
 
-        // Reset battle state.
+        // Reset state.
 
         animationPlaying = false;
     }
@@ -700,7 +929,7 @@ public class GameScreen {
 
     private void checkAnswer() {
 
-        // Don't accept input while an animation is playing.
+        // Don't accept input during animation.
 
         if (animationPlaying) {
             return;
@@ -721,7 +950,9 @@ public class GameScreen {
             answerField.getText().trim();
 
 
-        // Empty answer.
+        // -------------------------
+        // EMPTY ANSWER
+        // -------------------------
 
         if (guess.isEmpty()) {
 
@@ -733,7 +964,9 @@ public class GameScreen {
         }
 
 
-        // Check answer.
+        // -------------------------
+        // CHECK ANSWER
+        // -------------------------
 
         boolean valid =
             gameLogic.isValidGuess(
@@ -764,17 +997,16 @@ public class GameScreen {
             updateLabels();
 
 
-            // Play wizard attack.
+            // Wizard attacks.
 
             playWizardAttack(() -> {
 
-                // The enemy disappears immediately
-                // after the attack.
+                // Enemy disappears after attack.
 
                 enemyImageView.setVisible(false);
 
 
-                // Check if level is complete.
+                // Level complete?
 
                 if (
                     gameLogic.hasClearedLevel()
@@ -786,9 +1018,10 @@ public class GameScreen {
                 }
 
 
-                // Next word + new enemy.
+                // Next word.
 
                 generateNewWord();
+
             });
 
 
@@ -815,24 +1048,303 @@ public class GameScreen {
             answerField.clear();
 
 
-            // Play wizard hit animation first.
+            // Wizard gets hit.
 
-            playWizardHit(() -> {
+            // Enemy attacks.
 
-                // Enemy attacks after wizard is hit.
+            playEnemyAttack(() -> {
 
-                playEnemyAttack(() -> {
+                enemyIdleAnimator.playLoop();
 
-                    // Return enemy to idle.
+                animationPlaying = false;
 
-                    enemyIdleAnimator.playLoop();
+                answerField.requestFocus();
 
-                    animationPlaying = false;
-
-                    answerField.requestFocus();
-                });
             });
         }
+    }
+
+
+    // =========================================================
+    // ANIMATED INPUT
+    // =========================================================
+
+    private void updateAnimatedInput(
+        String text
+    ) {
+
+        animatedLetters.getChildren().clear();
+
+
+        // Create a label for each character.
+
+        for (
+            int i = 0;
+            i < text.length();
+            i++
+        ) {
+
+            char character =
+                text.charAt(i);
+
+
+            Label letter =
+                new Label(
+                    String.valueOf(character)
+                );
+
+
+            letter.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    22
+                )
+            );
+
+
+            letter.setTextFill(
+                Color.WHITE
+            );
+
+
+            // White glow.
+
+            letter.setEffect(
+                new DropShadow(
+                    8,
+                    Color.rgb(
+                        255,
+                        255,
+                        255,
+                        0.65
+                    )
+                )
+            );
+
+
+            letter.setMinWidth(18);
+
+            letter.setAlignment(
+                Pos.CENTER
+            );
+
+
+            // Start lower/smaller.
+
+            letter.setTranslateY(8);
+
+            letter.setScaleX(0.8);
+
+            letter.setScaleY(0.8);
+
+            letter.setOpacity(0);
+
+
+            animatedLetters.getChildren().add(
+                letter
+            );
+
+
+            // -------------------------
+            // APPEAR
+            // -------------------------
+
+            FadeTransition fade =
+                new FadeTransition(
+                    Duration.millis(180),
+                    letter
+                );
+
+
+            fade.setFromValue(0);
+
+            fade.setToValue(1);
+
+
+            ScaleTransition scale =
+                new ScaleTransition(
+                    Duration.millis(180),
+                    letter
+                );
+
+
+            scale.setFromX(0.8);
+
+            scale.setFromY(0.8);
+
+            scale.setToX(1);
+
+            scale.setToY(1);
+
+
+            TranslateTransition rise =
+                new TranslateTransition(
+                    Duration.millis(180),
+                    letter
+                );
+
+
+            rise.setFromY(8);
+
+            rise.setToY(0);
+
+
+            ParallelTransition appear =
+                new ParallelTransition(
+                    fade,
+                    scale,
+                    rise
+                );
+
+
+            appear.setDelay(
+                Duration.millis(
+                    i * 25
+                )
+            );
+
+
+            appear.play();
+
+
+            // -------------------------
+            // FLOAT
+            // -------------------------
+
+            TranslateTransition floatAnimation =
+                new TranslateTransition(
+                    Duration.millis(
+                        900 + (i * 80)
+                    ),
+                    letter
+                );
+
+
+            floatAnimation.setFromY(-2);
+
+            floatAnimation.setToY(2);
+
+            floatAnimation.setAutoReverse(true);
+
+            floatAnimation.setCycleCount(
+                TranslateTransition.INDEFINITE
+            );
+
+
+            appear.setOnFinished(
+                event -> {
+
+                    floatAnimation.play();
+
+                }
+            );
+        }
+    }
+
+
+    // =========================================================
+    // RED HIT FLASH
+    // =========================================================
+
+    private void flashRed(
+        ImageView imageView
+    ) {
+
+        if (imageView == null) {
+            return;
+        }
+
+
+        // Create red overlay.
+
+        ColorInput redColor =
+            new ColorInput(
+                0,
+                0,
+                imageView.getFitWidth(),
+                imageView.getFitHeight(),
+                Color.RED
+            );
+
+
+        Blend redBlend =
+            new Blend(
+                BlendMode.SRC_ATOP,
+                null,
+                redColor
+            );
+
+
+        // First flash.
+
+        imageView.setEffect(
+            redBlend
+        );
+
+
+        PauseTransition firstFlash =
+            new PauseTransition(
+                Duration.millis(80)
+            );
+
+
+        firstFlash.setOnFinished(
+            event -> {
+
+                imageView.setEffect(
+                    null
+                );
+
+
+                // Small gap before second flash.
+
+                PauseTransition gap =
+                    new PauseTransition(
+                        Duration.millis(50)
+                    );
+
+
+                gap.setOnFinished(
+                    event2 -> {
+
+                        // Second flash.
+
+                        imageView.setEffect(
+                            redBlend
+                        );
+
+
+                        PauseTransition secondFlash =
+                            new PauseTransition(
+                                Duration.millis(80)
+                            );
+
+
+                        secondFlash.setOnFinished(
+                            event3 -> {
+
+                                imageView.setEffect(
+                                    null
+                                );
+
+                            }
+                        );
+
+
+                        secondFlash.play();
+
+                    }
+                );
+
+
+                gap.play();
+
+            }
+        );
+
+
+        firstFlash.play();
     }
 
 
@@ -856,20 +1368,70 @@ public class GameScreen {
 
         // Play attack.
 
-        wizardAttackAnimator.playOnce(() -> {
+        wizardAttackAnimator.playOnce(
+            () -> {
 
-            // Return to idle.
+                wizardIdleAnimator.playLoop();
 
-            wizardIdleAnimator.playLoop();
-
-
-            animationPlaying = false;
+                animationPlaying = false;
 
 
-            if (onFinished != null) {
-                onFinished.run();
+                if (onFinished != null) {
+
+                    onFinished.run();
+
+                }
+
             }
-        });
+        );
+
+
+        // -----------------------------------------------------
+        // ENEMY HIT
+        // -----------------------------------------------------
+
+        int attackDuration =
+            8 *
+            WIZARD_ATTACK_FRAME_DURATION;
+
+
+        int hitDelay =
+            attackDuration -
+            (
+                HIT_TRIGGER_FRAMES *
+                WIZARD_ATTACK_FRAME_DURATION
+            );
+
+
+        hitDelay =
+            Math.max(
+                0,
+                hitDelay
+            );
+
+
+        PauseTransition hit =
+            new PauseTransition(
+                Duration.millis(
+                    hitDelay
+                )
+            );
+
+
+        hit.setOnFinished(
+            event -> {
+
+                // Enemy flashes red.
+
+                flashRed(
+                    enemyImageView
+                );
+
+            }
+        );
+
+
+        hit.play();
     }
 
 
@@ -891,19 +1453,22 @@ public class GameScreen {
         }
 
 
-        // Play hit.
+        // Play hit animation.
 
-        wizardHitAnimator.playOnce(() -> {
+        wizardHitAnimator.playOnce(
+            () -> {
 
-            // Return to idle.
-
-            wizardIdleAnimator.playLoop();
+                wizardIdleAnimator.playLoop();
 
 
-            if (onFinished != null) {
-                onFinished.run();
+                if (onFinished != null) {
+
+                    onFinished.run();
+
+                }
+
             }
-        });
+        );
     }
 
 
@@ -915,26 +1480,149 @@ public class GameScreen {
         Runnable onFinished
     ) {
 
-        // Stop idle.
+        // Stop enemy idle.
 
         if (enemyIdleAnimator != null) {
             enemyIdleAnimator.stop();
         }
 
 
-        // Play attack.
+        // Track whether each animation
+        // has completed.
 
-        enemyAttackAnimator.playOnce(() -> {
+        final boolean[] attackFinished = {
+            false
+        };
 
-            // Return to idle.
+        final boolean[] hitFinished = {
+            false
+        };
 
-            enemyIdleAnimator.playLoop();
+
+        // Finish only when both animations
+        // have completed.
+
+        Runnable finishAttack =
+            () -> {
+
+                if (
+                    attackFinished[0]
+                    && hitFinished[0]
+                ) {
+
+                    if (
+                        enemyIdleAnimator != null
+                    ) {
+
+                        enemyIdleAnimator.playLoop();
+
+                    }
 
 
-            if (onFinished != null) {
-                onFinished.run();
+                    if (
+                        onFinished != null
+                    ) {
+
+                        onFinished.run();
+
+                    }
+                }
+            };
+
+
+        // -----------------------------------------------------
+        // ENEMY ATTACK
+        // -----------------------------------------------------
+
+        enemyAttackAnimator.playOnce(
+            () -> {
+
+                attackFinished[0] = true;
+
+                finishAttack.run();
+
             }
-        });
+        );
+
+
+        // -----------------------------------------------------
+        // HIT TIMING
+        // -----------------------------------------------------
+
+        int attackFrames =
+            currentEnemy.getAttackFrames();
+
+
+        int attackDuration =
+            attackFrames *
+            ENEMY_ATTACK_FRAME_DURATION;
+
+
+        int hitDelay =
+            attackDuration -
+            (
+                HIT_TRIGGER_FRAMES *
+                ENEMY_ATTACK_FRAME_DURATION
+            );
+
+
+        hitDelay =
+            Math.max(
+                0,
+                hitDelay
+            );
+
+
+        PauseTransition hit =
+            new PauseTransition(
+                Duration.millis(
+                    hitDelay
+                )
+            );
+
+
+        hit.setOnFinished(
+            event -> {
+
+                // Flash wizard red.
+
+                flashRed(
+                    wizardImageView
+                );
+
+
+                // Stop wizard idle.
+
+                if (
+                    wizardIdleAnimator != null
+                ) {
+
+                    wizardIdleAnimator.stop();
+
+                }
+
+
+                // Play wizard hit.
+
+                wizardHitAnimator.playOnce(
+                    () -> {
+
+                        wizardIdleAnimator.playLoop();
+
+
+                        hitFinished[0] = true;
+
+
+                        finishAttack.run();
+
+                    }
+                );
+
+            }
+        );
+
+
+        hit.play();
     }
 
 
@@ -944,30 +1632,34 @@ public class GameScreen {
 
     private void startTimer() {
 
-        timeline = new Timeline(
-            new KeyFrame(
-                Duration.seconds(1),
-                event -> {
+        timeline =
+            new Timeline(
+                new KeyFrame(
+                    Duration.seconds(1),
+                    event -> {
 
-                    gameLogic.decreaseTime();
+                        gameLogic.decreaseTime();
 
-                    updateTimer();
+                        updateTimer();
 
 
-                    if (
-                        gameLogic.isTimeUp()
-                    ) {
+                        if (
+                            gameLogic.isTimeUp()
+                        ) {
 
-                        endGame(false);
+                            endGame(false);
+
+                        }
+
                     }
-                }
-            )
-        );
+                )
+            );
 
 
         timeline.setCycleCount(
             Timeline.INDEFINITE
         );
+
 
         timeline.play();
     }
@@ -1013,7 +1705,9 @@ public class GameScreen {
     private Button createQuitButton() {
 
         Button quitButton =
-            new Button("QUIT");
+            new Button(
+                "QUIT"
+            );
 
 
         quitButton.setPrefWidth(100);
@@ -1021,14 +1715,20 @@ public class GameScreen {
         quitButton.setPrefHeight(40);
 
         quitButton.setFont(
-            Font.font("Arial", 14)
+            Font.font(
+                "Arial",
+                14
+            )
         );
 
 
-        quitButton.setOnAction(event -> {
+        quitButton.setOnAction(
+            event -> {
 
-            showQuitConfirmation();
-        });
+                showQuitConfirmation();
+
+            }
+        );
 
 
         return quitButton;
@@ -1063,15 +1763,20 @@ public class GameScreen {
 
 
         confirmation.showAndWait()
-            .ifPresent(response -> {
+            .ifPresent(
+                response -> {
 
-                if (
-                    response == ButtonType.OK
-                ) {
+                    if (
+                        response ==
+                        ButtonType.OK
+                    ) {
 
-                    quitGame();
+                        quitGame();
+
+                    }
+
                 }
-            });
+            );
     }
 
 
@@ -1112,7 +1817,9 @@ public class GameScreen {
 
 
         MainMenu mainMenu =
-            new MainMenu(stage);
+            new MainMenu(
+                stage
+            );
 
 
         mainMenu.show();
@@ -1134,23 +1841,27 @@ public class GameScreen {
         }
 
 
-        // Stop all animations.
+        // Stop animations.
 
         if (wizardIdleAnimator != null) {
             wizardIdleAnimator.stop();
         }
 
+
         if (wizardAttackAnimator != null) {
             wizardAttackAnimator.stop();
         }
+
 
         if (wizardHitAnimator != null) {
             wizardHitAnimator.stop();
         }
 
+
         if (enemyIdleAnimator != null) {
             enemyIdleAnimator.stop();
         }
+
 
         if (enemyAttackAnimator != null) {
             enemyAttackAnimator.stop();
@@ -1159,17 +1870,21 @@ public class GameScreen {
 
         // Disable input.
 
-        submitButton.setDisable(true);
+        submitButton.setDisable(
+            true
+        );
 
-        answerField.setDisable(true);
+        answerField.setDisable(
+            true
+        );
 
-
-        // Stop accepting animation actions.
 
         animationPlaying = true;
 
 
-        // Game result message.
+        // -------------------------
+        // RESULT MESSAGE
+        // -------------------------
 
         if (cleared) {
 
@@ -1210,7 +1925,7 @@ public class GameScreen {
 
 
         // -------------------------
-        // RESULT UI
+        // FINAL SCORE LABEL
         // -------------------------
 
         Label finalScoreLabel =
@@ -1221,7 +1936,10 @@ public class GameScreen {
 
 
         finalScoreLabel.setFont(
-            Font.font("Serif", 28)
+            Font.font(
+                "Serif",
+                28
+            )
         );
 
 
@@ -1230,53 +1948,81 @@ public class GameScreen {
         );
 
 
-        Button playAgainButton =
-            new Button("PLAY AGAIN");
-
-
-        playAgainButton.setPrefWidth(180);
-
-        playAgainButton.setPrefHeight(40);
-
-
-        Button menuButton =
-            new Button("MAIN MENU");
-
-
-        menuButton.setPrefWidth(180);
-
-        menuButton.setPrefHeight(40);
-
-
         // -------------------------
         // PLAY AGAIN
         // -------------------------
 
-        playAgainButton.setOnAction(event -> {
-
-            GameScreen gameScreen =
-                new GameScreen(
-                    stage,
-                    difficulty
-                );
+        Button playAgainButton =
+            new Button(
+                "PLAY AGAIN"
+            );
 
 
-            gameScreen.show();
-        });
+        playAgainButton.setPrefWidth(
+            180
+        );
+
+        playAgainButton.setPrefHeight(
+            40
+        );
 
 
         // -------------------------
         // MAIN MENU
         // -------------------------
 
-        menuButton.setOnAction(event -> {
+        Button menuButton =
+            new Button(
+                "MAIN MENU"
+            );
 
-            MainMenu mainMenu =
-                new MainMenu(stage);
+
+        menuButton.setPrefWidth(
+            180
+        );
+
+        menuButton.setPrefHeight(
+            40
+        );
 
 
-            mainMenu.show();
-        });
+        // -------------------------
+        // PLAY AGAIN ACTION
+        // -------------------------
+
+        playAgainButton.setOnAction(
+            event -> {
+
+                GameScreen gameScreen =
+                    new GameScreen(
+                        stage,
+                        difficulty
+                    );
+
+
+                gameScreen.show();
+
+            }
+        );
+
+
+        // -------------------------
+        // MAIN MENU ACTION
+        // -------------------------
+
+        menuButton.setOnAction(
+            event -> {
+
+                MainMenu mainMenu =
+                    new MainMenu(
+                        stage
+                    );
+
+
+                mainMenu.show();
+
+            }
+        );
 
 
         // -------------------------

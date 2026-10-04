@@ -110,7 +110,7 @@ public class EnemyManager {
                 "Evil Wizard",
                 "assets/Enemies/Evil Wizard/Sprites/Idle.png",
                 8,
-                "assets/Enemies/Evil Wizard/Attack.png",
+                "assets/Enemies/Evil Wizard/Sprites/Attack.png",
                 8
         );
     }
