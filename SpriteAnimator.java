@@ -20,11 +20,15 @@ public class SpriteAnimator {
     private int currentFrame;
 
 
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
+
     public SpriteAnimator(
-        ImageView imageView,
-        Image spriteSheet,
-        int frameCount,
-        double frameDuration
+            ImageView imageView,
+            Image spriteSheet,
+            int frameCount,
+            double frameDuration
     ) {
 
         this.imageView = imageView;
@@ -34,29 +38,37 @@ public class SpriteAnimator {
         this.frameDuration = frameDuration;
 
         this.frameWidth =
-            spriteSheet.getWidth() / frameCount;
+                spriteSheet.getWidth() / frameCount;
 
         this.frameHeight =
-            spriteSheet.getHeight();
+                spriteSheet.getHeight();
 
         this.currentFrame = 0;
     }
 
+
+    // =========================================================
+    // SET FRAME
+    // =========================================================
 
     private void setFrame(int frame) {
 
         currentFrame = frame;
 
         imageView.setViewport(
-            new Rectangle2D(
-                frame * frameWidth,
-                0,
-                frameWidth,
-                frameHeight
-            )
+                new Rectangle2D(
+                        frame * frameWidth,
+                        0,
+                        frameWidth,
+                        frameHeight
+                )
         );
     }
 
+
+    // =========================================================
+    // PREPARE
+    // =========================================================
 
     private void prepare() {
 
@@ -79,23 +91,23 @@ public class SpriteAnimator {
         prepare();
 
         timeline = new Timeline(
-            new KeyFrame(
-                Duration.millis(frameDuration),
-                event -> {
+                new KeyFrame(
+                        Duration.millis(frameDuration),
+                        event -> {
 
-                    currentFrame++;
+                            currentFrame++;
 
-                    if (currentFrame >= frameCount) {
-                        currentFrame = 0;
-                    }
+                            if (currentFrame >= frameCount) {
+                                currentFrame = 0;
+                            }
 
-                    setFrame(currentFrame);
-                }
-            )
+                            setFrame(currentFrame);
+                        }
+                )
         );
 
         timeline.setCycleCount(
-            Timeline.INDEFINITE
+                Timeline.INDEFINITE
         );
 
         timeline.play();
@@ -113,50 +125,93 @@ public class SpriteAnimator {
         prepare();
 
         timeline = new Timeline(
-            new KeyFrame(
-                Duration.millis(frameDuration),
-                event -> {
+                new KeyFrame(
+                        Duration.millis(frameDuration),
+                        event -> {
 
-                    currentFrame++;
+                            currentFrame++;
 
-                    /*
-                     * Do NOT loop back to frame 0.
-                     *
-                     * Stop when the final frame
-                     * has been reached.
-                     */
-                    if (currentFrame >= frameCount) {
+                            /*
+                             * Stop once the final frame
+                             * has been reached.
+                             */
+                            if (currentFrame >= frameCount) {
 
-                        timeline.stop();
+                                timeline.stop();
 
-                        currentFrame =
-                            frameCount - 1;
+                                currentFrame =
+                                        frameCount - 1;
 
-                        setFrame(currentFrame);
+                                setFrame(currentFrame);
 
-                        if (onFinished != null) {
-                            onFinished.run();
+                                if (onFinished != null) {
+                                    onFinished.run();
+                                }
+
+                                return;
+                            }
+
+                            setFrame(currentFrame);
                         }
-
-                        return;
-                    }
-
-                    setFrame(currentFrame);
-                }
-            )
+                )
         );
 
-        /*
-         * We don't use cycleCount to determine
-         * when the animation ends.
-         *
-         * The frame counter above handles it.
-         */
         timeline.setCycleCount(
-            Timeline.INDEFINITE
+                Timeline.INDEFINITE
         );
 
         timeline.play();
+    }
+
+
+    // =========================================================
+    // PLAY ONCE - NO CALLBACK
+    // =========================================================
+
+    public void playOnce() {
+
+        playOnce(null);
+    }
+
+
+    // =========================================================
+    // PAUSE
+    // =========================================================
+
+    public void pause() {
+
+        if (timeline != null) {
+            timeline.pause();
+        }
+    }
+
+
+    // =========================================================
+    // RESUME
+    // =========================================================
+
+    public void resume() {
+
+        if (timeline != null) {
+            timeline.play();
+        }
+    }
+
+
+    // =========================================================
+    // PLAY
+    // =========================================================
+    // Alias for resume().
+    // This makes it possible to use either:
+    //
+    // animator.resume();
+    // animator.play();
+    //
+    // =========================================================
+
+    public void play() {
+
+        resume();
     }
 
 
@@ -169,8 +224,6 @@ public class SpriteAnimator {
         if (timeline != null) {
 
             timeline.stop();
-
-            timeline.setOnFinished(null);
 
             timeline = null;
         }

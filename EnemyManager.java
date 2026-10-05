@@ -36,8 +36,8 @@ public class EnemyManager {
 
         );
 
-        Enemy rat = new Enemy(
-            "Rat",
+        Enemy giantrat = new Enemy(
+            "Giant Rat",
             "assets/Enemies/Rat/idle.png",
             10,
             "assets/Enemies/Rat/attack_bite.png",
@@ -91,7 +91,7 @@ public class EnemyManager {
         enemies = new Enemy[] {
                 bat,
                 mimic,
-                rat,
+                giantrat,
                 slime,
                 flyingeye,
                 goblin,

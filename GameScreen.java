@@ -10,9 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
@@ -90,6 +88,8 @@ public class GameScreen {
     private SpriteAnimator wizardIdleAnimator;
     private SpriteAnimator wizardAttackAnimator;
     private SpriteAnimator wizardHitAnimator;
+    private SpriteAnimator wizardDeathAnimator;
+    private SpriteAnimator wizardRunAnimator;
 
 
     // =========================
@@ -110,6 +110,7 @@ public class GameScreen {
 
     private HBox battleArea;
 
+    private StackPane battleAnimationLayer;
 
     // =========================
     // STATE
@@ -117,6 +118,7 @@ public class GameScreen {
 
     private boolean animationPlaying = false;
 
+    private boolean gamePaused = false;
 
     // =========================
     // ANIMATION SETTINGS
@@ -403,6 +405,7 @@ public class GameScreen {
 
         setupWizardAnimations();
 
+
         setupEnemy();
 
 
@@ -465,6 +468,27 @@ public class GameScreen {
             enemyImageView
         );
 
+
+        // -------------------------
+        // BATTLE ANIMATION LAYER
+        // -------------------------
+
+        battleAnimationLayer =
+            new StackPane();
+
+        battleAnimationLayer.setMouseTransparent(
+            true
+        );
+
+        battleAnimationLayer.setPickOnBounds(
+            false
+        );
+
+        battleAnimationLayer.setAlignment(
+            Pos.CENTER
+        );
+
+
         // -------------------------
         // CENTER LAYOUT
         // -------------------------
@@ -475,26 +499,27 @@ public class GameScreen {
             Pos.CENTER
         );
 
+        StackPane battleContainer =
+            new StackPane();
+
+        battleContainer.setAlignment(
+            Pos.CENTER
+        );
+
+        battleContainer.getChildren().addAll(
+            battleArea,
+            battleAnimationLayer
+        );
+
 
         centerLayout.getChildren().addAll(
             difficultyLabel,
-            battleArea,
+            battleContainer,
             scrambledWordLabel,
             answerInputContainer,
             submitButton,
             messageLabel
         );
-
-
-        // -------------------------
-        // ROOT
-        // -------------------------
-
-        BorderPane root = new BorderPane();
-
-        root.setTop(hud);
-
-        root.setCenter(centerLayout);
 
 
         // -------------------------
@@ -516,14 +541,33 @@ public class GameScreen {
             )
         );
 
-
         bottomBar.getChildren().add(
             createQuitButton()
         );
 
 
-        root.setBottom(bottomBar);
+        // -------------------------
+        // ROOT
+        // -------------------------
 
+        BorderPane gameLayout = new BorderPane();
+
+        gameLayout.setTop(hud);
+
+        gameLayout.setCenter(centerLayout);
+
+        gameLayout.setBottom(bottomBar);
+
+        gameLayout.setStyle(
+            "-fx-background-color: #17233C;"
+        );
+
+
+        StackPane root = new StackPane();
+
+        root.getChildren().add(
+            gameLayout
+        );
 
         // -------------------------
         // BACKGROUND
@@ -560,6 +604,89 @@ public class GameScreen {
         // -------------------------
 
         answerField.requestFocus();
+    }
+
+    // =========================================================
+    // END CARD WIZARD ANIMATIONS
+    // =========================================================
+
+    private ImageView createEndCardWizard(
+        boolean cleared
+    ) {
+
+        ImageView endWizard =
+            new ImageView();
+
+
+        endWizard.setFitWidth(
+            220
+        );
+
+        endWizard.setFitHeight(
+            220
+        );
+
+        endWizard.setPreserveRatio(
+            true
+        );
+
+
+        // =====================================================
+        // SUCCESS
+        // =====================================================
+
+        if (cleared) {
+
+            Image runSheet =
+                new Image(
+                    new java.io.File(
+                        "assets/Wizard/Run.png"
+                    ).toURI().toString()
+                );
+
+
+            wizardRunAnimator =
+                new SpriteAnimator(
+                    endWizard,
+                    runSheet,
+                    8,
+                    150
+                );
+
+
+            wizardRunAnimator.playLoop();
+
+
+        // =====================================================
+        // FAILURE
+        // =====================================================
+
+        } else {
+
+            Image deathSheet =
+                new Image(
+                    new java.io.File(
+                        "assets/Wizard/Death.png"
+                    ).toURI().toString()
+                );
+
+
+            wizardDeathAnimator =
+                new SpriteAnimator(
+                    endWizard,
+                    deathSheet,
+                    7,
+                    180
+                );
+
+
+            wizardDeathAnimator.playOnce(
+                null
+            );
+        }
+
+
+        return endWizard;
     }
 
 
@@ -931,7 +1058,7 @@ public class GameScreen {
 
         // Don't accept input during animation.
 
-        if (animationPlaying) {
+        if (animationPlaying || gamePaused) {
             return;
         }
 
@@ -986,6 +1113,10 @@ public class GameScreen {
                     guess
                 );
 
+            showFloatingScore(
+                "+" + points + " POINTS!",
+                true
+            );
 
             messageLabel.setText(
                 "Correct! +" +
@@ -1033,6 +1164,11 @@ public class GameScreen {
 
             int penalty =
                 gameLogic.processWrongGuess();
+
+            showFloatingScore(
+                "-" + penalty + " POINTS!",
+false
+            );
 
 
             messageLabel.setText(
@@ -1434,44 +1570,6 @@ public class GameScreen {
         hit.play();
     }
 
-
-    // =========================================================
-    // WIZARD HIT
-    // =========================================================
-
-    private void playWizardHit(
-        Runnable onFinished
-    ) {
-
-        animationPlaying = true;
-
-
-        // Stop idle.
-
-        if (wizardIdleAnimator != null) {
-            wizardIdleAnimator.stop();
-        }
-
-
-        // Play hit animation.
-
-        wizardHitAnimator.playOnce(
-            () -> {
-
-                wizardIdleAnimator.playLoop();
-
-
-                if (onFinished != null) {
-
-                    onFinished.run();
-
-                }
-
-            }
-        );
-    }
-
-
     // =========================================================
     // ENEMY ATTACK
     // =========================================================
@@ -1688,6 +1786,219 @@ public class GameScreen {
         updateTimer();
     }
 
+    // =========================================================
+    // FLOATING DAMAGE TEXT
+    // =========================================================
+
+    private void showFloatingScore(
+        String text,
+        boolean positive
+    ) {
+
+        Label floatingLabel =
+            new Label(text);
+
+
+        // -------------------------
+        // TEXT STYLE
+        // -------------------------
+
+        floatingLabel.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                22
+            )
+        );
+
+
+        floatingLabel.setTextFill(
+            positive
+                ? Color.LIGHTGREEN
+                : Color.SALMON
+        );
+
+
+        floatingLabel.setEffect(
+            new DropShadow(
+                8,
+                positive
+                    ? Color.rgb(120, 255, 120, 0.65)
+                    : Color.rgb(255, 80, 80, 0.65)
+            )
+        );
+
+
+        // -------------------------
+        // INITIAL STATE
+        // -------------------------
+
+        floatingLabel.setOpacity(
+            0
+        );
+
+        floatingLabel.setScaleX(
+            0.7
+        );
+
+        floatingLabel.setScaleY(
+            0.7
+        );
+
+        floatingLabel.setTranslateY(
+            10
+        );
+
+
+        // -------------------------
+        // ADD TO BATTLE AREA
+        // -------------------------
+
+        battleAnimationLayer
+            .getChildren()
+            .add(
+                floatingLabel
+            );
+
+
+        // -------------------------
+        // APPEAR
+        // -------------------------
+
+        FadeTransition fadeIn =
+            new FadeTransition(
+                Duration.millis(180),
+                floatingLabel
+            );
+
+        fadeIn.setFromValue(
+            0
+        );
+
+        fadeIn.setToValue(
+            1
+        );
+
+
+        ScaleTransition scaleUp =
+            new ScaleTransition(
+                Duration.millis(180),
+                floatingLabel
+            );
+
+        scaleUp.setFromX(
+            0.7
+        );
+
+        scaleUp.setFromY(
+            0.7
+        );
+
+        scaleUp.setToX(
+            1.0
+        );
+
+        scaleUp.setToY(
+            1.0
+        );
+
+
+        // -------------------------
+        // FLOAT UPWARD
+        // -------------------------
+
+        TranslateTransition rise =
+            new TranslateTransition(
+                Duration.millis(900),
+                floatingLabel
+            );
+
+        rise.setFromY(
+            10
+        );
+
+        rise.setToY(
+            -70
+        );
+
+
+        // -------------------------
+        // FADE OUT
+        // -------------------------
+
+        FadeTransition fadeOut =
+            new FadeTransition(
+                Duration.millis(500),
+                floatingLabel
+            );
+
+        fadeOut.setFromValue(
+            1
+        );
+
+        fadeOut.setToValue(
+            0
+        );
+
+        fadeOut.setDelay(
+            Duration.millis(400)
+        );
+
+
+        // -------------------------
+        // APPEAR ANIMATION
+        // -------------------------
+
+        ParallelTransition appear =
+            new ParallelTransition(
+                fadeIn,
+                scaleUp
+            );
+
+
+        // -------------------------
+        // FLOAT + FADE
+        // -------------------------
+
+        ParallelTransition floatAndFade =
+            new ParallelTransition(
+                rise,
+                fadeOut
+            );
+
+
+        // -------------------------
+        // START FLOATING
+        // -------------------------
+
+        appear.setOnFinished(
+            event -> {
+
+                floatAndFade.play();
+
+            }
+        );
+
+
+        // -------------------------
+        // REMOVE AFTER ANIMATION
+        // -------------------------
+
+        floatAndFade.setOnFinished(
+            event -> {
+
+                battleAnimationLayer
+                    .getChildren()
+                    .remove(
+                        floatingLabel
+                    );
+
+            }
+        );
+
+
+        appear.play();
+    }
 
     private void updateTimer() {
 
@@ -1702,82 +2013,417 @@ public class GameScreen {
     // QUIT BUTTON
     // =========================================================
 
-    private Button createQuitButton() {
+        private Button createQuitButton() {
 
-        Button quitButton =
-            new Button(
-                "QUIT"
+            Button quitButton = new Button("QUIT");
+
+            quitButton.setPrefWidth(100);
+            quitButton.setPrefHeight(40);
+
+            quitButton.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    14
+                )
             );
 
+            quitButton.setTextFill(
+                Color.web("#F5E6C8")
+            );
 
-        quitButton.setPrefWidth(100);
+            // Normal
+            quitButton.setStyle(
+                "-fx-background-color: #3A263F;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
 
-        quitButton.setPrefHeight(40);
+            // Hover
+            quitButton.setOnMouseEntered(event -> {
 
-        quitButton.setFont(
-            Font.font(
-                "Arial",
-                14
-            )
-        );
+                quitButton.setStyle(
+                    "-fx-background-color: #503451;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #D6B878;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
 
+            });
 
-        quitButton.setOnAction(
-            event -> {
+            // Mouse leaves
+            quitButton.setOnMouseExited(event -> {
 
+                quitButton.setStyle(
+                    "-fx-background-color: #3A263F;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+            quitButton.setOnAction(event -> {
                 showQuitConfirmation();
+            });
 
-            }
-        );
-
-
-        return quitButton;
-    }
+            return quitButton;
+        }
 
 
-    // =========================================================
-    // QUIT CONFIRMATION
-    // =========================================================
+        // =========================================================
+        // QUIT CONFIRMATION
+        // =========================================================
 
-    private void showQuitConfirmation() {
+        private void showQuitConfirmation() {
 
-        Alert confirmation =
-            new Alert(
-                Alert.AlertType.CONFIRMATION
+                if (gamePaused) {
+            return;
+        }
+
+        gamePaused = true;
+
+        if (timeline != null) {
+            timeline.pause();
+        }
+
+        if (wizardIdleAnimator != null) {
+            wizardIdleAnimator.pause();
+        }
+
+        if (wizardAttackAnimator != null) {
+            wizardAttackAnimator.pause();
+        }
+
+        if (wizardHitAnimator != null) {
+            wizardHitAnimator.pause();
+        }
+
+        if (enemyIdleAnimator != null) {
+            enemyIdleAnimator.pause();
+        }
+
+        if (enemyAttackAnimator != null) {
+            enemyAttackAnimator.pause();
+        }
+
+        
+            // =========================================
+            // OVERLAY
+            // =========================================
+
+            StackPane overlayRoot = new StackPane();
+
+            overlayRoot.setPickOnBounds(true);
+
+            overlayRoot.setStyle(
+                "-fx-background-color: rgba(0, 0, 0, 0.65);"
             );
 
 
-        confirmation.setTitle(
-            "Quit Game"
-        );
+            // =========================================
+            // POPUP
+            // =========================================
+
+            VBox popup = new VBox(18);
+
+            popup.setAlignment(Pos.CENTER);
+
+            popup.setMaxWidth(400);
+            popup.setMaxHeight(230);
+
+            popup.setPadding(
+                new Insets(
+                    30,
+                    40,
+                    30,
+                    40
+                )
+            );
+
+            popup.setStyle(
+                "-fx-background-color: #202D48;" +
+                "-fx-background-radius: 14;" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 14;"
+            );
 
 
-        confirmation.setHeaderText(
-            "Return to Main Menu?"
-        );
+            // =========================================
+            // TITLE
+            // =========================================
+
+            Label titleLabel = new Label(
+                "QUIT THE GAME?"
+            );
+
+            titleLabel.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    28
+                )
+            );
+
+            titleLabel.setTextFill(
+                Color.web("#F5E6C8")
+            );
 
 
-        confirmation.setContentText(
-            "Your current game progress will be lost."
-        );
+            // =========================================
+            // MESSAGE
+            // =========================================
+
+            Label messageLabel = new Label(
+                "Are you sure you want to leave?\n" +
+                "Your current progress will be lost."
+            );
+
+            messageLabel.setFont(
+                Font.font(
+                    "Arial",
+                    15
+                )
+            );
+
+            messageLabel.setTextFill(
+                Color.LIGHTGRAY
+            );
+
+            messageLabel.setAlignment(
+                Pos.CENTER
+            );
+
+            messageLabel.setTextAlignment(
+                javafx.scene.text.TextAlignment.CENTER
+            );
 
 
-        confirmation.showAndWait()
-            .ifPresent(
-                response -> {
+            // =========================================
+            // CANCEL
+            // =========================================
 
-                    if (
-                        response ==
-                        ButtonType.OK
-                    ) {
+            Button cancelButton =
+                new Button("CANCEL");
 
-                        quitGame();
+            cancelButton.setPrefWidth(125);
+            cancelButton.setPrefHeight(42);
 
+            cancelButton.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    14
+                )
+            );
+
+            cancelButton.setTextFill(
+                Color.web("#F5E6C8")
+            );
+
+            cancelButton.setStyle(
+                "-fx-background-color: #3A4863;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #71809C;" +
+                "-fx-border-width: 1.2;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+
+            // =========================================
+            // QUIT
+            // =========================================
+
+            Button confirmQuitButton =
+                new Button("QUIT");
+
+            confirmQuitButton.setPrefWidth(125);
+            confirmQuitButton.setPrefHeight(42);
+
+            confirmQuitButton.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    14
+                )
+            );
+
+            confirmQuitButton.setTextFill(
+                Color.web("#F5E6C8")
+            );
+
+            confirmQuitButton.setStyle(
+                "-fx-background-color: #8B3030;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #C66A5A;" +
+                "-fx-border-width: 1.2;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+
+            // =========================================
+            // HOVER
+            // =========================================
+
+            cancelButton.setOnMouseEntered(event -> {
+
+                cancelButton.setStyle(
+                    "-fx-background-color: #4B5B78;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A8B4C9;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+            cancelButton.setOnMouseExited(event -> {
+
+                cancelButton.setStyle(
+                    "-fx-background-color: #3A4863;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #71809C;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+
+            confirmQuitButton.setOnMouseEntered(event -> {
+
+                confirmQuitButton.setStyle(
+                    "-fx-background-color: #A83A3A;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #E08A78;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+            confirmQuitButton.setOnMouseExited(event -> {
+
+                confirmQuitButton.setStyle(
+                    "-fx-background-color: #8B3030;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #C66A5A;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+
+            // =========================================
+            // BUTTON ACTIONS
+            // =========================================
+
+            cancelButton.setOnAction(event -> {
+
+                StackPane root =
+                    (StackPane) stage.getScene().getRoot();
+
+                root.getChildren().remove(
+                    overlayRoot
+                );
+
+                 // Resume the game
+                    gamePaused = false;
+
+                    // Resume timer
+                    if (timeline != null) {
+                        timeline.play();
                     }
 
-                }
+                    // Resume wizard animations
+                    if (wizardIdleAnimator != null) {
+                        wizardIdleAnimator.resume();
+                    }
+
+                    if (wizardAttackAnimator != null) {
+                        wizardAttackAnimator.resume();
+                    }
+
+                    if (wizardHitAnimator != null) {
+                        wizardHitAnimator.resume();
+                    }
+
+                    // Resume enemy animations
+                    if (enemyIdleAnimator != null) {
+                        enemyIdleAnimator.resume();
+                    }
+
+                    if (enemyAttackAnimator != null) {
+                        enemyAttackAnimator.resume();
+                    }
+
+                    // Return focus to the answer field
+                    if (answerField != null) {
+                        answerField.requestFocus();
+                    }
+
+            });
+
+
+            confirmQuitButton.setOnAction(event -> {
+
+                quitGame();
+
+            });
+
+
+            // =========================================
+            // BUILD POPUP
+            // =========================================
+
+            HBox buttonBox = new HBox(15);
+
+            buttonBox.setAlignment(
+                Pos.CENTER
             );
-    }
+
+            buttonBox.getChildren().addAll(
+                cancelButton,
+                confirmQuitButton
+            );
+
+            popup.getChildren().addAll(
+                titleLabel,
+                messageLabel,
+                buttonBox
+            );
+
+            overlayRoot.getChildren().add(
+                popup
+            );
+
+
+            // =========================================
+            // SHOW
+            // =========================================
+
+            StackPane root =
+                (StackPane) stage.getScene().getRoot();
+
+            root.getChildren().add(
+                overlayRoot
+            );
+        }
 
 
     // =========================================================
@@ -1834,79 +2480,58 @@ public class GameScreen {
         boolean cleared
     ) {
 
-        // Stop timer.
+        // =====================================================
+        // STOP GAME TIMER
+        // =====================================================
 
         if (timeline != null) {
             timeline.stop();
         }
 
 
-        // Stop animations.
+        // =====================================================
+        // STOP GAME ANIMATIONS
+        // =====================================================
 
         if (wizardIdleAnimator != null) {
             wizardIdleAnimator.stop();
         }
 
-
         if (wizardAttackAnimator != null) {
             wizardAttackAnimator.stop();
         }
-
 
         if (wizardHitAnimator != null) {
             wizardHitAnimator.stop();
         }
 
-
         if (enemyIdleAnimator != null) {
             enemyIdleAnimator.stop();
         }
-
 
         if (enemyAttackAnimator != null) {
             enemyAttackAnimator.stop();
         }
 
 
-        // Disable input.
-
-        submitButton.setDisable(
-            true
-        );
-
-        answerField.setDisable(
-            true
-        );
-
+        // =====================================================
+        // PREVENT FURTHER INPUT
+        // =====================================================
 
         animationPlaying = true;
 
 
-        // -------------------------
-        // RESULT MESSAGE
-        // -------------------------
-
-        if (cleared) {
-
-            messageLabel.setText(
-                "LEVEL CLEARED!"
-            );
-
-        } else {
-
-            messageLabel.setText(
-                "TIME'S UP!"
-            );
-        }
-
-
-        // -------------------------
-        // FINAL SCORE
-        // -------------------------
+        // =====================================================
+        // CALCULATE FINAL SCORE
+        // =====================================================
 
         int finalScore =
             gameLogic.calculateFinalScore();
 
+
+        // =====================================================
+        // SAVE SCORE
+        // =====================================================
 
         PlayerScore playerScore =
             new PlayerScore(
@@ -1924,9 +2549,104 @@ public class GameScreen {
         );
 
 
-        // -------------------------
-        // FINAL SCORE LABEL
-        // -------------------------
+        // =====================================================
+        // END CARD ROOT
+        // =====================================================
+
+        StackPane endRoot =
+            new StackPane();
+
+        endRoot.setStyle(
+            "-fx-background-color: #17233C;"
+        );
+
+
+        // =====================================================
+        // DARK OVERLAY
+        // =====================================================
+
+        Region overlay =
+            new Region();
+
+        overlay.setStyle(
+            "-fx-background-color: rgba(0, 0, 0, 0.30);"
+        );
+
+
+        // =====================================================
+        // END CARD CONTENT
+        // =====================================================
+
+        VBox endContent =
+            new VBox(20);
+
+        endContent.setAlignment(
+            Pos.CENTER
+        );
+
+
+        // =====================================================
+        // TITLE
+        // =====================================================
+
+        Label titleLabel;
+
+        if (cleared) {
+
+            titleLabel =
+                new Label(
+                    "ESCAPED THE DUNGEON!"
+                );
+
+        } else {
+
+            titleLabel =
+                new Label(
+                    "TIME HAS RUN OUT!"
+                );
+        }
+
+
+        titleLabel.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                40
+            )
+        );
+
+
+        titleLabel.setTextFill(
+            Color.web("#F5E6C8")
+        );
+
+
+        titleLabel.setEffect(
+            new DropShadow(
+                12,
+                Color.rgb(
+                    0,
+                    0,
+                    0,
+                    0.65
+                )
+            )
+        );
+
+
+        // =====================================================
+        // WIZARD
+        // =====================================================
+
+        ImageView endWizard =
+            createEndCardWizard(
+                cleared
+            );
+
+
+        // =====================================================
+        // FINAL SCORE
+        // =====================================================
 
         Label finalScoreLabel =
             new Label(
@@ -1938,7 +2658,8 @@ public class GameScreen {
         finalScoreLabel.setFont(
             Font.font(
                 "Serif",
-                28
+                FontWeight.BOLD,
+                26
             )
         );
 
@@ -1948,9 +2669,21 @@ public class GameScreen {
         );
 
 
-        // -------------------------
+        // =====================================================
+        // BUTTON CONTAINER
+        // =====================================================
+
+        VBox buttonBox =
+            new VBox(12);
+
+        buttonBox.setAlignment(
+            Pos.CENTER
+        );
+
+
+        // =====================================================
         // PLAY AGAIN
-        // -------------------------
+        // =====================================================
 
         Button playAgainButton =
             new Button(
@@ -1959,17 +2692,39 @@ public class GameScreen {
 
 
         playAgainButton.setPrefWidth(
-            180
+            200
         );
 
         playAgainButton.setPrefHeight(
-            40
+            45
+        );
+
+        playAgainButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                16
+            )
+        );
+
+        playAgainButton.setTextFill(
+            Color.web("#F5E6C8")
         );
 
 
-        // -------------------------
+        playAgainButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
+
+
+        // =====================================================
         // MAIN MENU
-        // -------------------------
+        // =====================================================
 
         Button menuButton =
             new Button(
@@ -1978,20 +2733,119 @@ public class GameScreen {
 
 
         menuButton.setPrefWidth(
-            180
+            200
         );
 
         menuButton.setPrefHeight(
-            40
+            45
+        );
+
+        menuButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                16
+            )
+        );
+
+        menuButton.setTextFill(
+            Color.web("#F5E6C8")
         );
 
 
-        // -------------------------
+        menuButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
+
+
+        // =====================================================
+        // BUTTON HOVER
+        // =====================================================
+
+        playAgainButton.setOnMouseEntered(
+            event -> {
+
+                playAgainButton.setStyle(
+                    "-fx-background-color: #503451;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #D6B878;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
+
+
+        playAgainButton.setOnMouseExited(
+            event -> {
+
+                playAgainButton.setStyle(
+                    "-fx-background-color: #3A263F;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
+
+
+        menuButton.setOnMouseEntered(
+            event -> {
+
+                menuButton.setStyle(
+                    "-fx-background-color: #503451;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #D6B878;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
+
+
+        menuButton.setOnMouseExited(
+            event -> {
+
+                menuButton.setStyle(
+                    "-fx-background-color: #3A263F;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
+
+
+        // =====================================================
         // PLAY AGAIN ACTION
-        // -------------------------
+        // =====================================================
 
         playAgainButton.setOnAction(
             event -> {
+
+                if (wizardRunAnimator != null) {
+                    wizardRunAnimator.stop();
+                }
+
+                if (wizardDeathAnimator != null) {
+                    wizardDeathAnimator.stop();
+                }
+
 
                 GameScreen gameScreen =
                     new GameScreen(
@@ -2006,12 +2860,21 @@ public class GameScreen {
         );
 
 
-        // -------------------------
+        // =====================================================
         // MAIN MENU ACTION
-        // -------------------------
+        // =====================================================
 
         menuButton.setOnAction(
             event -> {
+
+                if (wizardRunAnimator != null) {
+                    wizardRunAnimator.stop();
+                }
+
+                if (wizardDeathAnimator != null) {
+                    wizardDeathAnimator.stop();
+                }
+
 
                 MainMenu mainMenu =
                     new MainMenu(
@@ -2025,24 +2888,52 @@ public class GameScreen {
         );
 
 
-        // -------------------------
-        // ADD RESULT CONTROLS
-        // -------------------------
+        // =====================================================
+        // BUILD BUTTON AREA
+        // =====================================================
 
-        BorderPane root =
-            (BorderPane)
-            stage.getScene().getRoot();
-
-
-        VBox centerLayout =
-            (VBox)
-            root.getCenter();
-
-
-        centerLayout.getChildren().addAll(
-            finalScoreLabel,
+        buttonBox.getChildren().addAll(
             playAgainButton,
             menuButton
+        );
+
+
+        // =====================================================
+        // BUILD END CARD
+        // =====================================================
+
+        endContent.getChildren().addAll(
+            titleLabel,
+            endWizard,
+            finalScoreLabel,
+            buttonBox
+        );
+
+
+        // =====================================================
+        // ADD TO ROOT
+        // =====================================================
+
+        endRoot.getChildren().addAll(
+            overlay,
+            endContent
+        );
+
+
+        // =====================================================
+        // REPLACE ENTIRE GAME SCREEN
+        // =====================================================
+
+        Scene endScene =
+            new Scene(
+                endRoot,
+                900,
+                600
+            );
+
+
+        stage.setScene(
+            endScene
         );
     }
 }
