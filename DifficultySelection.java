@@ -46,7 +46,7 @@ public class DifficultySelection {
 
         Label title = new Label("CHOOSE YOUR PATH");
         title.setFont(Font.font(
-                "Serif",
+                "Palatino Linotype",
                 FontWeight.BOLD,
                 42
         ));
@@ -58,7 +58,7 @@ public class DifficultySelection {
 
         Label subtitle = new Label("How will you enter the dungeon?");
         subtitle.setFont(Font.font(
-                "Serif",
+                "Garamond",
                 FontPosture.ITALIC,
                 18
         ));
@@ -70,7 +70,7 @@ public class DifficultySelection {
 
         Label apprenticeTitle = new Label("APPRENTICE");
         apprenticeTitle.setFont(Font.font(
-                "Serif",
+                "Palatino Linotype",
                 FontWeight.BOLD,
                 27
         ));
@@ -82,7 +82,7 @@ public class DifficultySelection {
                 "Find 4 Words"
         );
 
-        apprenticeInfo.setFont(Font.font("Serif", 17));
+        apprenticeInfo.setFont(Font.font("Palatino Linotype", 17));
         apprenticeInfo.setTextFill(Color.web("#D8CCE8"));
         apprenticeInfo.setAlignment(Pos.CENTER);
         apprenticeInfo.setLineSpacing(4);
@@ -146,7 +146,7 @@ public class DifficultySelection {
 
         Label sorcererTitle = new Label("SORCERER");
         sorcererTitle.setFont(Font.font(
-                "Serif",
+                "Palatino Linotype",
                 FontWeight.BOLD,
                 27
         ));
@@ -158,7 +158,7 @@ public class DifficultySelection {
                 "Find 6 Words"
         );
 
-        sorcererInfo.setFont(Font.font("Serif", 17));
+        sorcererInfo.setFont(Font.font("Palatino Linotype", 17));
         sorcererInfo.setTextFill(Color.web("#D8CCE8"));
         sorcererInfo.setAlignment(Pos.CENTER);
         sorcererInfo.setLineSpacing(4);

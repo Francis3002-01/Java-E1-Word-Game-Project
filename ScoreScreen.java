@@ -36,7 +36,7 @@ public class ScoreScreen {
         Label title = new Label("HIGH SCORES");
 
         title.setFont(Font.font(
-                "Serif",
+                "Palatino Linotype",
                 FontWeight.BOLD,
                 42
         ));

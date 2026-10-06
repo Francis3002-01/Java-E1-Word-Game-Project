@@ -16,6 +16,7 @@ import javafx.util.Duration;
 import java.util.Random;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
+import javafx.animation.ScaleTransition;
 
 
 public class MainMenu {
@@ -33,7 +34,7 @@ public class MainMenu {
         // TITLE
         Label title = new Label("WIZARD'S ESCAPE");
 
-        title.setFont(Font.font("Serif", FontWeight.BOLD, 50));
+        title.setFont(Font.font("Palatino Linotype", FontWeight.BOLD, 50));
 
         title.setTextFill(Color.web("#E8D8FF"));
         
@@ -46,7 +47,7 @@ public class MainMenu {
 
         // SUBTITLE
         Label subtitle = new Label("A Word-Scramble Adventure");
-        subtitle.setFont(Font.font("Serif", FontPosture.ITALIC, 19));
+        subtitle.setFont(Font.font("Garamond", FontPosture.ITALIC, 19));
 
         subtitle.setTextFill(
             Color.web("#D8C7FF")
@@ -62,7 +63,7 @@ public class MainMenu {
         String buttonStyle =
             "-fx-background-color: rgba(20, 15, 45, 0.88);" +
             "-fx-text-fill: #F3E8FF;" +
-            "-fx-font-family: 'Serif';" +
+            "-fx-font-family: 'Georgia';" +
             "-fx-font-size: 21px;" +
             "-fx-font-weight: bold;" +
             "-fx-background-radius: 12;" +
@@ -86,7 +87,7 @@ public class MainMenu {
 
             button.setPrefWidth(250);
             button.setPrefHeight(54);
-            button.setFont(Font.font("Serif", 21));
+            button.setFont(Font.font("Georgia", 21));
             button.setStyle(buttonStyle);
 
             button.setOnMouseEntered(e -> {
