@@ -27,7 +27,6 @@ public class MainMenu {
         this.stage = stage;
     }
 
-
     public void show() {
 
 
@@ -106,16 +105,30 @@ public class MainMenu {
                     "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);"
                 );
 
-                button.setScaleX(1.04);
-                button.setScaleY(1.04);
+                ScaleTransition grow =
+                new ScaleTransition(
+                        Duration.millis(150),
+                        button
+                );
+
+                grow.setToX(1.06);
+                grow.setToY(1.06);
+                grow.playFromStart();
             });
 
             button.setOnMouseExited(e -> {
 
                 button.setStyle(buttonStyle);
 
-                button.setScaleX(1);
-                button.setScaleY(1);
+                ScaleTransition shrink =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                button
+                        );
+
+                shrink.setToX(1.0);
+                shrink.setToY(1.0);
+                shrink.playFromStart();
             });
     }
 

@@ -1,5 +1,7 @@
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -10,6 +12,16 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.animation.ScaleTransition;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 
 public class DifficultySelection {
 
@@ -18,6 +30,16 @@ public class DifficultySelection {
     // Design resolution
     private static final double DESIGN_WIDTH = 900;
     private static final double DESIGN_HEIGHT = 600;
+
+    // =========================================================
+    // PARTICLE SETTINGS
+    // =========================================================
+
+        private static final int PARTICLE_COUNT = 35;
+
+        private final Random random = new Random();
+
+        private final List<Circle> particles = new ArrayList<>();
 
     public DifficultySelection(Stage stage) {
         this.stage = stage;
@@ -36,6 +58,104 @@ public class DifficultySelection {
 
         designRoot.setScaleX(scale);
         designRoot.setScaleY(scale);
+        }
+
+        private void createParticles(StackPane particleLayer) {
+
+                for (int i = 0; i < PARTICLE_COUNT; i++) {
+
+                        double radius = 1.0 + random.nextDouble() * 2.0;
+
+                        Circle particle = new Circle(radius);
+
+                        particle.setFill(Color.web(
+                                random.nextBoolean()
+                                        ? "#C9A7F2"
+                                        : "#8F6BB8"
+                        ));
+
+                        particle.setOpacity(
+                                0.15 + random.nextDouble() * 0.45
+                        );
+
+                        resetParticle(particle);
+
+                        particleLayer.getChildren().add(particle);
+                        particles.add(particle);
+
+                        animateParticle(particle);
+                }
+        }
+
+        private void animateParticle(Circle particle) {
+
+                double startX = particle.getTranslateX();
+                double startY = particle.getTranslateY();
+
+                double movementX =
+                        (random.nextDouble() - 0.5) * 80;
+
+                double movementY =
+                        -40 - random.nextDouble() * 100;
+
+                double duration =
+                        4 + random.nextDouble() * 5;
+
+                TranslateTransition movement =
+                        new TranslateTransition(
+                                Duration.seconds(duration),
+                                particle
+                        );
+
+                movement.setFromX(startX);
+                movement.setFromY(startY);
+                movement.setToX(startX + movementX);
+                movement.setToY(startY + movementY);
+
+                FadeTransition fade =
+                        new FadeTransition(
+                                Duration.seconds(duration),
+                                particle
+                        );
+
+                fade.setFromValue(
+                        0.15 + random.nextDouble() * 0.45
+                );
+
+                fade.setToValue(0.0);
+
+                ParallelTransition animation =
+                        new ParallelTransition(
+                                movement,
+                                fade
+                        );
+
+                animation.setOnFinished(event -> {
+
+                        resetParticle(particle);
+
+                        animateParticle(particle);
+                });
+
+                animation.play();
+        }
+
+        private void resetParticle(Circle particle) {
+
+                double startX =
+                        random.nextDouble() * DESIGN_WIDTH
+                        - DESIGN_WIDTH / 2;
+
+                double startY =
+                        DESIGN_HEIGHT / 2
+                        + random.nextDouble() * 50;
+
+                particle.setTranslateX(startX);
+                particle.setTranslateY(startY);
+
+                particle.setOpacity(
+                        0.15 + random.nextDouble() * 0.45
+                );
         }
 
     public void show() {
@@ -201,17 +321,35 @@ public class DifficultySelection {
 
         for (Button button : difficultyButtons) {
 
-            button.setOnMouseEntered(event -> {
-                button.setStyle(hoverButtonStyle);
-                button.setScaleX(1.04);
-                button.setScaleY(1.04);
-            });
+        button.setOnMouseEntered(event -> {
 
-            button.setOnMouseExited(event -> {
+                button.setStyle(hoverButtonStyle);
+
+                ScaleTransition grow =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                button
+                        );
+
+                grow.setToX(1.06);
+                grow.setToY(1.06);
+                grow.playFromStart();
+        });
+
+        button.setOnMouseExited(event -> {
+
                 button.setStyle(normalButtonStyle);
-                button.setScaleX(1);
-                button.setScaleY(1);
-            });
+
+                ScaleTransition shrink =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                button
+                        );
+
+                shrink.setToX(1.0);
+                shrink.setToY(1.0);
+                shrink.playFromStart();
+        });
         }
 
         // =========================================================
@@ -242,34 +380,60 @@ public class DifficultySelection {
         backButton.setFocusTraversable(false);
 
         String backStyle =
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: #BFAED6;" +
-                "-fx-font-family: 'Serif';" +
-                "-fx-font-size: 16px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-border-color: transparent;" +
-                "-fx-cursor: hand;";
-
-        String backHoverStyle =
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: #FFFFFF;" +
+                "-fx-background-color: rgba(35, 24, 60, 0.95);" +
+                "-fx-text-fill: #F3E8FF;" +
                 "-fx-font-family: 'Serif';" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-border-color: #9C7AC7;" +
                 "-fx-border-radius: 8;" +
                 "-fx-background-radius: 8;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-cursor: hand;";
+
+        String backHoverStyle =
+                "-fx-background-color: rgba(72, 45, 110, 0.98);" +
+                "-fx-text-fill: #FFFFFF;" +
+                "-fx-font-family: 'Serif';" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-border-color: #C9A7F2;" +
+                "-fx-border-radius: 8;" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-width: 2;" +
                 "-fx-cursor: hand;" +
-                "-fx-effect: dropshadow(gaussian, #9B6DCE, 10, 0.45, 0, 0);";
+                "-fx-effect: dropshadow(gaussian, #9B6DCE, 12, 0.55, 0, 0);";
 
         backButton.setStyle(backStyle);
 
         backButton.setOnMouseEntered(event -> {
-            backButton.setStyle(backHoverStyle);
+
+        backButton.setStyle(backHoverStyle);
+
+        ScaleTransition grow =
+                new ScaleTransition(
+                        Duration.millis(150),
+                        backButton
+                );
+
+        grow.setToX(1.06);
+        grow.setToY(1.06);
+        grow.playFromStart();
         });
 
         backButton.setOnMouseExited(event -> {
-            backButton.setStyle(backStyle);
+
+        backButton.setStyle(backStyle);
+
+        ScaleTransition shrink =
+                new ScaleTransition(
+                        Duration.millis(150),
+                        backButton
+                );
+
+        shrink.setToX(1.0);
+        shrink.setToY(1.0);
+        shrink.playFromStart();
         });
 
         backButton.setOnAction(event -> {
@@ -304,40 +468,96 @@ public class DifficultySelection {
         );
 
         // =========================================================
+        // SCALING CONTAINER
+        // =========================================================
+
+        StackPane scaleContainer = new StackPane();
+
+        scaleContainer.setStyle(
+                "-fx-background-color: #120D20;"
+        );
+
+        // =========================================================
+        // BACKGROUND
+        // =========================================================
+
+        ImageView backgroundImage = new ImageView(
+                new Image(
+                        getClass()
+                                .getResource("/assets/difficultybg.png")
+                                .toExternalForm()
+                )
+        );
+
+        backgroundImage.setPreserveRatio(false);
+        backgroundImage.setMouseTransparent(true);
+
+        // Make the background always fill the entire window
+        backgroundImage.fitWidthProperty()
+                .bind(scaleContainer.widthProperty());
+
+        backgroundImage.fitHeightProperty()
+                .bind(scaleContainer.heightProperty());
+
+
+        // =========================================================
         // DESIGN ROOT
         // =========================================================
 
         StackPane designRoot = new StackPane();
+
         designRoot.setPrefSize(
                 DESIGN_WIDTH,
                 DESIGN_HEIGHT
         );
 
-        designRoot.setStyle(
-                "-fx-background-color: #120D20;"
-        );
-
-        designRoot.getChildren().add(content);
 
         // =========================================================
-        // SCALING CONTAINER
+        // PARTICLE LAYER
         // =========================================================
 
-        StackPane scaleContainer = new StackPane();
-        scaleContainer.setStyle(
-                "-fx-background-color: #120D20;"
+        StackPane particleLayer = new StackPane();
+
+        particleLayer.setPrefSize(
+                DESIGN_WIDTH,
+                DESIGN_HEIGHT
         );
 
-        scaleContainer.getChildren().add(designRoot);
+        particleLayer.setMouseTransparent(true);
 
-        // Calculate the scale while preserving the 900x600 aspect ratio.
-        scaleContainer.widthProperty().addListener((obs, oldValue, newValue) -> {
-        updateScale(scaleContainer, designRoot);
-        });
+        createParticles(particleLayer);
 
-        scaleContainer.heightProperty().addListener((obs, oldValue, newValue) -> {
-        updateScale(scaleContainer, designRoot);
-        });
+
+        // =========================================================
+        // LAYER ORDER
+        // =========================================================
+
+        designRoot.getChildren().addAll(
+                particleLayer,
+                content
+        );
+
+        scaleContainer.getChildren().addAll(
+                backgroundImage,
+                designRoot
+        );
+
+
+        // =========================================================
+        // RESPONSIVE SCALING
+        // =========================================================
+
+        scaleContainer.widthProperty().addListener(
+                (obs, oldValue, newValue) -> {
+                updateScale(scaleContainer, designRoot);
+                }
+        );
+
+        scaleContainer.heightProperty().addListener(
+                (obs, oldValue, newValue) -> {
+                updateScale(scaleContainer, designRoot);
+                }
+        );
 
         // =========================================================
         // SCENE
@@ -354,6 +574,8 @@ public class DifficultySelection {
         stage.setScene(scene);
         stage.setTitle("Wizard's Escape");
         stage.show();
+
+        updateScale(scaleContainer, designRoot);
     }
 
 }

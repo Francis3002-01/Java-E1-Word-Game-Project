@@ -1,5 +1,7 @@
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -10,6 +12,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
+import javafx.scene.shape.Circle;
+import java.util.Random;
+
 
 public class ScoreScreen {
 
@@ -19,10 +29,193 @@ public class ScoreScreen {
     private static final double DESIGN_WIDTH = 900;
     private static final double DESIGN_HEIGHT = 600;
 
+    // =========================================================
+    // PARTICLE SETTINGS
+    // =========================================================
+
+    private static final int PARTICLE_COUNT = 30;
+
+    private final Random random = new Random();
+
     public ScoreScreen(Stage stage) {
         this.stage = stage;
     }
 
+        // =========================================================
+        // PARTICLE SYSTEM
+        // =========================================================
+
+        private void createParticles(StackPane particleLayer) {
+
+        for (int i = 0; i < PARTICLE_COUNT; i++) {
+
+                double radius =
+                        1.0 + random.nextDouble() * 2.0;
+
+                Circle particle =
+                        new Circle(radius);
+
+                particle.setFill(
+                        Color.web(
+                                random.nextBoolean()
+                                        ? "#C9A7F2"
+                                        : "#8F6BB8"
+                        )
+                );
+
+                resetParticle(particle);
+
+                particleLayer.getChildren().add(
+                        particle
+                );
+
+                animateParticle(particle);
+        }
+        }
+
+        private void animateParticle(Circle particle) {
+
+        double startX =
+                particle.getTranslateX();
+
+        double startY =
+                particle.getTranslateY();
+
+        double movementX =
+                (random.nextDouble() - 0.5) * 60;
+
+        double movementY =
+                -40 - random.nextDouble() * 90;
+
+        double duration =
+                4 + random.nextDouble() * 4;
+
+        TranslateTransition movement =
+                new TranslateTransition(
+                        Duration.seconds(duration),
+                        particle
+                );
+
+        movement.setFromX(startX);
+        movement.setFromY(startY);
+
+        movement.setToX(
+                startX + movementX
+        );
+
+        movement.setToY(
+                startY + movementY
+        );
+
+        FadeTransition fade =
+                new FadeTransition(
+                        Duration.seconds(duration),
+                        particle
+                );
+
+        fade.setFromValue(
+                0.2 + random.nextDouble() * 0.4
+        );
+
+        fade.setToValue(0.0);
+
+        ParallelTransition animation =
+                new ParallelTransition(
+                        movement,
+                        fade
+                );
+
+        animation.setOnFinished(event -> {
+
+                resetParticle(particle);
+
+                animateParticle(particle);
+        });
+
+        animation.play();
+        }
+
+        private void resetParticle(Circle particle) {
+
+        /*
+        * Score cards occupy roughly the center
+        * of the 900x600 design.
+        *
+        * The particles are therefore spawned
+        * around the outside of the cards.
+        */
+
+        double x;
+        double y;
+
+        int area =
+                random.nextInt(4);
+
+        switch (area) {
+
+                // Left side of the cards
+                case 0:
+
+                x =
+                        80 + random.nextDouble() * 120;
+
+                y =
+                        240 + random.nextDouble() * 230;
+
+                break;
+
+                // Right side of the cards
+                case 1:
+
+                x =
+                        700 + random.nextDouble() * 120;
+
+                y =
+                        240 + random.nextDouble() * 230;
+
+                break;
+
+                // Above the cards
+                case 2:
+
+                x =
+                        180 + random.nextDouble() * 540;
+
+                y =
+                        190 + random.nextDouble() * 50;
+
+                break;
+
+                // Below the cards
+                default:
+
+                x =
+                        180 + random.nextDouble() * 540;
+
+                y =
+                        475 + random.nextDouble() * 45;
+
+                break;
+        }
+
+        /*
+        * StackPane uses its center as the origin
+        * for translateX / translateY.
+        */
+
+        particle.setTranslateX(
+                x - DESIGN_WIDTH / 2
+        );
+
+        particle.setTranslateY(
+                y - DESIGN_HEIGHT / 2
+        );
+
+        particle.setOpacity(
+                0.2 + random.nextDouble() * 0.4
+        );
+        }
+    
     // =========================================================
     // SHOW SCORE SCREEN
     // =========================================================
@@ -324,41 +517,67 @@ public class ScoreScreen {
                 false
         );
 
-        String backStyle =
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: #BFAED6;" +
-                "-fx-font-family: 'Serif';" +
-                "-fx-font-size: 16px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-border-color: transparent;" +
-                "-fx-cursor: hand;";
-
-        String backHoverStyle =
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: #FFFFFF;" +
+       String backStyle =
+                "-fx-background-color: rgba(35, 24, 60, 0.95);" +
+                "-fx-text-fill: #F3E8FF;" +
                 "-fx-font-family: 'Serif';" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-border-color: #9C7AC7;" +
                 "-fx-border-radius: 8;" +
                 "-fx-background-radius: 8;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-cursor: hand;";
+
+        String backHoverStyle =
+                "-fx-background-color: rgba(72, 45, 110, 0.98);" +
+                "-fx-text-fill: #FFFFFF;" +
+                "-fx-font-family: 'Serif';" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-border-color: #C9A7F2;" +
+                "-fx-border-radius: 8;" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-width: 2;" +
                 "-fx-cursor: hand;" +
-                "-fx-effect: dropshadow(gaussian, #9B6DCE, 10, 0.45, 0, 0);";
+                "-fx-effect: dropshadow(gaussian, #9B6DCE, 12, 0.55, 0, 0);";
 
         backButton.setStyle(
                 backStyle
         );
 
         backButton.setOnMouseEntered(event -> {
-            backButton.setStyle(
-                    backHoverStyle
-            );
+
+        backButton.setStyle(
+                backHoverStyle
+        );
+
+        ScaleTransition grow =
+                new ScaleTransition(
+                        Duration.millis(150),
+                        backButton
+                );
+
+        grow.setToX(1.06);
+        grow.setToY(1.06);
+        grow.playFromStart();
         });
 
         backButton.setOnMouseExited(event -> {
-            backButton.setStyle(
-                    backStyle
-            );
+
+        backButton.setStyle(
+                backStyle
+        );
+
+        ScaleTransition shrink =
+                new ScaleTransition(
+                        Duration.millis(150),
+                        backButton
+                );
+
+        shrink.setToX(1.0);
+        shrink.setToY(1.0);
+        shrink.playFromStart();
         });
 
         backButton.setOnAction(event -> {
@@ -388,6 +607,40 @@ public class ScoreScreen {
         );
 
         // =========================================================
+        // SCALING CONTAINER
+        // =========================================================
+
+        StackPane scaleContainer =
+                new StackPane();
+
+        scaleContainer.setStyle(
+                "-fx-background-color: #120D20;"
+        );
+
+        // =========================================================
+        // BACKGROUND
+        // =========================================================
+
+        ImageView backgroundImage =
+                new ImageView(
+                        new Image(
+                                getClass()
+                                        .getResource("/assets/scoresbg.png")
+                                        .toExternalForm()
+                        )
+                );
+
+        backgroundImage.setPreserveRatio(false);
+        backgroundImage.setMouseTransparent(true);
+
+        // Make the background fill the entire window
+        backgroundImage.fitWidthProperty()
+                .bind(scaleContainer.widthProperty());
+
+        backgroundImage.fitHeightProperty()
+                .bind(scaleContainer.heightProperty());
+
+        // =========================================================
         // DESIGN ROOT
         // =========================================================
 
@@ -399,44 +652,59 @@ public class ScoreScreen {
                 DESIGN_HEIGHT
         );
 
-        designRoot.setStyle(
-                "-fx-background-color: #120D20;"
+        // =========================================================
+        // PARTICLE LAYER
+        // =========================================================
+
+        StackPane particleLayer =
+                new StackPane();
+
+        particleLayer.setPrefSize(
+                DESIGN_WIDTH,
+                DESIGN_HEIGHT
         );
 
-        designRoot.getChildren().add(
+        particleLayer.setMouseTransparent(
+                true
+        );
+
+        createParticles(
+                particleLayer
+        );
+
+        // =========================================================
+        // LAYER ORDER
+        // =========================================================
+
+        designRoot.getChildren().addAll(
+                particleLayer,
                 content
         );
 
-        // =========================================================
-        // SCALING CONTAINER
-        // =========================================================
-
-        StackPane scaleContainer =
-                new StackPane();
-
-        scaleContainer.setStyle(
-                "-fx-background-color: #120D20;"
-        );
-
-        scaleContainer.getChildren().add(
+        scaleContainer.getChildren().addAll(
+                backgroundImage,
                 designRoot
         );
 
+        // =========================================================
+        // RESPONSIVE SCALING
+        // =========================================================
+
         scaleContainer.widthProperty().addListener(
                 (obs, oldValue, newValue) -> {
-                    updateScale(
-                            scaleContainer,
-                            designRoot
-                    );
+                updateScale(
+                        scaleContainer,
+                        designRoot
+                );
                 }
         );
 
         scaleContainer.heightProperty().addListener(
                 (obs, oldValue, newValue) -> {
-                    updateScale(
-                            scaleContainer,
-                            designRoot
-                    );
+                updateScale(
+                        scaleContainer,
+                        designRoot
+                );
                 }
         );
 
@@ -459,40 +727,38 @@ public class ScoreScreen {
         stage.setTitle("Wizard's Escape");
         stage.show();
 
-        // Apply initial scale
         updateScale(
                 scaleContainer,
                 designRoot
         );
     }
+        // =========================================================
+        // RESPONSIVE SCALING
+        // =========================================================
 
-    // =========================================================
-    // RESPONSIVE SCALING
-    // =========================================================
+        private void updateScale(
+                        StackPane scaleContainer,
+                        StackPane designRoot
+                ) {
 
-    private void updateScale(
-            StackPane scaleContainer,
-            StackPane designRoot
-    ) {
+                double scaleX =
+                        scaleContainer.getWidth()
+                                / DESIGN_WIDTH;
 
-        double scaleX =
-                scaleContainer.getWidth()
-                        / DESIGN_WIDTH;
+                double scaleY =
+                        scaleContainer.getHeight()
+                                / DESIGN_HEIGHT;
 
-        double scaleY =
-                scaleContainer.getHeight()
-                        / DESIGN_HEIGHT;
+                double scale =
+                        Math.min(scaleX, scaleY);
 
-        double scale =
-                Math.min(scaleX, scaleY);
+                designRoot.setScaleX(
+                        scale
+                );
 
-        designRoot.setScaleX(
-                scale
-        );
-
-        designRoot.setScaleY(
-                scale
-        );
-    }
+                designRoot.setScaleY(
+                        scale
+                );
+        }
 }
 

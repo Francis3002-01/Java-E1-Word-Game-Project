@@ -137,6 +137,13 @@ public class GameScreen {
 
     private static final int HIT_TRIGGER_FRAMES = 2;
 
+    // =========================
+    // SPRITE DISPLAY SETTINGS
+    // =========================
+
+    private static final double SPRITE_SIZE = 240;
+    private static final double END_CARD_SPRITE_SIZE = 220;
+
     private long wordStartTime;
 
 
@@ -977,8 +984,8 @@ answerField.addEventFilter(
     private ImageView createEndCardWizard(boolean cleared) {
 
         ImageView endWizard =new ImageView();
-        endWizard.setFitWidth(220);
-        endWizard.setFitHeight(220);
+        endWizard.setFitWidth(END_CARD_SPRITE_SIZE);
+        endWizard.setFitHeight(END_CARD_SPRITE_SIZE);
         endWizard.setPreserveRatio(true);
 
         // =====================================================
@@ -1166,14 +1173,11 @@ answerField.addEventFilter(
 
         wizardImageView = new ImageView();
 
-        wizardImageView.setFitWidth(192);
+        wizardImageView.setFitWidth(SPRITE_SIZE);
 
-        wizardImageView.setFitHeight(192);
+        wizardImageView.setFitHeight(SPRITE_SIZE);
 
         wizardImageView.setPreserveRatio(true);
-
-        wizardImageView.setScaleX(1);
-
 
         wizardIdleAnimator =
             new SpriteAnimator(
@@ -1273,9 +1277,9 @@ answerField.addEventFilter(
             enemyImageView =
                 new ImageView();
 
-            enemyImageView.setFitWidth(192);
+            enemyImageView.setFitWidth(SPRITE_SIZE);
 
-            enemyImageView.setFitHeight(192);
+            enemyImageView.setFitHeight(SPRITE_SIZE);
 
             enemyImageView.setPreserveRatio(true);
 
