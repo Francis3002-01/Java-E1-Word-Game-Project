@@ -4,6 +4,8 @@ public class GameLogic {
     private int score;
     private int wordsFound;
     private int remainingTime;
+    private int currentStreak;
+    private int hintsRemaining;
 
     private final int goal;
 
@@ -14,59 +16,52 @@ public class GameLogic {
 
         score = 0;
         wordsFound = 0;
+        currentStreak = 0;
 
         if (difficulty.equalsIgnoreCase("Apprentice")) {
-
             remainingTime = GameConfig.APPRENTICE_START_TIME;
             goal = GameConfig.APPRENTICE_GOAL;
-
-        } 
+            hintsRemaining = GameConfig.APPRENTICE_HINTS;
+        }
         
         else if (difficulty.equalsIgnoreCase("Sorcerer")) {
-
             remainingTime = GameConfig.SORCERER_START_TIME;
             goal = GameConfig.SORCERER_GOAL;
-
-        } 
+            hintsRemaining = GameConfig.SORCERER_HINTS;
+        }
         
         else {
-            throw new IllegalArgumentException(
-                    "Invalid difficulty."
-            );
+            throw new IllegalArgumentException("Invalid difficulty.");
         }
     }
 
-
     // Validate the player's guess
-    public boolean isValidGuess(String guess, String scramble) {
+    public boolean isValidGuess(String guess, String currentWord) {
 
-        if (guess == null || scramble == null) {
+        if (guess == null || currentWord == null) {
             return false;
         }
 
-        // Remove spaces and convert to lowercase
         guess = guess.trim().toLowerCase();
-        scramble = scramble.trim().toLowerCase();
+        currentWord = currentWord.trim().toLowerCase();
 
         // Empty answer is invalid
         if (guess.isEmpty()) {
             return false;
         }
 
-        // Check dictionary
+        // Must be a valid dictionary word
         if (!WordDictionary.contains(guess)) {
             return false;
         }
 
-        // Check if the word can be created
-        // using the available scramble letters
-        return canCreateWord(guess, scramble);
+        // Must exactly match the current word
+        return guess.equals(currentWord);
     }
-
 
     // Check whether the guess can be created
     // using only the scramble letters
-    private boolean canCreateWord(String guess, String scramble) {
+    /*private boolean canCreateWord(String guess, String scramble) {
 
         int[] letterCount = new int[26];
 
@@ -95,28 +90,44 @@ public class GameLogic {
         }
 
         return true;
-    }
+    }*/
 
 
     // Process a correct answer
-    public int processCorrectGuess(String guess) {
+    public int processCorrectGuess(String guess, double secondsTaken) {
 
-        int points = calculateWordPoints(guess);
+    currentStreak++;
 
-        score += points;
+    int basePoints = calculateWordPoints(guess);
+    int streakBonus = calculateStreakBonus();
+    int speedBonus = calculateSpeedBonus(secondsTaken);
 
-        // Add 10 seconds
-        remainingTime += GameConfig.CORRECT_TIME_BONUS;
+    int subtotal =
+        basePoints +
+        streakBonus +
+        speedBonus;
 
-        // Increase words found
-        wordsFound++;
+    double multiplier = getDifficultyMultiplier();
 
-        return points;
-    }
+    int totalPoints =
+        (int) Math.round(subtotal * multiplier);
+
+    score += totalPoints;
+
+    // Add 10 seconds
+    remainingTime += GameConfig.CORRECT_TIME_BONUS;
+
+    // Increase words found
+    wordsFound++;
+
+    return totalPoints;
+}
 
 
     // Process a wrong answer
     public int processWrongGuess() {
+
+        currentStreak = 0;
 
         score -= GameConfig.WRONG_WORD_PENALTY;
 
@@ -146,9 +157,64 @@ public class GameLogic {
             case 7:
                 return GameConfig.SEVEN_LETTER_POINTS;
 
+            case 8:
+                return GameConfig.EIGHT_LETTER_POINTS;
+
             default:
                 return 0;
         }
+    }
+
+    private int calculateStreakBonus() {
+
+        switch (currentStreak) {
+
+            case 2:
+                return GameConfig.STREAK_BONUS_2;
+
+            case 3:
+                return GameConfig.STREAK_BONUS_3;
+
+            case 4:
+                return GameConfig.STREAK_BONUS_4;
+
+            default:
+                if (currentStreak >= 5) {
+                    return GameConfig.STREAK_BONUS_MAX;
+                }
+
+                return 0;
+        }
+    }
+
+    private int calculateSpeedBonus(double secondsTaken) {
+
+        if (secondsTaken <= 2) {
+            return GameConfig.SPEED_BONUS_2_SECONDS;
+        }
+
+        else if (secondsTaken <= 4) {
+            return GameConfig.SPEED_BONUS_4_SECONDS;
+        }
+
+        else if (secondsTaken <= 6) {
+            return GameConfig.SPEED_BONUS_6_SECONDS;
+        }
+
+        else if (secondsTaken <= 8) {
+            return GameConfig.SPEED_BONUS_8_SECONDS;
+        }
+
+        return 0;
+    }
+
+    private double getDifficultyMultiplier() {
+
+        if (difficulty.equalsIgnoreCase("Sorcerer")) {
+            return GameConfig.SORCERER_MULTIPLIER;
+        }
+
+        return GameConfig.APPRENTICE_MULTIPLIER;
     }
 
 
@@ -185,16 +251,10 @@ public class GameLogic {
 
 
     // Calculate the time bonus
-    public int calculateTimeBonus() {
-
-        return remainingTime * GameConfig.TIME_BONUS_PER_SECOND;
-    }
-
-
-    // Get final score after applying time bonus
+    // Get final score
     public int calculateFinalScore() {
 
-        return score + calculateTimeBonus();
+        return score;
     }
 
 
@@ -221,5 +281,21 @@ public class GameLogic {
 
     public int getGoal() {
         return goal;
+    }
+
+    public boolean useHint() {
+
+        if (hintsRemaining <= 0) {
+            return false;
+        }
+
+        hintsRemaining--;
+        score -= GameConfig.HINT_PENALTY;
+
+        return true;
+    }
+
+    public int getHintsRemaining() {
+        return hintsRemaining;
     }
 }

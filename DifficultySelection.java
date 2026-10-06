@@ -79,7 +79,7 @@ public class DifficultySelection {
         Label apprenticeInfo = new Label(
                 "4–6 Letters\n" +
                 "30 Seconds\n" +
-                "Find 4 Words"
+                "Find 6 Words"
         );
 
         apprenticeInfo.setFont(Font.font("Palatino Linotype", 17));
@@ -155,7 +155,7 @@ public class DifficultySelection {
         Label sorcererInfo = new Label(
                 "6–8 Letters\n" +
                 "35 Seconds\n" +
-                "Find 6 Words"
+                "Find 8 Words"
         );
 
         sorcererInfo.setFont(Font.font("Palatino Linotype", 17));

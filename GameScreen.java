@@ -38,6 +38,15 @@ import javafx.stage.Stage;
 
 import javafx.util.Duration;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
 
 public class GameScreen {
 
@@ -52,55 +61,53 @@ public class GameScreen {
     // =========================
     // UI ELEMENTS
     // =========================
-
     private Label difficultyLabel;
     private Label scoreLabel;
     private Label wordsLabel;
     private Label timerLabel;
+    private Label hintsLabel;
     private Label scrambledWordLabel;
     private Label messageLabel;
-
     private TextField answerField;
     private Button submitButton;
+    private Button hintButton;
+
+    /*private String revealedLetters = "";
+    private StackPane answerInputContainer;
+    private HBox animatedLetters;*/
 
 
-    // =========================
-    // ANIMATED INPUT
-    // =========================
-
+    private final Set<Integer> revealedPositions = new HashSet<>();
     private StackPane answerInputContainer;
     private HBox animatedLetters;
+    private int activeBoxIndex = 0;
+    private char[] typedLetters;
 
+
+    //private Timeline cursorTimeline;
+    //private boolean cursorVisible = true;
 
     // =========================
     // GAME TIMER
     // =========================
-
     private Timeline timeline;
-
 
     // =========================
     // WIZARD
     // =========================
-
     private ImageView wizardImageView;
-
     private SpriteAnimator wizardIdleAnimator;
     private SpriteAnimator wizardAttackAnimator;
     private SpriteAnimator wizardHitAnimator;
     private SpriteAnimator wizardDeathAnimator;
     private SpriteAnimator wizardRunAnimator;
 
-
     // =========================
     // ENEMY
     // =========================
-
     private ImageView enemyImageView;
-
     private SpriteAnimator enemyIdleAnimator;
     private SpriteAnimator enemyAttackAnimator;
-
     private Enemy currentEnemy;
 
 
@@ -130,15 +137,14 @@ public class GameScreen {
 
     private static final int HIT_TRIGGER_FRAMES = 2;
 
+    private long wordStartTime;
+
 
     // =========================================================
     // CONSTRUCTOR
     // =========================================================
 
-    public GameScreen(
-        Stage stage,
-        String difficulty
-    ) {
+    public GameScreen(Stage stage, String difficulty) {
 
         this.stage = stage;
         this.difficulty = difficulty;
@@ -210,80 +216,52 @@ public class GameScreen {
         // -------------------------
         // TIMER
         // -------------------------
+        timerLabel = new Label("Time: " +gameLogic.getRemainingTime());
+        timerLabel.setFont(Font.font("Arial", 18));
+        timerLabel.setTextFill(Color.WHITE);
 
-        timerLabel = new Label(
-            "Time: " +
-            gameLogic.getRemainingTime()
+        // -------------------------
+        // HINTS
+        // -------------------------
+        hintsLabel = new Label(
+            "Hints: " +
+            gameLogic.getHintsRemaining() +
+            "/" +
+            getTotalHints()
         );
 
-        timerLabel.setFont(
-            Font.font("Arial", 18)
-        );
-
-        timerLabel.setTextFill(
-            Color.WHITE
-        );
-
+        hintsLabel.setFont(Font.font("Arial", 18));
+        hintsLabel.setTextFill(Color.WHITE);
 
         // -------------------------
         // SCRAMBLED WORD
         // -------------------------
-
         scrambledWordLabel = new Label();
-
-        scrambledWordLabel.setFont(
-            Font.font("Serif", 42)
-        );
-
-        scrambledWordLabel.setTextFill(
-            Color.WHITE
-        );
-
+        scrambledWordLabel.setFont(Font.font("Serif", 42));
+        scrambledWordLabel.setTextFill(Color.WHITE);
 
         // -------------------------
         // ANSWER FIELD
         // -------------------------
-
         answerField = new TextField();
-
-        answerField.setPromptText(
-            "Enter your answer"
-        );
-
-        answerField.setMaxWidth(300);
-
-        answerField.setPrefHeight(45);
-
-        answerField.setFont(
-            Font.font("Arial", 18)
-        );
-
+        answerField.setMaxWidth(1);
+        answerField.setPrefWidth(1);
+        answerField.setPrefHeight(1);
+        answerField.setOpacity(0);
 
         // -------------------------
         // ANIMATED LETTER DISPLAY
         // -------------------------
-
         animatedLetters = new HBox(3);
-
-        animatedLetters.setAlignment(
-            Pos.CENTER
-        );
-
-        animatedLetters.setMouseTransparent(
-            true
-        );
-
+        animatedLetters.setAlignment(Pos.CENTER);
+        animatedLetters.setMouseTransparent(false);
 
         // -------------------------
         // INPUT CONTAINER
         // -------------------------
-
         answerInputContainer = new StackPane();
-
         answerInputContainer.setMaxWidth(300);
-
         answerInputContainer.setPrefHeight(45);
-
 
         // Dark transparent TextField.
 
@@ -336,6 +314,33 @@ public class GameScreen {
 
         setSubmitButtonNormalStyle();
 
+        // -------------------------
+        // HINT BUTTON
+        // -------------------------
+
+        hintButton = new Button("HINT");
+        hintButton.setPrefWidth(100);
+        hintButton.setPrefHeight(45);
+
+        hintButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                16
+            )
+        );
+
+        hintButton.setTextFill(Color.web("#F5E6C8"));
+
+        hintButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
+
 
         // -------------------------
         // MESSAGE
@@ -364,11 +369,106 @@ public class GameScreen {
 
         });
 
+        /*hintButton.setOnAction(event -> {
+
+            if (gameLogic.useHint()) 
+            {
+                String currentWord = wordManager.getCurrentWord();
+
+                for (int i = 0; i < currentWord.length(); i++) 
+                {
+                    String letter = String.valueOf(currentWord.charAt(i));
+
+                    if (!revealedLetters.contains(letter)) 
+                    {
+                        revealedLetters += letter;
+                        StringBuilder hint = new StringBuilder();
+
+                        for (int j = 0; j < currentWord.length(); j++) 
+                        {
+
+                            String currentLetter =String.valueOf(currentWord.charAt(j));
+
+                            if (revealedLetters.contains(currentLetter)) {
+                                hint.append(currentLetter.toUpperCase());
+                            } 
+                            
+                            else {
+                                hint.append("_");
+                            }
+
+                            if (j < currentWord.length() - 1) {
+                                hint.append(" ");
+                            }
+                        }
+
+                        answerField.setText(hint.toString());
+                        messageLabel.setText("Hint used! -10 points.");
+
+                        updateLabels();
+
+                        hintsLabel.setText(
+                            "Hints: " +
+                            gameLogic.getHintsRemaining() +
+                            "/" +
+                            getTotalHints()
+                        );
+
+                        break;
+                    }
+                }
+            }
+        });*/
+
+        hintButton.setOnAction(event -> 
+        {
+            String currentWord = wordManager.getCurrentWord();
+            List<Integer> availablePositions = new ArrayList<>();
+
+            for (int i = 0; i < currentWord.length(); i++) {
+                if (!revealedPositions.contains(i)) {
+                    availablePositions.add(i);
+                }
+            }
+
+            if (availablePositions.isEmpty()) {
+                return;
+            }
+
+            int hintPosition =
+                availablePositions.get(
+                    new Random().nextInt(availablePositions.size())
+                );
+
+            // No available position
+            if (hintPosition == -1) {
+                return;
+            }
+
+            // Use the hint
+            if (!gameLogic.useHint()) {
+                return;
+            }
+
+            // Remember the exact position revealed
+            revealedPositions.add(hintPosition);
+
+            // Refresh the visible boxes.
+            // Do NOT add the hinted letter to answerField.
+            updateLetterBoxes();
+
+            // Move cursor to the next available box
+            moveToNextAvailableBox();
+            messageLabel.setText("Hint used! -10 points.");
+            updateLabels();
+
+            // Return keyboard focus to the answer field
+            answerField.requestFocus();
+        });
+        
 
         answerField.setOnAction(event -> {
-
             checkAnswer();
-
         });
 
 
@@ -390,14 +490,270 @@ public class GameScreen {
         // INPUT LISTENER
         // -------------------------
 
-        answerField.textProperty().addListener(
+        /*answerField.textProperty().addListener(
             (observable, oldValue, newValue) -> {
 
-                updateAnimatedInput(newValue);
+        if (typedLetters == null) {
+            return;
+        }
 
+        String currentWord = wordManager.getCurrentWord();
+
+        // Prevent more characters than the word length
+        if (newValue.length() > currentWord.length()) {
+
+            answerField.setText(
+                newValue.substring(
+                    0,
+                    currentWord.length()
+                )
+            );
+
+            return;
+        }
+
+        // -------------------------------------------------
+        // NEW CHARACTER ENTERED
+        // -------------------------------------------------
+
+        if (newValue.length() > oldValue.length()) {
+
+            char newCharacter =
+                newValue.charAt(
+                    newValue.length() - 1
+                );
+
+            // Find the next editable box
+            moveToNextAvailableBox();
+
+            if (activeBoxIndex < typedLetters.length) {
+
+                typedLetters[activeBoxIndex] =
+                    newCharacter;
+
+                activeBoxIndex++;
+
+                moveToNextAvailableBox();
             }
-        );
+        }
 
+        // -------------------------------------------------
+        // CHARACTER DELETED
+        // -------------------------------------------------
+
+        else if (newValue.length() < oldValue.length()) {
+
+                    // Move backwards to an editable box
+                    int deleteIndex =
+                        activeBoxIndex - 1;
+
+                    while (
+                        deleteIndex >= 0 &&
+                        revealedPositions.contains(deleteIndex)
+                    ) {
+                        deleteIndex--;
+                    }
+
+                    if (deleteIndex >= 0) {
+
+                        typedLetters[deleteIndex] = '\0';
+
+                        activeBoxIndex = deleteIndex;
+                    }
+                }
+
+                // Clear the hidden TextField.
+                // It is only being used to detect keyboard input.
+                if (!newValue.isEmpty()) {
+                    answerField.clear();
+                }
+
+                updateLetterBoxes();
+                updateActiveBox();
+            }
+        );*/
+
+        answerField.addEventFilter(
+    KeyEvent.KEY_TYPED,
+    event -> {
+
+        if (typedLetters == null || animationPlaying || gamePaused) {
+            return;
+        }
+
+        String character = event.getCharacter();
+
+        if (character == null || character.isEmpty()) {
+            return;
+        }
+
+        char newCharacter = character.charAt(0);
+
+        // Only allow letters.
+        if (!Character.isLetter(newCharacter)) {
+            event.consume();
+            return;
+        }
+
+        moveToNextAvailableBox();
+
+        if (activeBoxIndex < typedLetters.length) {
+
+            typedLetters[activeBoxIndex] =
+                Character.toLowerCase(newCharacter);
+
+            activeBoxIndex++;
+
+            moveToNextAvailableBox();
+
+            updateLetterBoxes();
+        }
+
+        event.consume();
+    }
+);
+
+
+answerField.addEventFilter(
+    KeyEvent.KEY_PRESSED,
+    event -> {
+
+        if (typedLetters == null || animationPlaying || gamePaused) {
+            return;
+        }
+
+        // =========================
+        // BACKSPACE
+        // =========================
+
+        if (event.getCode() == KeyCode.BACK_SPACE) {
+
+    int deleteIndex = activeBoxIndex;
+
+    // If the currently selected box already has a letter,
+    // delete that letter first.
+    if (
+        deleteIndex >= 0 &&
+        deleteIndex < typedLetters.length &&
+        !revealedPositions.contains(deleteIndex) &&
+        typedLetters[deleteIndex] != '\0'
+    ) {
+
+        typedLetters[deleteIndex] = '\0';
+
+        updateLetterBoxes();
+
+        event.consume();
+        return;
+    }
+
+    // Otherwise, move backward to the previous editable box.
+    deleteIndex--;
+
+    while (
+        deleteIndex >= 0 &&
+        revealedPositions.contains(deleteIndex)
+    ) {
+        deleteIndex--;
+    }
+
+    if (deleteIndex >= 0) {
+
+        typedLetters[deleteIndex] = '\0';
+
+        activeBoxIndex = deleteIndex;
+
+        updateLetterBoxes();
+    }
+
+    event.consume();
+    return;
+}
+
+
+        // =========================
+        // DELETE
+        // =========================
+
+        if (event.getCode() == KeyCode.DELETE) {
+
+            if (
+                activeBoxIndex < typedLetters.length &&
+                !revealedPositions.contains(activeBoxIndex)
+            ) {
+
+                typedLetters[activeBoxIndex] = '\0';
+
+                updateLetterBoxes();
+            }
+
+            event.consume();
+            return;
+        }
+
+
+        // =========================
+        // LEFT ARROW
+        // =========================
+
+        if (event.getCode() == KeyCode.LEFT) {
+
+            int index = activeBoxIndex - 1;
+
+            while (
+                index >= 0 &&
+                revealedPositions.contains(index)
+            ) {
+                index--;
+            }
+
+            if (index >= 0) {
+                activeBoxIndex = index;
+                updateActiveBox();
+            }
+
+            event.consume();
+            return;
+        }
+
+
+        // =========================
+        // RIGHT ARROW
+        // =========================
+
+        if (event.getCode() == KeyCode.RIGHT) {
+
+            int index = activeBoxIndex + 1;
+
+            while (
+                index < typedLetters.length &&
+                revealedPositions.contains(index)
+            ) {
+                index++;
+            }
+
+            if (index < typedLetters.length) {
+                activeBoxIndex = index;
+                updateActiveBox();
+            }
+
+            event.consume();
+            return;
+        }
+
+
+        // =========================
+        // ENTER
+        // =========================
+
+        if (event.getCode() == KeyCode.ENTER) {
+
+            checkAnswer();
+
+            event.consume();
+        }
+    }
+);
 
         // -------------------------
         // CHARACTER ANIMATIONS
@@ -495,29 +851,24 @@ public class GameScreen {
 
         VBox centerLayout = new VBox(20);
 
-        centerLayout.setAlignment(
-            Pos.CENTER
-        );
+        centerLayout.setAlignment(Pos.CENTER);
 
-        StackPane battleContainer =
-            new StackPane();
+        StackPane battleContainer =new StackPane();
 
-        battleContainer.setAlignment(
-            Pos.CENTER
-        );
+        battleContainer.setAlignment(Pos.CENTER);
 
-        battleContainer.getChildren().addAll(
-            battleArea,
-            battleAnimationLayer
-        );
+        battleContainer.getChildren().addAll(battleArea,battleAnimationLayer);
 
+        HBox actionButtons = new HBox(10);
+        actionButtons.setAlignment(Pos.CENTER);
+        actionButtons.getChildren().addAll(submitButton,hintButton);
 
         centerLayout.getChildren().addAll(
             difficultyLabel,
             battleContainer,
             scrambledWordLabel,
             answerInputContainer,
-            submitButton,
+            actionButtons,
             messageLabel
         );
 
@@ -607,34 +958,32 @@ public class GameScreen {
     }
 
     // =========================================================
+    // TOTAL HINTS
+    // =========================================================
+
+    private int getTotalHints() {
+
+        if (difficulty.equalsIgnoreCase("Apprentice")) {
+            return GameConfig.APPRENTICE_HINTS;
+        }
+
+        return GameConfig.SORCERER_HINTS;
+    }
+
+    // =========================================================
     // END CARD WIZARD ANIMATIONS
     // =========================================================
 
-    private ImageView createEndCardWizard(
-        boolean cleared
-    ) {
+    private ImageView createEndCardWizard(boolean cleared) {
 
-        ImageView endWizard =
-            new ImageView();
-
-
-        endWizard.setFitWidth(
-            220
-        );
-
-        endWizard.setFitHeight(
-            220
-        );
-
-        endWizard.setPreserveRatio(
-            true
-        );
-
+        ImageView endWizard =new ImageView();
+        endWizard.setFitWidth(220);
+        endWizard.setFitHeight(220);
+        endWizard.setPreserveRatio(true);
 
         // =====================================================
         // SUCCESS
         // =====================================================
-
         if (cleared) {
 
             Image runSheet =
@@ -738,8 +1087,9 @@ public class GameScreen {
             Pos.CENTER_LEFT
         );
 
-        scoreBox.getChildren().add(
-            scoreLabel
+        scoreBox.getChildren().addAll(
+            scoreLabel,
+            hintsLabel
         );
 
 
@@ -756,40 +1106,25 @@ public class GameScreen {
 
         VBox timeBox = new VBox(5);
 
-        timeBox.setAlignment(
-            Pos.CENTER_RIGHT
-        );
+        timeBox.setAlignment(Pos.CENTER_RIGHT);
+        timeBox.getChildren().add(timerLabel);
 
-        timeBox.getChildren().add(
-            timerLabel
-        );
+        /*VBox hintsBox = new VBox(5);
+
+        hintsBox.setAlignment(Pos.CENTER_RIGHT);
+        hintsBox.getChildren().add(hintsLabel);*/
 
 
         HBox rightHUD = new HBox(35);
 
-        rightHUD.setAlignment(
-            Pos.CENTER_RIGHT
-        );
-
-        rightHUD.getChildren().addAll(
-            wordsBox,
-            timeBox
-        );
-
+        rightHUD.getChildren().addAll(wordsBox,timeBox);
 
         Region spacer = new Region();
 
-        HBox.setHgrow(
-            spacer,
-            Priority.ALWAYS
-        );
-
+        HBox.setHgrow(spacer,Priority.ALWAYS);
 
         HBox hud = new HBox(20);
-
-        hud.setAlignment(
-            Pos.CENTER_LEFT
-        );
+        hud.setAlignment(Pos.CENTER_LEFT);
 
         hud.setPadding(
             new Insets(
@@ -1027,19 +1362,45 @@ public class GameScreen {
 
 
         // Generate word.
+        /*String scrambledWord =wordManager.generateNewWord();
 
-        String scrambledWord =
-            wordManager.generateNewWord();
+        scrambledWordLabel.setText(scrambledWord);
+        wordStartTime = System.nanoTime();*/
+        String scrambledWord = wordManager.generateNewWord();
 
+        /*revealedPositions.clear();
+        activeBoxIndex = 0;
+        scrambledWordLabel.setText(scrambledWord);*/
+        revealedPositions.clear();
+        activeBoxIndex = 0;
 
-        scrambledWordLabel.setText(
-            scrambledWord
-        );
+        typedLetters = new char[wordManager.getCurrentWord().length()];
+
+        /*for (int i = 0; i < typedLetters.length; i++) {
+            typedLetters[i] = '\0';
+        }*/
+
+scrambledWordLabel.setText(scrambledWord);
+
+        createLetterBoxes();
+
+        wordStartTime = System.nanoTime();
+                
 
 
         // Reset answer.
+        for (int i = 0; i < typedLetters.length; i++) {
+            typedLetters[i] = '\0';
+        }
+
+        activeBoxIndex = 0;
+
+        moveToNextAvailableBox();
 
         answerField.clear();
+
+
+
 
         answerField.requestFocus();
 
@@ -1057,36 +1418,22 @@ public class GameScreen {
     private void checkAnswer() {
 
         // Don't accept input during animation.
-
         if (animationPlaying || gamePaused) {
             return;
         }
 
-
         // Don't accept input after game ends.
-
-        if (
-            gameLogic.isTimeUp()
-            || gameLogic.hasClearedLevel()
-        ) {
+        if (gameLogic.isTimeUp()|| gameLogic.hasClearedLevel()) {
             return;
         }
 
-
-        String guess =
-            answerField.getText().trim();
-
+        String guess =buildCurrentGuess().trim();
 
         // -------------------------
         // EMPTY ANSWER
         // -------------------------
-
         if (guess.isEmpty()) {
-
-            messageLabel.setText(
-                "Please enter a word."
-            );
-
+            messageLabel.setText("Please enter a word.");
             return;
         }
 
@@ -1098,7 +1445,7 @@ public class GameScreen {
         boolean valid =
             gameLogic.isValidGuess(
                 guess,
-                wordManager.getScrambledWord()
+                wordManager.getCurrentWord()
             );
 
 
@@ -1107,11 +1454,10 @@ public class GameScreen {
         // =====================================================
 
         if (valid) {
+            
+            double secondsTaken = (System.nanoTime() - wordStartTime) / 1_000_000_000.0;
 
-            int points =
-                gameLogic.processCorrectGuess(
-                    guess
-                );
+            int points = gameLogic.processCorrectGuess(guess, secondsTaken);
 
             showFloatingScore(
                 "+" + points + " POINTS!",
@@ -1129,30 +1475,19 @@ public class GameScreen {
 
 
             // Wizard attacks.
-
             playWizardAttack(() -> {
-
                 // Enemy disappears after attack.
-
                 enemyImageView.setVisible(false);
 
 
                 // Level complete?
-
-                if (
-                    gameLogic.hasClearedLevel()
-                ) {
-
+                if (gameLogic.hasClearedLevel()) {
                     endGame(true);
-
                     return;
                 }
 
-
                 // Next word.
-
                 generateNewWord();
-
             });
 
 
@@ -1160,15 +1495,13 @@ public class GameScreen {
         // WRONG
         // =====================================================
 
-        } else {
+        } 
+        
+        else {
 
-            int penalty =
-                gameLogic.processWrongGuess();
+            int penalty =gameLogic.processWrongGuess();
 
-            showFloatingScore(
-                "-" + penalty + " POINTS!",
-false
-            );
+            showFloatingScore("-" + penalty + " POINTS!",false);
 
 
             messageLabel.setText(
@@ -1200,37 +1533,88 @@ false
         }
     }
 
+    private String buildCurrentGuess() {
 
-    // =========================================================
-    // ANIMATED INPUT
-    // =========================================================
+    String currentWord = wordManager.getCurrentWord();
 
-    private void updateAnimatedInput(
-        String text
-    ) {
+    StringBuilder guess =
+        new StringBuilder();
+
+    for (int i = 0; i < currentWord.length(); i++) {
+
+        // Hinted letter
+        if (revealedPositions.contains(i)) {
+
+            guess.append(
+                currentWord.charAt(i)
+            );
+        }
+
+        // Player letter
+        else if (
+            typedLetters != null &&
+            typedLetters[i] != '\0'
+        ) {
+
+            guess.append(
+                typedLetters[i]
+            );
+        }
+
+        // Empty box
+        else {
+
+            return "";
+        }
+    }
+
+    return guess.toString();
+}
+
+    /*private void createLetterBoxes() {
 
         animatedLetters.getChildren().clear();
 
+        String currentWord = wordManager.getCurrentWord();
 
-        // Create a label for each character.
+        for (int i = 0; i < currentWord.length(); i++) {
+            Label letterBox = new Label("_");
+            letterBox.setPrefSize(45, 50);
+            letterBox.setAlignment(Pos.CENTER);
+            letterBox.setFont(Font.font("Georgia",FontWeight.BOLD,22));
+            letterBox.setTextFill(Color.WHITE);
 
-        for (
-            int i = 0;
-            i < text.length();
-            i++
-        ) {
+            letterBox.setStyle(
+                "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-background-radius: 6;"
+            );
+            animatedLetters.getChildren().add(letterBox);
+        }
+    }*/
 
-            char character =
-                text.charAt(i);
+    /*private void createLetterBoxes() {
 
+        animatedLetters.getChildren().clear();
 
-            Label letter =
-                new Label(
-                    String.valueOf(character)
-                );
+        if (cursorTimeline != null) {
+            cursorTimeline.stop();
+        }
 
+        cursorVisible = true;
 
-            letter.setFont(
+        String currentWord = wordManager.getCurrentWord();
+
+        for (int i = 0; i < currentWord.length(); i++) {
+
+            Label letterBox = new Label("_");
+
+            letterBox.setPrefSize(45, 50);
+            letterBox.setAlignment(Pos.CENTER);
+
+            letterBox.setFont(
                 Font.font(
                     "Georgia",
                     FontWeight.BOLD,
@@ -1238,10 +1622,112 @@ false
                 )
             );
 
+            letterBox.setTextFill(Color.WHITE);
 
-            letter.setTextFill(
-                Color.WHITE
+            letterBox.setStyle(
+                "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-background-radius: 6;"
             );
+
+            final int boxIndex = i;
+
+            letterBox.setOnMouseEntered(event -> {
+                if (!revealedPositions.contains(boxIndex)) {
+                    activeBoxIndex = boxIndex;
+                    updateLetterBoxes(answerField.getText());
+                    answerField.requestFocus();
+                }
+            });
+
+            animatedLetters.getChildren().add(letterBox);
+        }
+
+        startCursorBlink();
+    }*/
+    private void createLetterBoxes() {
+
+        animatedLetters.getChildren().clear();
+
+        String currentWord = wordManager.getCurrentWord();
+
+        for (int i = 0; i < currentWord.length(); i++) {
+
+            Label letterBox = new Label("_");
+
+            letterBox.setPrefSize(45, 50);
+            letterBox.setAlignment(Pos.CENTER);
+
+            letterBox.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    22
+                )
+            );
+
+            letterBox.setTextFill(Color.WHITE);
+
+            letterBox.setStyle(
+                "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-background-radius: 6;"
+            );
+
+            final int boxIndex = i;
+
+            letterBox.setOnMouseEntered(event -> {
+
+            if (!revealedPositions.contains(boxIndex)) {
+
+                activeBoxIndex = boxIndex;
+
+                updateLetterBoxes();
+
+                answerField.requestFocus();
+            }
+        });
+
+        letterBox.setOnMouseClicked(event -> {
+
+            if (!revealedPositions.contains(boxIndex)) {
+
+                activeBoxIndex = boxIndex;
+
+                updateActiveBox();
+
+                answerField.requestFocus();
+            }
+        });
+
+            animatedLetters.getChildren().add(letterBox);
+        }
+
+        updateActiveBox();
+    }
+
+
+    // =========================================================
+    // ANIMATED INPUT
+    // =========================================================
+
+    /*private void updateAnimatedInput(String text) {
+
+        animatedLetters.getChildren().clear();
+
+        // Create a label for each character.
+        for (int i = 0;i < text.length();i++) {
+
+            char character =text.charAt(i);
+            Label letter =new Label(String.valueOf(character));
+
+            letter.setFont(Font.font("Georgia",FontWeight.BOLD,22));
+
+            letter.setTextFill(Color.WHITE);
 
 
             // White glow.
@@ -1376,24 +1862,200 @@ false
                 }
             );
         }
+    }*/
+
+
+   /*private void updateLetterBoxes(String input) {
+
+    String currentWord = wordManager.getCurrentWord();
+
+    int maxLetters = currentWord.length();
+
+    if (input.length() > maxLetters) {
+        answerField.setText(
+            input.substring(0, maxLetters)
+        );
+        return;
     }
 
+    for (int i = 0; i < animatedLetters.getChildren().size(); i++) {
+
+        Label letterBox =
+            (Label) animatedLetters.getChildren().get(i);
+
+        if (i < input.length()) {
+
+            letterBox.setText(
+                String.valueOf(
+                    input.charAt(i)
+                ).toUpperCase()
+            );
+
+        } else {
+
+            letterBox.setText("_");
+        }
+    }
+}*/
+
+    private void updateLetterBoxes() {
+
+    String currentWord = wordManager.getCurrentWord();
+
+    for (int i = 0; i < currentWord.length(); i++) {
+
+        Label letterBox =
+            (Label) animatedLetters.getChildren().get(i);
+
+        // -----------------------------------------
+        // HINTED / LOCKED BOX
+        // -----------------------------------------
+
+        if (revealedPositions.contains(i)) {
+
+            letterBox.setText(
+                String.valueOf(
+                    currentWord.charAt(i)
+                ).toUpperCase()
+            );
+        }
+
+        // -----------------------------------------
+        // PLAYER TYPED LETTER
+        // -----------------------------------------
+
+        else if (
+            typedLetters != null &&
+            typedLetters[i] != '\0'
+        ) {
+
+            letterBox.setText(
+                String.valueOf(
+                    typedLetters[i]
+                ).toUpperCase()
+            );
+        }
+
+        // -----------------------------------------
+        // EMPTY BOX
+        // -----------------------------------------
+
+        else {
+
+            letterBox.setText("_");
+        }
+    }
+
+    updateActiveBox();
+}
+
+    private void updateActiveBox() {
+
+        for (int i = 0; i < animatedLetters.getChildren().size(); i++) {
+
+            Label letterBox =
+                (Label) animatedLetters.getChildren().get(i);
+
+            // HINTED / LOCKED BOX
+            if (revealedPositions.contains(i)) {
+
+                letterBox.setStyle(
+                    "-fx-background-color: rgba(168, 139, 90, 0.45);" +
+                    "-fx-border-color: #F5E6C8;" +
+                    "-fx-border-width: 2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;"
+                );
+            }
+
+            // ACTIVE KEYBOARD BOX
+            else if (i == activeBoxIndex) {
+
+                letterBox.setStyle(
+                    "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                    "-fx-border-color: #4CAF50;" +
+                    "-fx-border-width: 2.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;"
+                );
+            }
+
+            // NORMAL BOX
+            else {
+
+                letterBox.setStyle(
+                    "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;"
+                );
+            }
+        }
+    }
+
+    /*private void startCursorBlink() {
+
+        if (cursorTimeline != null) {
+            cursorTimeline.stop();
+        }
+
+        cursorVisible = true;
+
+        updateActiveBox();
+
+        cursorTimeline = new Timeline(
+            new KeyFrame(
+                Duration.millis(500),
+                event -> {
+
+                    cursorVisible = !cursorVisible;
+
+                    updateActiveBox();
+                }
+            )
+        );
+
+        cursorTimeline.setCycleCount(
+            Timeline.INDEFINITE
+        );
+
+        cursorTimeline.play();
+    }*/
+
+    /*private void startCursorBlink() {
+
+        updateActiveBox();
+    }*/
+
+    private void moveToNextAvailableBox() {
+
+        String currentWord =
+            wordManager.getCurrentWord();
+
+        while (
+            activeBoxIndex < currentWord.length() &&
+            (
+                revealedPositions.contains(activeBoxIndex) ||
+                typedLetters[activeBoxIndex] != '\0'
+            )
+        ) {
+            activeBoxIndex++;
+        }
+
+        updateActiveBox();
+    }
 
     // =========================================================
     // RED HIT FLASH
     // =========================================================
-
-    private void flashRed(
-        ImageView imageView
-    ) {
+    private void flashRed(ImageView imageView) {
 
         if (imageView == null) {
             return;
         }
 
-
         // Create red overlay.
-
         ColorInput redColor =
             new ColorInput(
                 0,
@@ -1402,7 +2064,6 @@ false
                 imageView.getFitHeight(),
                 Color.RED
             );
-
 
         Blend redBlend =
             new Blend(
@@ -1413,28 +2074,17 @@ false
 
 
         // First flash.
-
-        imageView.setEffect(
-            redBlend
-        );
-
-
-        PauseTransition firstFlash =
-            new PauseTransition(
-                Duration.millis(80)
-            );
-
+        imageView.setEffect(redBlend);
+        PauseTransition firstFlash =new PauseTransition(Duration.millis(80));
 
         firstFlash.setOnFinished(
             event -> {
-
                 imageView.setEffect(
                     null
                 );
 
 
                 // Small gap before second flash.
-
                 PauseTransition gap =
                     new PauseTransition(
                         Duration.millis(50)
@@ -1443,12 +2093,8 @@ false
 
                 gap.setOnFinished(
                     event2 -> {
-
                         // Second flash.
-
-                        imageView.setEffect(
-                            redBlend
-                        );
+                        imageView.setEffect(redBlend);
 
 
                         PauseTransition secondFlash =
@@ -1769,31 +2415,17 @@ false
 
     private void updateLabels() {
 
-        scoreLabel.setText(
-            "Score: " +
-            gameLogic.getScore()
-        );
-
-
-        wordsLabel.setText(
-            "Words Found: " +
-            gameLogic.getWordsFound() +
-            " / " +
-            gameLogic.getGoal()
-        );
-
-
+        scoreLabel.setText("Score: " +gameLogic.getScore());
+        wordsLabel.setText("Words Found: " +gameLogic.getWordsFound() +" / " +gameLogic.getGoal());
+        hintsLabel.setText("Hints: " +gameLogic.getHintsRemaining() +"/" +getTotalHints());
         updateTimer();
+
     }
 
     // =========================================================
     // FLOATING DAMAGE TEXT
     // =========================================================
-
-    private void showFloatingScore(
-        String text,
-        boolean positive
-    ) {
+    private void showFloatingScore(String text,boolean positive) {
 
         Label floatingLabel =
             new Label(text);
