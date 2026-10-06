@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Wizard's Escape",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "Java-E1-Word-Game-Project",
+            "vmArgs": "--module-path \"${workspaceFolder}/lib\" --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.web --enable-native-access=javafx.graphics -Djava.library.path=\"${workspaceFolder}/native\""
+        }
+    ]
+}

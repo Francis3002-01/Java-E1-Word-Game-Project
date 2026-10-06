@@ -1,0 +1,26 @@
+{
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+
+    "java.autobuild.enabled": true,
+
+    "java.project.sourcePaths": [
+        "."
+    ],
+    "java.project.outputPath": "bin",
+
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+
+    "java.project.resourceFilters": [
+        ".git",
+        ".vscode",
+        "assets",
+        "legal",
+        "lib",
+        "native"
+    ],
+
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable"
+}
