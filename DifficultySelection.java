@@ -45,6 +45,47 @@ public class DifficultySelection {
         this.stage = stage;
     }
 
+        private void transitionTo(Runnable nextScreen) {
+
+        Scene currentScene = stage.getScene();
+
+        if (currentScene == null) {
+                nextScreen.run();
+                return;
+        }
+
+        FadeTransition fadeOut =
+                new FadeTransition(
+                        Duration.millis(250),
+                        currentScene.getRoot()
+                );
+
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+
+        fadeOut.setOnFinished(event -> {
+
+                nextScreen.run();
+
+                Scene newScene = stage.getScene();
+
+                newScene.getRoot().setOpacity(0.0);
+
+                FadeTransition fadeIn =
+                        new FadeTransition(
+                                Duration.millis(300),
+                                newScene.getRoot()
+                        );
+
+                fadeIn.setFromValue(0.0);
+                fadeIn.setToValue(1.0);
+
+                fadeIn.play();
+        });
+
+        fadeOut.play();
+        }
+
         private void updateScale(StackPane scaleContainer, StackPane designRoot) {
 
         double scaleX =
@@ -357,17 +398,23 @@ public class DifficultySelection {
         // =========================================================
 
         apprenticeButton.setOnAction(event -> {
-            GameScreen gameScreen =
-                    new GameScreen(stage, "Apprentice");
 
-            gameScreen.show();
+                transitionTo(()-> {
+                GameScreen gameScreen =
+                        new GameScreen(stage, "Apprentice");
+
+                gameScreen.show();
+                });
         });
 
         sorcererButton.setOnAction(event -> {
-            GameScreen gameScreen =
-                    new GameScreen(stage, "Sorcerer");
 
-            gameScreen.show();
+                transitionTo(()-> {
+                GameScreen gameScreen =
+                        new GameScreen(stage, "Sorcerer");
+
+                gameScreen.show();
+                });
         });
 
         // =========================================================
@@ -437,8 +484,11 @@ public class DifficultySelection {
         });
 
         backButton.setOnAction(event -> {
-            MainMenu mainMenu = new MainMenu(stage);
-            mainMenu.show();
+
+                transitionTo(() -> {
+                        MainMenu mainMenu = new MainMenu(stage);
+                        mainMenu.show();
+                });
         });
 
         // =========================================================

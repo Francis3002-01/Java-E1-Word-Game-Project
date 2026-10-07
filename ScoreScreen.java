@@ -216,6 +216,47 @@ public class ScoreScreen {
         );
         }
     
+        private void transitionTo(Runnable nextScreen) {
+
+                Scene currentScene = stage.getScene();
+
+                if (currentScene == null) {
+                        nextScreen.run();
+                        return;
+                }
+
+                FadeTransition fadeOut =
+                        new FadeTransition(
+                                Duration.millis(250),
+                                currentScene.getRoot()
+                        );
+
+                fadeOut.setFromValue(1.0);
+                fadeOut.setToValue(0.0);
+
+                fadeOut.setOnFinished(event -> {
+
+                        nextScreen.run();
+
+                        Scene newScene = stage.getScene();
+
+                        newScene.getRoot().setOpacity(0.0);
+
+                        FadeTransition fadeIn =
+                                new FadeTransition(
+                                        Duration.millis(300),
+                                        newScene.getRoot()
+                                );
+
+                        fadeIn.setFromValue(0.0);
+                        fadeIn.setToValue(1.0);
+
+                        fadeIn.play();
+                });
+
+                fadeOut.play();
+        }
+
     // =========================================================
     // SHOW SCORE SCREEN
     // =========================================================
@@ -582,10 +623,13 @@ public class ScoreScreen {
 
         backButton.setOnAction(event -> {
 
-            MainMenu mainMenu =
-                    new MainMenu(stage);
+                transitionTo(()-> {
+                        
+                MainMenu mainMenu =
+                        new MainMenu(stage);
 
-            mainMenu.show();
+                mainMenu.show();
+                });
         });
 
         // =========================================================

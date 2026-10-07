@@ -17,6 +17,7 @@ import java.util.Random;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
 import javafx.animation.ScaleTransition;
+import javafx.animation.FadeTransition;
 
 
 public class MainMenu {
@@ -137,18 +138,26 @@ public class MainMenu {
         // BUTTON ACTIONS
 
         playButton.setOnAction(event -> {
+
+            transitionTo(()-> {
             DifficultySelection difficultySelection =
                     new DifficultySelection(stage);
 
             difficultySelection.show();
+            });
+
         });
 
 
         scoreButton.setOnAction(event -> {
+
+            transitionTo(()-> {
             ScoreScreen scoreScreen =
                     new ScoreScreen(stage);
 
             scoreScreen.show();
+            });
+
         });
 
 
@@ -330,6 +339,47 @@ public class MainMenu {
 
         stage.setScene(scene);
 
+    }
+
+    private void transitionTo(Runnable nextScreen) {
+
+        Scene currentScene = stage.getScene();
+
+        if (currentScene == null) {
+            nextScreen.run();
+            return;
+        }
+
+        FadeTransition fadeOut =
+                new FadeTransition(
+                        Duration.millis(250),
+                        currentScene.getRoot()
+                );
+
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+
+        fadeOut.setOnFinished(event -> {
+
+            nextScreen.run();
+
+            Scene newScene = stage.getScene();
+
+            newScene.getRoot().setOpacity(0.0);
+
+            FadeTransition fadeIn =
+                    new FadeTransition(
+                            Duration.millis(300),
+                            newScene.getRoot()
+                    );
+
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+
+            fadeIn.play();
+        });
+
+        fadeOut.play();
     }
 
     private Circle createParticle() {
