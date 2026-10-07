@@ -263,6 +263,8 @@ public class ScoreScreen {
 
     public void show() {
 
+        MusicManager.playMenuMusic();
+
         // =========================================================
         // TITLE
         // =========================================================
@@ -286,7 +288,7 @@ public class ScoreScreen {
         );
 
         subtitle.setFont(Font.font(
-                "Serif",
+                "Georgia",
                 FontPosture.ITALIC,
                 18
         ));
@@ -313,7 +315,7 @@ public class ScoreScreen {
                 new Label("APPRENTICE");
 
         apprenticeTitle.setFont(Font.font(
-                "Serif",
+                "Georgia",
                 FontWeight.BOLD,
                 27
         ));
@@ -326,7 +328,7 @@ public class ScoreScreen {
                 new Label("The path of the beginning wizard");
 
         apprenticeDescription.setFont(
-                Font.font("Serif", 15)
+                Font.font("Georgia", 15)
         );
 
         apprenticeDescription.setTextFill(
@@ -338,7 +340,7 @@ public class ScoreScreen {
 
         apprenticeScoreLabel.setFont(
                 Font.font(
-                        "Serif",
+                        "Georgia",
                         FontWeight.BOLD,
                         36
                 )
@@ -366,7 +368,7 @@ public class ScoreScreen {
 
         apprenticeScoreText.setFont(
                 Font.font(
-                        "Serif",
+                        "Georgia",
                         FontWeight.BOLD,
                         13
                 )
@@ -422,7 +424,7 @@ public class ScoreScreen {
                 new Label("SORCERER");
 
         sorcererTitle.setFont(Font.font(
-                "Serif",
+                "Georgia",
                 FontWeight.BOLD,
                 27
         ));
@@ -435,7 +437,7 @@ public class ScoreScreen {
                 new Label("The path of the master wizard");
 
         sorcererDescription.setFont(
-                Font.font("Serif", 15)
+                Font.font("Georgia", 15)
         );
 
         sorcererDescription.setTextFill(
@@ -447,7 +449,7 @@ public class ScoreScreen {
 
         sorcererScoreLabel.setFont(
                 Font.font(
-                        "Serif",
+                        "Georgia",
                         FontWeight.BOLD,
                         36
                 )
@@ -475,7 +477,7 @@ public class ScoreScreen {
 
         sorcererScoreText.setFont(
                 Font.font(
-                        "Serif",
+                        "Georgia",
                         FontWeight.BOLD,
                         13
                 )
@@ -561,7 +563,7 @@ public class ScoreScreen {
        String backStyle =
                 "-fx-background-color: rgba(35, 24, 60, 0.95);" +
                 "-fx-text-fill: #F3E8FF;" +
-                "-fx-font-family: 'Serif';" +
+                "-fx-font-family: 'Georgia';" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-border-color: #9C7AC7;" +
@@ -573,7 +575,7 @@ public class ScoreScreen {
         String backHoverStyle =
                 "-fx-background-color: rgba(72, 45, 110, 0.98);" +
                 "-fx-text-fill: #FFFFFF;" +
-                "-fx-font-family: 'Serif';" +
+                "-fx-font-family: 'Georgia';" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-border-color: #C9A7F2;" +

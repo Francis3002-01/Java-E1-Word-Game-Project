@@ -30,6 +30,7 @@ public class MainMenu {
 
     public void show() {
 
+        MusicManager.playMenuMusic();
 
         // TITLE
         Label title = new Label("WIZARD'S ESCAPE");
@@ -95,7 +96,7 @@ public class MainMenu {
                 button.setStyle(
                     "-fx-background-color: rgba(63, 39, 105, 0.95);" +
                     "-fx-text-fill: #FFFFFF;" +
-                    "-fx-font-family: 'Serif';" +
+                    "-fx-font-family: 'Georgia';" +
                     "-fx-font-size: 21px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-background-radius: 12;" +
@@ -203,7 +204,7 @@ public class MainMenu {
         // BACKGROUND IMAGE
 
         Image bgImage = new Image(
-                "file:assets/wizard_background.png",
+                "file:assets/mainmenubg.png",
                 900,
                 600,
                 false,

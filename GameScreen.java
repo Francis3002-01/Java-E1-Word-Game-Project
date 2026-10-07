@@ -69,7 +69,6 @@ public class GameScreen {
     private Label scrambledWordLabel;
     private Label messageLabel;
     private TextField answerField;
-    private Button submitButton;
     private Button hintButton;
 
     /*private String revealedLetters = "";
@@ -168,6 +167,8 @@ public class GameScreen {
 
     public void show() {
 
+        MusicManager.playGameMusic();
+
         // -------------------------
         // DIFFICULTY
         // -------------------------
@@ -177,11 +178,15 @@ public class GameScreen {
         );
 
         difficultyLabel.setFont(
-            Font.font("Serif", 24)
+            Font.font("Georgia", 24)
         );
 
         difficultyLabel.setTextFill(
             Color.WHITE
+        );
+
+        difficultyLabel.setEffect(
+            createTextShadow()
         );
 
 
@@ -201,6 +206,9 @@ public class GameScreen {
             Color.WHITE
         );
 
+        scoreLabel.setEffect(
+            createTextShadow()
+        );
 
         // -------------------------
         // WORDS
@@ -219,6 +227,9 @@ public class GameScreen {
             Color.WHITE
         );
 
+        wordsLabel.setEffect(
+            createTextShadow()
+        );
 
         // -------------------------
         // TIMER
@@ -226,6 +237,10 @@ public class GameScreen {
         timerLabel = new Label("Time: " +gameLogic.getRemainingTime());
         timerLabel.setFont(Font.font("Arial", 18));
         timerLabel.setTextFill(Color.WHITE);
+
+        timerLabel.setEffect(
+            createTextShadow()
+        );
 
         // -------------------------
         // HINTS
@@ -240,12 +255,114 @@ public class GameScreen {
         hintsLabel.setFont(Font.font("Arial", 18));
         hintsLabel.setTextFill(Color.WHITE);
 
+        hintsLabel.setEffect(
+            createTextShadow()
+        );
+
+        // -------------------------
+        // HINT BUTTON
+        // -------------------------
+
+        hintButton = new Button("HINT");
+
+        hintButton.setPrefWidth(100);
+        hintButton.setPrefHeight(40);
+
+        hintButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                14
+            )
+        );
+
+        hintButton.setTextFill(
+            Color.web("#F5E6C8")
+        );
+
+        hintButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
+
+        hintButton.setOnMouseEntered(event -> {
+
+            hintButton.setStyle(
+                "-fx-background-color: #503451;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #D6B878;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+        });
+
+        hintButton.setOnMouseExited(event -> {
+
+            hintButton.setStyle(
+                "-fx-background-color: #3A263F;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+        });
+
         // -------------------------
         // SCRAMBLED WORD
         // -------------------------
         scrambledWordLabel = new Label();
-        scrambledWordLabel.setFont(Font.font("Serif", 42));
+        scrambledWordLabel.setFont(Font.font("Palatino Linotype", 42));
         scrambledWordLabel.setTextFill(Color.WHITE);
+        scrambledWordLabel.setTranslateY(60);
+
+        DropShadow wordShadow = new DropShadow();
+
+            wordShadow.setRadius(8);
+            wordShadow.setSpread(0.45);
+            wordShadow.setOffsetX(3);
+            wordShadow.setOffsetY(3);
+            wordShadow.setColor(
+                Color.rgb(0, 0, 0, 0.9)
+            );
+
+            scrambledWordLabel.setEffect(wordShadow);
+
+        // -------------------------
+        // MESSAGE LABEL
+        // -------------------------
+
+        messageLabel = new Label();
+
+        messageLabel.setFont(
+            Font.font(
+                "Arial",
+                16
+            )
+        );
+
+        messageLabel.setTextFill(
+            Color.WHITE
+        );
+
+        messageLabel.setEffect(
+            createTextShadow()
+        );
+
+        messageLabel.setAlignment(
+            Pos.CENTER
+        );
+
+        messageLabel.setTranslateY(60);
+
+        messageLabel.setMinHeight(25);
 
         // -------------------------
         // ANSWER FIELD
@@ -295,86 +412,7 @@ public class GameScreen {
         );
 
 
-        // -------------------------
-        // SUBMIT BUTTON
-        // -------------------------
-
-        submitButton = new Button(
-            "CAST SPELL"
-        );
-
-        submitButton.setPrefWidth(200);
-
-        submitButton.setPrefHeight(45);
-
-        submitButton.setFont(
-            Font.font(
-                "Georgia",
-                FontWeight.BOLD,
-                16
-            )
-        );
-
-        submitButton.setTextFill(
-            Color.web("#F5E6C8")
-        );
-
-        setSubmitButtonNormalStyle();
-
-        // -------------------------
-        // HINT BUTTON
-        // -------------------------
-
-        hintButton = new Button("HINT");
-        hintButton.setPrefWidth(100);
-        hintButton.setPrefHeight(45);
-
-        hintButton.setFont(
-            Font.font(
-                "Georgia",
-                FontWeight.BOLD,
-                16
-            )
-        );
-
-        hintButton.setTextFill(Color.web("#F5E6C8"));
-
-        hintButton.setStyle(
-            "-fx-background-color: #3A263F;" +
-            "-fx-background-radius: 6;" +
-            "-fx-border-color: #A88B5A;" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 6;" +
-            "-fx-cursor: hand;"
-        );
-
-
-        // -------------------------
-        // MESSAGE
-        // -------------------------
-
-        messageLabel = new Label(
-            "Unscramble the word!"
-        );
-
-        messageLabel.setFont(
-            Font.font("Arial", 16)
-        );
-
-        messageLabel.setTextFill(
-            Color.LIGHTGRAY
-        );
-
-
-        // -------------------------
-        // BUTTON ACTIONS
-        // -------------------------
-
-        submitButton.setOnAction(event -> {
-
-            checkAnswer();
-
-        });
+       
 
         /*hintButton.setOnAction(event -> {
 
@@ -477,21 +515,6 @@ public class GameScreen {
         answerField.setOnAction(event -> {
             checkAnswer();
         });
-
-
-        submitButton.setOnMouseEntered(event -> {
-
-            setSubmitButtonHoverStyle();
-
-        });
-
-
-        submitButton.setOnMouseExited(event -> {
-
-            setSubmitButtonNormalStyle();
-
-        });
-
 
         // -------------------------
         // INPUT LISTENER
@@ -852,30 +875,46 @@ answerField.addEventFilter(
         );
 
 
+        StackPane battleContainer = new StackPane();
+        battleContainer.setAlignment(Pos.CENTER);
+
+        battleContainer.setTranslateY(180);
+
+        battleContainer.getChildren().addAll(
+            battleArea,
+            battleAnimationLayer
+        );
+
+
+        // -------------------------
+        // INPUT + HINT
+        // -------------------------
+
+        HBox inputRow = new HBox(15);
+        inputRow.setAlignment(Pos.CENTER);
+
+        inputRow.setTranslateY(70);
+
+        inputRow.getChildren().addAll(
+            answerInputContainer,
+            hintButton
+        );
+
+
         // -------------------------
         // CENTER LAYOUT
         // -------------------------
 
         VBox centerLayout = new VBox(20);
-
         centerLayout.setAlignment(Pos.CENTER);
-
-        StackPane battleContainer =new StackPane();
-
-        battleContainer.setAlignment(Pos.CENTER);
-
-        battleContainer.getChildren().addAll(battleArea,battleAnimationLayer);
-
-        HBox actionButtons = new HBox(10);
-        actionButtons.setAlignment(Pos.CENTER);
-        actionButtons.getChildren().addAll(submitButton,hintButton);
+        centerLayout.setPadding(
+            new Insets(20, 0, 20, 0)
+        );
 
         centerLayout.getChildren().addAll(
-            difficultyLabel,
             battleContainer,
             scrambledWordLabel,
-            answerInputContainer,
-            actionButtons,
+            inputRow,
             messageLabel
         );
 
@@ -884,26 +923,15 @@ answerField.addEventFilter(
         // BOTTOM BAR
         // -------------------------
 
-        HBox bottomBar = new HBox();
-
-        bottomBar.setAlignment(
-            Pos.BOTTOM_LEFT
-        );
+        BorderPane bottomBar = new BorderPane();
 
         bottomBar.setPadding(
-            new Insets(
-                15,
-                20,
-                15,
-                20
-            )
+            new Insets(0, 30, 25, 30)
         );
 
-        bottomBar.getChildren().add(
-            createQuitButton()
-        );
+        Button quitButton = createQuitButton();
 
-
+        bottomBar.setLeft(quitButton);
         // -------------------------
         // ROOT
         // -------------------------
@@ -917,11 +945,30 @@ answerField.addEventFilter(
         gameLayout.setBottom(bottomBar);
 
         gameLayout.setStyle(
-            "-fx-background-color: #17233C;"
+            "-fx-background-color: transparent;"
         );
 
 
         StackPane root = new StackPane();
+
+        ImageView backgroundImage = new ImageView(
+                new Image(
+                        getClass()
+                                .getResource("/assets/ingamebg.png")
+                                .toExternalForm()
+                )
+        );
+
+        backgroundImage.setPreserveRatio(false);
+        backgroundImage.setMouseTransparent(true);
+
+        backgroundImage.fitWidthProperty()
+                .bind(root.widthProperty());
+
+        backgroundImage.fitHeightProperty()
+                .bind(root.heightProperty());
+
+        root.getChildren().add(backgroundImage);
 
         root.getChildren().add(
             gameLayout
@@ -1047,42 +1094,6 @@ answerField.addEventFilter(
 
 
     // =========================================================
-    // SUBMIT BUTTON NORMAL STYLE
-    // =========================================================
-
-    private void setSubmitButtonNormalStyle() {
-
-        submitButton.setStyle(
-            "-fx-background-color: #3A263F;" +
-            "-fx-background-radius: 6;" +
-            "-fx-border-color: #A88B5A;" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 6;" +
-            "-fx-padding: 10 28 10 28;" +
-            "-fx-cursor: hand;"
-        );
-    }
-
-
-    // =========================================================
-    // SUBMIT BUTTON HOVER STYLE
-    // =========================================================
-
-    private void setSubmitButtonHoverStyle() {
-
-        submitButton.setStyle(
-            "-fx-background-color: #503451;" +
-            "-fx-background-radius: 6;" +
-            "-fx-border-color: #D6B878;" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 6;" +
-            "-fx-padding: 10 28 10 28;" +
-            "-fx-cursor: hand;"
-        );
-    }
-
-
-    // =========================================================
     // HUD
     // =========================================================
 
@@ -1145,8 +1156,10 @@ answerField.addEventFilter(
 
         hud.getChildren().addAll(
             scoreBox,
+            difficultyLabel,
             spacer,
             rightHUD
+            
         );
 
 
@@ -1673,6 +1686,10 @@ scrambledWordLabel.setText(scrambledWord);
             );
 
             letterBox.setTextFill(Color.WHITE);
+
+            letterBox.setEffect(
+                createTextShadow()
+            );
 
             letterBox.setStyle(
                 "-fx-background-color: rgba(0, 0, 0, 0.35);" +
@@ -2427,6 +2444,26 @@ scrambledWordLabel.setText(scrambledWord);
     }
 
     // =========================================================
+    // TEXT SHADOW
+    // =========================================================
+
+    private DropShadow createTextShadow() {
+
+        DropShadow shadow = new DropShadow();
+
+        shadow.setRadius(5);
+        shadow.setSpread(0.35);
+        shadow.setOffsetX(2);
+        shadow.setOffsetY(2);
+        shadow.setColor(
+            Color.rgb(0, 0, 0, 0.85)
+        );
+
+        return shadow;
+    }
+
+
+    // =========================================================
     // FLOATING DAMAGE TEXT
     // =========================================================
     private void showFloatingScore(String text,boolean positive) {
@@ -2798,7 +2835,7 @@ scrambledWordLabel.setText(scrambledWord);
             // =========================================
 
             Label titleLabel = new Label(
-                "QUIT THE GAME?"
+                "QUIT THE RUN?"
             );
 
             titleLabel.setFont(
@@ -3116,6 +3153,8 @@ scrambledWordLabel.setText(scrambledWord);
         boolean cleared
     ) {
 
+        MusicManager.playEndMusic(cleared);
+
         // =====================================================
         // STOP GAME TIMER
         // =====================================================
@@ -3192,8 +3231,50 @@ scrambledWordLabel.setText(scrambledWord);
         StackPane endRoot =
             new StackPane();
 
-        endRoot.setStyle(
-            "-fx-background-color: #17233C;"
+
+        // =====================================================
+        // END CARD BACKGROUND
+        // =====================================================
+
+        Image endBackgroundImage;
+
+        if (cleared) {
+
+            // Successful completion
+            endBackgroundImage =
+                new Image(
+                    new java.io.File(
+                        "assets/escapebg.png"
+                    ).toURI().toString()
+                );
+
+        } else {
+
+            // Time ran out
+            endBackgroundImage =
+                new Image(
+                    new java.io.File(
+                        "assets/ingamebg.png"
+                    ).toURI().toString()
+                );
+        }
+
+
+        ImageView endBackground =
+            new ImageView(
+                endBackgroundImage
+            );
+
+        endBackground.setPreserveRatio(false);
+        endBackground.setMouseTransparent(true);
+
+        // Make background fill the entire end screen
+        endBackground.fitWidthProperty().bind(
+            endRoot.widthProperty()
+        );
+
+        endBackground.fitHeightProperty().bind(
+            endRoot.heightProperty()
         );
 
 
@@ -3293,7 +3374,7 @@ scrambledWordLabel.setText(scrambledWord);
 
         finalScoreLabel.setFont(
             Font.font(
-                "Serif",
+                "Georgia",
                 FontWeight.BOLD,
                 26
             )
@@ -3551,6 +3632,7 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
 
         endRoot.getChildren().addAll(
+            endBackground,
             overlay,
             endContent
         );

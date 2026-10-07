@@ -201,6 +201,8 @@ public class DifficultySelection {
 
     public void show() {
 
+        MusicManager.playMenuMusic();
+
         // =========================================================
         // TITLE
         // =========================================================
@@ -256,7 +258,7 @@ public class DifficultySelection {
         String normalButtonStyle =
                 "-fx-background-color: rgba(35, 24, 60, 0.95);" +
                 "-fx-text-fill: #F3E8FF;" +
-                "-fx-font-family: 'Serif';" +
+                "-fx-font-family: 'Georgia';" +
                 "-fx-font-size: 17px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-background-radius: 10;" +
@@ -268,7 +270,7 @@ public class DifficultySelection {
         String hoverButtonStyle =
                 "-fx-background-color: rgba(72, 45, 110, 0.98);" +
                 "-fx-text-fill: #FFFFFF;" +
-                "-fx-font-family: 'Serif';" +
+                "-fx-font-family: 'Georgia';" +
                 "-fx-font-size: 17px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-background-radius: 10;" +
@@ -429,7 +431,7 @@ public class DifficultySelection {
         String backStyle =
                 "-fx-background-color: rgba(35, 24, 60, 0.95);" +
                 "-fx-text-fill: #F3E8FF;" +
-                "-fx-font-family: 'Serif';" +
+                "-fx-font-family: 'Georgia';" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-border-color: #9C7AC7;" +
@@ -441,7 +443,7 @@ public class DifficultySelection {
         String backHoverStyle =
                 "-fx-background-color: rgba(72, 45, 110, 0.98);" +
                 "-fx-text-fill: #FFFFFF;" +
-                "-fx-font-family: 'Serif';" +
+                "-fx-font-family: 'Georgia';" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-border-color: #C9A7F2;" +
