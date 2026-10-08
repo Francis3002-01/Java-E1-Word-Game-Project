@@ -1474,7 +1474,7 @@ scrambledWordLabel.setText(scrambledWord);
             
             double secondsTaken = (System.nanoTime() - wordStartTime) / 1_000_000_000.0;
 
-            int points = gameLogic.processCorrectGuess(guess, secondsTaken);
+            /*int points = gameLogic.processCorrectGuess(guess, secondsTaken);
 
             showFloatingScore(
                 "+" + points + " POINTS!",
@@ -1505,21 +1505,51 @@ scrambledWordLabel.setText(scrambledWord);
 
                 // Next word.
                 generateNewWord();
+            });*/
+
+            int points = gameLogic.processCorrectGuess(guess, secondsTaken);
+
+            showFloatingScore(
+                "+" + points + " POINTS!",
+                true
+            );
+
+            messageLabel.setText(
+                "Correct! +" +
+                points +
+                " points! +10 seconds!"
+            );
+
+            updateLabels();
+
+            // Level complete?
+            if (gameLogic.hasClearedLevel()) {
+                if (timeline != null) {
+                    timeline.stop();
+                }
+
+                playWizardAttack(() -> {
+                    enemyImageView.setVisible(false);
+                    endGame(true);
+                });
+
+                return;
+            }
+
+            // Wizard attacks.
+            playWizardAttack(() -> {
+                enemyImageView.setVisible(false);
+                generateNewWord();
             });
 
 
         // =====================================================
         // WRONG
         // =====================================================
-
-        } 
-        
-        else {
+        } else {
 
             int penalty =gameLogic.processWrongGuess();
-
             showFloatingScore("-" + penalty + " POINTS!",false);
-
 
             messageLabel.setText(
                 "Wrong answer! -" +
@@ -1527,60 +1557,38 @@ scrambledWordLabel.setText(scrambledWord);
                 " points."
             );
 
-
             updateLabels();
-
 
             answerField.clear();
 
-
             // Wizard gets hit.
-
             // Enemy attacks.
-
             playEnemyAttack(() -> {
-
                 enemyIdleAnimator.playLoop();
-
                 animationPlaying = false;
-
                 answerField.requestFocus();
-
             });
         }
     }
 
     private String buildCurrentGuess() {
-
     String currentWord = wordManager.getCurrentWord();
 
-    StringBuilder guess =
-        new StringBuilder();
-
+    StringBuilder guess = new StringBuilder();
     for (int i = 0; i < currentWord.length(); i++) {
 
         // Hinted letter
         if (revealedPositions.contains(i)) {
-
-            guess.append(
-                currentWord.charAt(i)
-            );
+            guess.append(currentWord.charAt(i));
         }
 
         // Player letter
-        else if (
-            typedLetters != null &&
-            typedLetters[i] != '\0'
-        ) {
-
-            guess.append(
-                typedLetters[i]
-            );
+        else if (typedLetters != null &&typedLetters[i] != '\0') {
+            guess.append(typedLetters[i]);
         }
 
         // Empty box
         else {
-
             return "";
         }
     }
@@ -1588,82 +1596,6 @@ scrambledWordLabel.setText(scrambledWord);
     return guess.toString();
 }
 
-    /*private void createLetterBoxes() {
-
-        animatedLetters.getChildren().clear();
-
-        String currentWord = wordManager.getCurrentWord();
-
-        for (int i = 0; i < currentWord.length(); i++) {
-            Label letterBox = new Label("_");
-            letterBox.setPrefSize(45, 50);
-            letterBox.setAlignment(Pos.CENTER);
-            letterBox.setFont(Font.font("Georgia",FontWeight.BOLD,22));
-            letterBox.setTextFill(Color.WHITE);
-
-            letterBox.setStyle(
-                "-fx-background-color: rgba(0, 0, 0, 0.35);" +
-                "-fx-border-color: #A88B5A;" +
-                "-fx-border-width: 1.5;" +
-                "-fx-border-radius: 6;" +
-                "-fx-background-radius: 6;"
-            );
-            animatedLetters.getChildren().add(letterBox);
-        }
-    }*/
-
-    /*private void createLetterBoxes() {
-
-        animatedLetters.getChildren().clear();
-
-        if (cursorTimeline != null) {
-            cursorTimeline.stop();
-        }
-
-        cursorVisible = true;
-
-        String currentWord = wordManager.getCurrentWord();
-
-        for (int i = 0; i < currentWord.length(); i++) {
-
-            Label letterBox = new Label("_");
-
-            letterBox.setPrefSize(45, 50);
-            letterBox.setAlignment(Pos.CENTER);
-
-            letterBox.setFont(
-                Font.font(
-                    "Georgia",
-                    FontWeight.BOLD,
-                    22
-                )
-            );
-
-            letterBox.setTextFill(Color.WHITE);
-
-            letterBox.setStyle(
-                "-fx-background-color: rgba(0, 0, 0, 0.35);" +
-                "-fx-border-color: #A88B5A;" +
-                "-fx-border-width: 1.5;" +
-                "-fx-border-radius: 6;" +
-                "-fx-background-radius: 6;"
-            );
-
-            final int boxIndex = i;
-
-            letterBox.setOnMouseEntered(event -> {
-                if (!revealedPositions.contains(boxIndex)) {
-                    activeBoxIndex = boxIndex;
-                    updateLetterBoxes(answerField.getText());
-                    answerField.requestFocus();
-                }
-            });
-
-            animatedLetters.getChildren().add(letterBox);
-        }
-
-        startCursorBlink();
-    }*/
     private void createLetterBoxes() {
 
         animatedLetters.getChildren().clear();
@@ -1730,194 +1662,6 @@ scrambledWordLabel.setText(scrambledWord);
 
         updateActiveBox();
     }
-
-
-    // =========================================================
-    // ANIMATED INPUT
-    // =========================================================
-
-    /*private void updateAnimatedInput(String text) {
-
-        animatedLetters.getChildren().clear();
-
-        // Create a label for each character.
-        for (int i = 0;i < text.length();i++) {
-
-            char character =text.charAt(i);
-            Label letter =new Label(String.valueOf(character));
-
-            letter.setFont(Font.font("Georgia",FontWeight.BOLD,22));
-
-            letter.setTextFill(Color.WHITE);
-
-
-            // White glow.
-
-            letter.setEffect(
-                new DropShadow(
-                    8,
-                    Color.rgb(
-                        255,
-                        255,
-                        255,
-                        0.65
-                    )
-                )
-            );
-
-
-            letter.setMinWidth(18);
-
-            letter.setAlignment(
-                Pos.CENTER
-            );
-
-
-            // Start lower/smaller.
-
-            letter.setTranslateY(8);
-
-            letter.setScaleX(0.8);
-
-            letter.setScaleY(0.8);
-
-            letter.setOpacity(0);
-
-
-            animatedLetters.getChildren().add(
-                letter
-            );
-
-
-            // -------------------------
-            // APPEAR
-            // -------------------------
-
-            FadeTransition fade =
-                new FadeTransition(
-                    Duration.millis(180),
-                    letter
-                );
-
-
-            fade.setFromValue(0);
-
-            fade.setToValue(1);
-
-
-            ScaleTransition scale =
-                new ScaleTransition(
-                    Duration.millis(180),
-                    letter
-                );
-
-
-            scale.setFromX(0.8);
-
-            scale.setFromY(0.8);
-
-            scale.setToX(1);
-
-            scale.setToY(1);
-
-
-            TranslateTransition rise =
-                new TranslateTransition(
-                    Duration.millis(180),
-                    letter
-                );
-
-
-            rise.setFromY(8);
-
-            rise.setToY(0);
-
-
-            ParallelTransition appear =
-                new ParallelTransition(
-                    fade,
-                    scale,
-                    rise
-                );
-
-
-            appear.setDelay(
-                Duration.millis(
-                    i * 25
-                )
-            );
-
-
-            appear.play();
-
-
-            // -------------------------
-            // FLOAT
-            // -------------------------
-
-            TranslateTransition floatAnimation =
-                new TranslateTransition(
-                    Duration.millis(
-                        900 + (i * 80)
-                    ),
-                    letter
-                );
-
-
-            floatAnimation.setFromY(-2);
-
-            floatAnimation.setToY(2);
-
-            floatAnimation.setAutoReverse(true);
-
-            floatAnimation.setCycleCount(
-                TranslateTransition.INDEFINITE
-            );
-
-
-            appear.setOnFinished(
-                event -> {
-
-                    floatAnimation.play();
-
-                }
-            );
-        }
-    }*/
-
-
-   /*private void updateLetterBoxes(String input) {
-
-    String currentWord = wordManager.getCurrentWord();
-
-    int maxLetters = currentWord.length();
-
-    if (input.length() > maxLetters) {
-        answerField.setText(
-            input.substring(0, maxLetters)
-        );
-        return;
-    }
-
-    for (int i = 0; i < animatedLetters.getChildren().size(); i++) {
-
-        Label letterBox =
-            (Label) animatedLetters.getChildren().get(i);
-
-        if (i < input.length()) {
-
-            letterBox.setText(
-                String.valueOf(
-                    input.charAt(i)
-                ).toUpperCase()
-            );
-
-        } else {
-
-            letterBox.setText("_");
-        }
-    }
-}*/
 
     private void updateLetterBoxes() {
 
