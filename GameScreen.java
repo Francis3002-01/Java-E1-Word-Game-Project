@@ -1383,6 +1383,7 @@ answerField.addEventFilter(
 
         scrambledWordLabel.setText(scrambledWord);
         wordStartTime = System.nanoTime();*/
+        
         String scrambledWord = wordManager.generateNewWord();
 
         /*revealedPositions.clear();

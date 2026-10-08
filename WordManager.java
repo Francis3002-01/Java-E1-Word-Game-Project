@@ -1,11 +1,13 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class WordManager {
 
     private final List<String> availableWords;
+    private final Set<String> usedWords;
 
     private String currentWord;
     private String scrambledWord;
@@ -13,6 +15,7 @@ public class WordManager {
     public WordManager(String difficulty) {
 
         availableWords = new ArrayList<>();
+        usedWords = new HashSet<>();
 
         int minLength;
         int maxLength;
@@ -54,12 +57,37 @@ public class WordManager {
 
 
     // Select and scramble a new word
-    public String generateNewWord() {
+    /*public String generateNewWord() {
 
         // Randomly select a word
         currentWord = availableWords.get(
                 (int) (Math.random() * availableWords.size())
         );
+
+        scrambledWord = scrambleWord(currentWord);
+
+        return scrambledWord;
+    }*/
+
+    public String generateNewWord() {
+
+        List<String> unusedWords = new ArrayList<>();
+
+        for (String word : availableWords) {
+            if (!usedWords.contains(word)) {
+                unusedWords.add(word);
+            }
+        }
+
+        if (unusedWords.isEmpty()) {
+            throw new IllegalStateException("No unused words remaining.");
+        }
+
+        currentWord = unusedWords.get(
+            (int) (Math.random() * unusedWords.size())
+        );
+
+        usedWords.add(currentWord);
 
         scrambledWord = scrambleWord(currentWord);
 

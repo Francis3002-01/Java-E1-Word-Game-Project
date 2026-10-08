@@ -79,9 +79,9 @@ public class GameLogic {
             return false;
         }
 
-        if (usedWords.contains(guess)) {
+        /*if (usedWords.contains(guess)) {
             return false;
-        }
+        }*/
 
         return guess.equals(currentWord);
     }
