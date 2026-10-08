@@ -1,3 +1,6 @@
+import java.util.HashSet;
+import java.util.Set;
+
 public class GameLogic {
 
     private final String difficulty;
@@ -6,8 +9,8 @@ public class GameLogic {
     private int remainingTime;
     private int currentStreak;
     private int hintsRemaining;
-
     private final int goal;
+    private final Set<String> usedWords = new HashSet<>();
 
     // Constructor
     public GameLogic(String difficulty) {
@@ -36,6 +39,29 @@ public class GameLogic {
     }
 
     // Validate the player's guess
+    /*public boolean isValidGuess(String guess, String currentWord) {
+
+        if (guess == null || currentWord == null) {
+            return false;
+        }
+
+        guess = guess.trim().toLowerCase();
+        currentWord = currentWord.trim().toLowerCase();
+
+        
+        if (guess.isEmpty()) {
+            return false;
+        }
+
+        
+        if (!WordDictionary.contains(guess)) {
+            return false;
+        }
+
+        
+        return guess.equals(currentWord);
+    }*/
+
     public boolean isValidGuess(String guess, String currentWord) {
 
         if (guess == null || currentWord == null) {
@@ -45,17 +71,18 @@ public class GameLogic {
         guess = guess.trim().toLowerCase();
         currentWord = currentWord.trim().toLowerCase();
 
-        // Empty answer is invalid
         if (guess.isEmpty()) {
             return false;
         }
 
-        // Must be a valid dictionary word
         if (!WordDictionary.contains(guess)) {
             return false;
         }
 
-        // Must exactly match the current word
+        if (usedWords.contains(guess)) {
+            return false;
+        }
+
         return guess.equals(currentWord);
     }
 
@@ -96,32 +123,35 @@ public class GameLogic {
     // Process a correct answer
     public int processCorrectGuess(String guess, double secondsTaken) {
 
-    currentStreak++;
+        currentStreak++;
 
-    int basePoints = calculateWordPoints(guess);
-    int streakBonus = calculateStreakBonus();
-    int speedBonus = calculateSpeedBonus(secondsTaken);
+        usedWords.add(guess.trim().toLowerCase());
 
-    int subtotal =
-        basePoints +
-        streakBonus +
-        speedBonus;
+        int basePoints = calculateWordPoints(guess);
+        
+        int streakBonus = calculateStreakBonus();
+        int speedBonus = calculateSpeedBonus(secondsTaken);
 
-    double multiplier = getDifficultyMultiplier();
+        int subtotal =
+            basePoints +
+            streakBonus +
+            speedBonus;
 
-    int totalPoints =
-        (int) Math.round(subtotal * multiplier);
+        double multiplier = getDifficultyMultiplier();
 
-    score += totalPoints;
+        int totalPoints =
+            (int) Math.round(subtotal * multiplier);
 
-    // Add 10 seconds
-    remainingTime += GameConfig.CORRECT_TIME_BONUS;
+        score += totalPoints;
 
-    // Increase words found
-    wordsFound++;
+        // Add 10 seconds
+        remainingTime += GameConfig.CORRECT_TIME_BONUS;
 
-    return totalPoints;
-}
+        // Increase words found
+        wordsFound++;
+
+        return totalPoints;
+    }
 
 
     // Process a wrong answer
