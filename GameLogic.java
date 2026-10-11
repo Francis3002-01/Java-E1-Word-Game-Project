@@ -159,9 +159,9 @@ public class GameLogic {
 
         currentStreak = 0;
 
-        score -= GameConfig.WRONG_WORD_PENALTY;
-
-        return GameConfig.WRONG_WORD_PENALTY;
+        return deductScore(
+            GameConfig.WRONG_WORD_PENALTY
+        );
     }
 
 
@@ -320,12 +320,27 @@ public class GameLogic {
         }
 
         hintsRemaining--;
-        score -= GameConfig.HINT_PENALTY;
+
+        deductScore(
+            GameConfig.HINT_PENALTY
+        );
 
         return true;
     }
 
     public int getHintsRemaining() {
         return hintsRemaining;
+    }
+
+    private int deductScore(int amount) {
+
+        int scoreBefore = score;
+
+        score = Math.max(
+            0,
+            score - amount
+        );
+
+        return scoreBefore - score;
     }
 }

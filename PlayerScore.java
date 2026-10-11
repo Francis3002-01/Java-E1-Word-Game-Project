@@ -5,10 +5,9 @@ public class PlayerScore {
     private int score;
 
     // Constructor
-    public PlayerScore(String difficulty,int score) {
-        //this.playerName = playerName;
+    public PlayerScore(String difficulty, int score) {
         this.difficulty = difficulty;
-        this.score = score;
+        this.score = Math.max(0, score);
     }
 
     // Get player name

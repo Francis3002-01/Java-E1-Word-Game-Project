@@ -491,9 +491,14 @@ public class GameScreen {
             }
 
             // Use the hint
+            int scoreBeforeHint = gameLogic.getScore();
+
             if (!gameLogic.useHint()) {
                 return;
             }
+
+            int actualHintPenalty =
+                scoreBeforeHint - gameLogic.getScore();
 
             // Remember the exact position revealed
             revealedPositions.add(hintPosition);
@@ -504,7 +509,27 @@ public class GameScreen {
 
             // Move cursor to the next available box
             moveToNextAvailableBox();
-            messageLabel.setText("Hint used! -10 points.");
+
+            if (actualHintPenalty > 0) {
+
+                messageLabel.setText(
+                    "Hint used! -" +
+                    actualHintPenalty +
+                    " points."
+                );
+
+                showFloatingScore(
+                    "-" + actualHintPenalty + " POINTS!",
+                    false
+                );
+
+            } else {
+
+                messageLabel.setText(
+                    "Hint used! No points deducted."
+                );
+            }
+
             updateLabels();
 
             // Return keyboard focus to the answer field
@@ -1549,14 +1574,27 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         } else {
 
-            int penalty =gameLogic.processWrongGuess();
-            showFloatingScore("-" + penalty + " POINTS!",false);
+            int penalty = gameLogic.processWrongGuess();
 
-            messageLabel.setText(
-                "Wrong answer! -" +
-                penalty +
-                " points."
-            );
+            if (penalty > 0) {
+
+                showFloatingScore(
+                    "-" + penalty + " POINTS!",
+                    false
+                );
+
+                messageLabel.setText(
+                    "Wrong answer! -" +
+                    penalty +
+                    " points."
+                );
+
+            } else {
+
+                messageLabel.setText(
+                    "Wrong answer! No points deducted."
+                );
+            }
 
             updateLabels();
 
