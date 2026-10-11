@@ -21,11 +21,15 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import javafx.scene.media.AudioClip;
+import java.io.File;
 
 
 public class DifficultySelection {
 
     private Stage stage;
+    private AudioClip hoverSound;
+    private AudioClip clickSound;
 
     // Design resolution
     private static final double DESIGN_WIDTH = 900;
@@ -203,6 +207,19 @@ public class DifficultySelection {
 
         MusicManager.playMenuMusic();
 
+        File hoverFile = new File("assets/button_hover.wav");
+        File clickFile = new File("assets/button_click.wav");
+
+        if (hoverFile.exists()) {
+        hoverSound = new AudioClip(hoverFile.toURI().toString());
+        hoverSound.setVolume(0.5);
+        }
+
+        if (clickFile.exists()) {
+        clickSound = new AudioClip(clickFile.toURI().toString());
+        clickSound.setVolume(0.7);
+        }
+
         // =========================================================
         // TITLE
         // =========================================================
@@ -264,8 +281,7 @@ public class DifficultySelection {
                 "-fx-background-radius: 10;" +
                 "-fx-border-color: #9C7AC7;" +
                 "-fx-border-radius: 10;" +
-                "-fx-border-width: 1.5;" +
-                "-fx-cursor: hand;";
+                "-fx-border-width: 1.5;"; 
 
         String hoverButtonStyle =
                 "-fx-background-color: rgba(72, 45, 110, 0.98);" +
@@ -277,7 +293,6 @@ public class DifficultySelection {
                 "-fx-border-color: #C9A7F2;" +
                 "-fx-border-radius: 10;" +
                 "-fx-border-width: 2;" +
-                "-fx-cursor: hand;" +
                 "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);";
 
         apprenticeButton.setStyle(normalButtonStyle);
@@ -366,6 +381,7 @@ public class DifficultySelection {
 
         button.setOnMouseEntered(event -> {
 
+                playHoverSound();
                 button.setStyle(hoverButtonStyle);
 
                 ScaleTransition grow =
@@ -401,6 +417,7 @@ public class DifficultySelection {
 
         apprenticeButton.setOnAction(event -> {
 
+                playClickSound();
                 transitionTo(()-> {
                 GameScreen gameScreen =
                         new GameScreen(stage, "Apprentice");
@@ -437,8 +454,7 @@ public class DifficultySelection {
                 "-fx-border-color: #9C7AC7;" +
                 "-fx-border-radius: 8;" +
                 "-fx-background-radius: 8;" +
-                "-fx-border-width: 1.5;" +
-                "-fx-cursor: hand;";
+                "-fx-border-width: 1.5;" ;
 
         String backHoverStyle =
                 "-fx-background-color: rgba(72, 45, 110, 0.98);" +
@@ -450,13 +466,13 @@ public class DifficultySelection {
                 "-fx-border-radius: 8;" +
                 "-fx-background-radius: 8;" +
                 "-fx-border-width: 2;" +
-                "-fx-cursor: hand;" +
                 "-fx-effect: dropshadow(gaussian, #9B6DCE, 12, 0.55, 0, 0);";
 
         backButton.setStyle(backStyle);
 
         backButton.setOnMouseEntered(event -> {
 
+        playHoverSound();
         backButton.setStyle(backHoverStyle);
 
         ScaleTransition grow =
@@ -487,6 +503,7 @@ public class DifficultySelection {
 
         backButton.setOnAction(event -> {
 
+                playClickSound();
                 transitionTo(() -> {
                         MainMenu mainMenu = new MainMenu(stage);
                         mainMenu.show();
@@ -621,6 +638,8 @@ public class DifficultySelection {
                 DESIGN_HEIGHT
         );
 
+        CursorManager.setCustomCursor(scene);
+
         scene.setFill(Color.web("#120D20"));
 
         stage.setScene(scene);
@@ -629,5 +648,17 @@ public class DifficultySelection {
 
         updateScale(scaleContainer, designRoot);
     }
+
+        private void playHoverSound() {
+                if (hoverSound != null) {
+                        hoverSound.play();
+                }
+        }
+
+        private void playClickSound() {
+                if (clickSound != null) {
+                        clickSound.play();
+                }
+        }
 
 }

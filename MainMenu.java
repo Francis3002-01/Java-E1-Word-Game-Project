@@ -18,12 +18,16 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
 import javafx.animation.ScaleTransition;
 import javafx.animation.FadeTransition;
-import javafx.stage.Modality;
+import javafx.scene.media.AudioClip;
+import javafx.event.ActionEvent;
+import java.io.File;
 
 
 public class MainMenu {
 
     private Stage stage;
+    private AudioClip hoverSound;
+    private AudioClip clickSound;
 
     public MainMenu(Stage stage) {
         this.stage = stage;
@@ -32,6 +36,23 @@ public class MainMenu {
     public void show() {
 
         MusicManager.playMenuMusic();
+        // Load button sound effects
+        File hoverFile = new File("assets/button_hover.wav");
+        File clickFile = new File("assets/button_click.wav");
+
+        if (hoverFile.exists()) {
+            hoverSound = new AudioClip(hoverFile.toURI().toString());
+            hoverSound.setVolume(0.5);
+        } else {
+            System.out.println("Hover sound not found: " + hoverFile.getAbsolutePath());
+        }
+
+        if (clickFile.exists()) {
+            clickSound = new AudioClip(clickFile.toURI().toString());
+            clickSound.setVolume(0.7);
+        } else {
+            System.out.println("Click sound not found: " + clickFile.getAbsolutePath());
+        }
 
         // TITLE
         Label title = new Label("WIZARD'S ESCAPE");
@@ -72,7 +93,6 @@ public class MainMenu {
             "-fx-border-color: #9C7AC7;" +
             "-fx-border-radius: 12;" +
             "-fx-border-width: 1.5;" +
-            "-fx-cursor: hand;" +
             "-fx-padding: 8 25 8 25;";
 
         Button playButton = new Button("PLAY");
@@ -94,8 +114,7 @@ public class MainMenu {
             "-fx-background-radius: 27;" +
             "-fx-border-color: #9C7AC7;" +
             "-fx-border-radius: 27;" +
-            "-fx-border-width: 1.5;" +
-            "-fx-cursor: hand;";
+            "-fx-border-width: 1.5;" ;
 
         String helpButtonHoverStyle =
             "-fx-background-color: rgba(63, 39, 105, 0.95);" +
@@ -107,12 +126,13 @@ public class MainMenu {
             "-fx-border-color: #C9A7F2;" +
             "-fx-border-radius: 27;" +
             "-fx-border-width: 2;" +
-            "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);" +
-            "-fx-cursor: hand;";
+            "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);" ;
+            
 
         helpButton.setStyle(helpButtonStyle);
 
         helpButton.setOnMouseEntered(e -> {
+            playHoverSound();
             helpButton.setStyle(helpButtonHoverStyle);
 
             ScaleTransition grow =
@@ -155,8 +175,8 @@ public class MainMenu {
             "-fx-background-radius: 25;" +
             "-fx-border-color: #9C7AC7;" +
             "-fx-border-radius: 25;" +
-            "-fx-border-width: 1.5;" +
-            "-fx-cursor: hand;";
+            "-fx-border-width: 1.5;" ;
+        
 
         String musicButtonHoverStyle =
             "-fx-background-color: rgba(63, 39, 105, 0.95);" +
@@ -166,13 +186,12 @@ public class MainMenu {
             "-fx-border-color: #C9A7F2;" +
             "-fx-border-radius: 25;" +
             "-fx-border-width: 2;" +
-            "-fx-cursor: hand;" +
             "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);";
 
         musicButton.setStyle(musicButtonStyle);
 
         musicButton.setOnMouseEntered(e -> {
-
+            playHoverSound();
             musicButton.setStyle(musicButtonHoverStyle);
 
             ScaleTransition grow =
@@ -229,7 +248,7 @@ public class MainMenu {
             button.setStyle(buttonStyle);
 
             button.setOnMouseEntered(e -> {
-
+                playHoverSound();
                 button.setStyle(
                     "-fx-background-color: rgba(63, 39, 105, 0.95);" +
                     "-fx-text-fill: #FFFFFF;" +
@@ -240,7 +259,6 @@ public class MainMenu {
                     "-fx-border-color: #C9A7F2;" +
                     "-fx-border-radius: 12;" +
                     "-fx-border-width: 2;" +
-                    "-fx-cursor: hand;" +
                     "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);"
                 );
 
@@ -557,7 +575,6 @@ public class MainMenu {
             "-fx-border-color: #9C7AC7;" +
             "-fx-border-radius: 12;" +
             "-fx-border-width: 1.5;" +
-            "-fx-cursor: hand;" +
             "-fx-padding: 8 25 8 25;";
 
         String closeButtonHoverStyle =
@@ -570,7 +587,6 @@ public class MainMenu {
             "-fx-border-color: #C9A7F2;" +
             "-fx-border-radius: 12;" +
             "-fx-border-width: 2;" +
-            "-fx-cursor: hand;" +
             "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);" +
             "-fx-padding: 8 25 8 25;";
 
@@ -580,7 +596,7 @@ public class MainMenu {
         closeHelpButton.setStyle(closeButtonStyle);
 
         closeHelpButton.setOnMouseEntered(e -> {
-
+            playHoverSound();
             closeHelpButton.setStyle(closeButtonHoverStyle);
 
             ScaleTransition grow =
@@ -688,12 +704,40 @@ public class MainMenu {
             fadeOut.play();
         });
 
+        // Play click sound for all menu buttons
+        Button[] allButtons = {
+            playButton,
+            scoreButton,
+            quitButton,
+            helpButton,
+            musicButton,
+            closeHelpButton
+        };
 
+        for (Button button : allButtons) {
+            button.addEventFilter(ActionEvent.ACTION, event -> {
+                playClickSound();
+            });
+        }
+        
         Scene scene = new Scene(root);
+        CursorManager.setCustomCursor(scene);
         scene.setFill(Color.BLACK);
 
         stage.setScene(scene);
 
+    }
+
+    private void playHoverSound() {
+        if (hoverSound != null) {
+            hoverSound.play();
+        }
+    }
+
+    private void playClickSound() {
+        if (clickSound != null) {
+            clickSound.play();
+        }
     }
 
     private void transitionTo(Runnable nextScreen) {

@@ -19,11 +19,15 @@ import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
 import javafx.scene.shape.Circle;
 import java.util.Random;
+import javafx.scene.media.AudioClip;
+import java.io.File;
 
 
 public class ScoreScreen {
 
     private Stage stage;
+    private AudioClip hoverSound;
+    private AudioClip clickSound;
 
     // Design resolution
     private static final double DESIGN_WIDTH = 900;
@@ -264,6 +268,19 @@ public class ScoreScreen {
     public void show() {
 
         MusicManager.playMenuMusic();
+
+        File hoverFile = new File("assets/button_hover.wav");
+        File clickFile = new File("assets/button_click.wav");
+
+        if (hoverFile.exists()) {
+        hoverSound = new AudioClip(hoverFile.toURI().toString());
+        hoverSound.setVolume(0.5);
+        }
+
+        if (clickFile.exists()) {
+        clickSound = new AudioClip(clickFile.toURI().toString());
+        clickSound.setVolume(0.7);
+        }
 
         // =========================================================
         // TITLE
@@ -569,8 +586,7 @@ public class ScoreScreen {
                 "-fx-border-color: #9C7AC7;" +
                 "-fx-border-radius: 8;" +
                 "-fx-background-radius: 8;" +
-                "-fx-border-width: 1.5;" +
-                "-fx-cursor: hand;";
+                "-fx-border-width: 1.5;" ;
 
         String backHoverStyle =
                 "-fx-background-color: rgba(72, 45, 110, 0.98);" +
@@ -582,7 +598,6 @@ public class ScoreScreen {
                 "-fx-border-radius: 8;" +
                 "-fx-background-radius: 8;" +
                 "-fx-border-width: 2;" +
-                "-fx-cursor: hand;" +
                 "-fx-effect: dropshadow(gaussian, #9B6DCE, 12, 0.55, 0, 0);";
 
         backButton.setStyle(
@@ -590,7 +605,7 @@ public class ScoreScreen {
         );
 
         backButton.setOnMouseEntered(event -> {
-
+        playHoverSound();
         backButton.setStyle(
                 backHoverStyle
         );
@@ -624,7 +639,8 @@ public class ScoreScreen {
         });
 
         backButton.setOnAction(event -> {
-
+                playClickSound();
+                
                 transitionTo(()-> {
                         
                 MainMenu mainMenu =
@@ -765,6 +781,8 @@ public class ScoreScreen {
                         DESIGN_HEIGHT
                 );
 
+        CursorManager.setCustomCursor(scene);
+
         scene.setFill(
                 Color.web("#120D20")
         );
@@ -778,6 +796,18 @@ public class ScoreScreen {
                 designRoot
         );
     }
+
+    private void playHoverSound() {
+                if (hoverSound != null) {
+                        hoverSound.play();
+                }
+        }
+
+    private void playClickSound() {
+                if (clickSound != null) {
+                        clickSound.play();
+                }
+        }
         // =========================================================
         // RESPONSIVE SCALING
         // =========================================================

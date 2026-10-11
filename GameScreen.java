@@ -47,6 +47,11 @@ import java.util.Set;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
+import javafx.scene.media.AudioClip;
+import javafx.event.ActionEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+
 
 public class GameScreen {
 
@@ -57,6 +62,14 @@ public class GameScreen {
     private WordManager wordManager;
     private EnemyManager enemyManager;
 
+    // =========================
+    // SOUND EFFECTS
+    // =========================
+
+    private AudioClip hoverSound;
+    private AudioClip clickSound;
+    private AudioClip correctAnswerSound;
+    private AudioClip wrongAnswerSound;
 
     // =========================
     // UI ELEMENTS
@@ -145,6 +158,52 @@ public class GameScreen {
 
     private long wordStartTime;
 
+    
+    private void loadSoundEffects() {
+
+        hoverSound = loadAudioClip("assets/button_hover.wav");
+        clickSound = loadAudioClip("assets/button_click.wav");
+
+        correctAnswerSound = loadAudioClip("assets/correct_answer.wav");
+        wrongAnswerSound = loadAudioClip("assets/wrong_answer.wav");
+    }
+
+    private AudioClip loadAudioClip(String path) {
+
+        java.io.File file = new java.io.File(path);
+
+        if (!file.exists()) {
+            System.err.println("Sound file not found: " + file.getAbsolutePath());
+            return null;
+        }
+
+        return new AudioClip(file.toURI().toString());
+    }
+
+    private void playHoverSound() {
+        if (hoverSound != null) {
+            hoverSound.play();
+        }
+    }
+
+    private void playClickSound() {
+        if (clickSound != null) {
+            clickSound.play();
+        }
+    }
+
+    private void playCorrectAnswerSound() {
+        if (correctAnswerSound != null) {
+            correctAnswerSound.play();
+        }
+    }
+
+    private void playWrongAnswerSound() {
+        if (wrongAnswerSound != null) {
+            wrongAnswerSound.play();
+        }
+    }
+
 
     // =========================================================
     // CONSTRUCTOR
@@ -158,8 +217,25 @@ public class GameScreen {
         gameLogic = new GameLogic(difficulty);
         wordManager = new WordManager(difficulty);
         enemyManager = new EnemyManager();
+
+        loadSoundEffects();
     }
 
+    
+    private void addButtonSounds(Button button) {
+
+        // Play hover sound without replacing existing hover animations.
+        button.addEventFilter(
+            MouseEvent.MOUSE_ENTERED,
+            event -> playHoverSound()
+        );
+
+        // Play click sound for mouse and keyboard activation.
+        button.addEventFilter(
+            ActionEvent.ACTION,
+            event -> playClickSound()
+        );
+    }
 
     // =========================================================
     // SHOW GAME SCREEN
@@ -285,8 +361,8 @@ public class GameScreen {
             "-fx-background-radius: 6;" +
             "-fx-border-color: #A88B5A;" +
             "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 6;" +
-            "-fx-cursor: hand;"
+            "-fx-border-radius: 6;" 
+            
         );
 
         hintButton.setOnMouseEntered(event -> {
@@ -296,8 +372,8 @@ public class GameScreen {
                 "-fx-background-radius: 6;" +
                 "-fx-border-color: #D6B878;" +
                 "-fx-border-width: 1.5;" +
-                "-fx-border-radius: 6;" +
-                "-fx-cursor: hand;"
+                "-fx-border-radius: 6;" 
+                
             );
 
         });
@@ -309,8 +385,8 @@ public class GameScreen {
                 "-fx-background-radius: 6;" +
                 "-fx-border-color: #A88B5A;" +
                 "-fx-border-width: 1.5;" +
-                "-fx-border-radius: 6;" +
-                "-fx-cursor: hand;"
+                "-fx-border-radius: 6;" 
+                
             );
 
         });
@@ -535,6 +611,8 @@ public class GameScreen {
             // Return keyboard focus to the answer field
             answerField.requestFocus();
         });
+        
+        addButtonSounds(hintButton);
         
 
         answerField.setOnAction(event -> {
@@ -1018,6 +1096,7 @@ answerField.addEventFilter(
             600
         );
 
+        CursorManager.setCustomCursor(scene);
 
         stage.setScene(scene);
 
@@ -1498,6 +1577,8 @@ scrambledWordLabel.setText(scrambledWord);
 
         if (valid) {
             
+            playCorrectAnswerSound();
+
             double secondsTaken = (System.nanoTime() - wordStartTime) / 1_000_000_000.0;
 
             /*int points = gameLogic.processCorrectGuess(guess, secondsTaken);
@@ -1573,6 +1654,8 @@ scrambledWordLabel.setText(scrambledWord);
         // WRONG
         // =====================================================
         } else {
+
+            playWrongAnswerSound();
 
             int penalty = gameLogic.processWrongGuess();
 
@@ -2494,8 +2577,7 @@ scrambledWordLabel.setText(scrambledWord);
                 "-fx-background-radius: 6;" +
                 "-fx-border-color: #A88B5A;" +
                 "-fx-border-width: 1.5;" +
-                "-fx-border-radius: 6;" +
-                "-fx-cursor: hand;"
+                "-fx-border-radius: 6;" 
             );
 
             // Hover
@@ -2506,8 +2588,7 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #D6B878;" +
                     "-fx-border-width: 1.5;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;"
                 );
 
             });
@@ -2520,8 +2601,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #A88B5A;" +
                     "-fx-border-width: 1.5;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             });
@@ -2529,6 +2610,8 @@ scrambledWordLabel.setText(scrambledWord);
             quitButton.setOnAction(event -> {
                 showQuitConfirmation();
             });
+
+            addButtonSounds(quitButton);
 
             return quitButton;
         }
@@ -2542,7 +2625,11 @@ scrambledWordLabel.setText(scrambledWord);
 
                 if (gamePaused) {
             return;
+
         }
+
+       
+
 
         gamePaused = true;
 
@@ -2690,8 +2777,7 @@ scrambledWordLabel.setText(scrambledWord);
                 "-fx-background-radius: 6;" +
                 "-fx-border-color: #71809C;" +
                 "-fx-border-width: 1.2;" +
-                "-fx-border-radius: 6;" +
-                "-fx-cursor: hand;"
+                "-fx-border-radius: 6;"
             );
 
 
@@ -2722,8 +2808,7 @@ scrambledWordLabel.setText(scrambledWord);
                 "-fx-background-radius: 6;" +
                 "-fx-border-color: #C66A5A;" +
                 "-fx-border-width: 1.2;" +
-                "-fx-border-radius: 6;" +
-                "-fx-cursor: hand;"
+                "-fx-border-radius: 6;"
             );
 
 
@@ -2738,8 +2823,7 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #A8B4C9;" +
                     "-fx-border-width: 1.2;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;"
                 );
 
             });
@@ -2751,8 +2835,7 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #71809C;" +
                     "-fx-border-width: 1.2;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
                 );
 
             });
@@ -2765,8 +2848,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #E08A78;" +
                     "-fx-border-width: 1.2;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             });
@@ -2778,8 +2861,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #C66A5A;" +
                     "-fx-border-width: 1.2;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             });
@@ -2790,6 +2873,7 @@ scrambledWordLabel.setText(scrambledWord);
             // =========================================
 
             cancelButton.setOnAction(event -> {
+
 
                 StackPane root =
                     (StackPane) stage.getScene().getRoot();
@@ -2835,6 +2919,7 @@ scrambledWordLabel.setText(scrambledWord);
 
             });
 
+            addButtonSounds(cancelButton);
 
             confirmQuitButton.setOnAction(event -> {
 
@@ -2842,6 +2927,7 @@ scrambledWordLabel.setText(scrambledWord);
 
             });
 
+            addButtonSounds(confirmQuitButton);
 
             // =========================================
             // BUILD POPUP
@@ -3217,8 +3303,8 @@ scrambledWordLabel.setText(scrambledWord);
             "-fx-background-radius: 6;" +
             "-fx-border-color: #A88B5A;" +
             "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 6;" +
-            "-fx-cursor: hand;"
+            "-fx-border-radius: 6;" 
+            
         );
 
 
@@ -3258,8 +3344,8 @@ scrambledWordLabel.setText(scrambledWord);
             "-fx-background-radius: 6;" +
             "-fx-border-color: #A88B5A;" +
             "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 6;" +
-            "-fx-cursor: hand;"
+            "-fx-border-radius: 6;" 
+            
         );
 
 
@@ -3275,8 +3361,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #D6B878;" +
                     "-fx-border-width: 1.5;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             }
@@ -3291,8 +3377,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #A88B5A;" +
                     "-fx-border-width: 1.5;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             }
@@ -3307,8 +3393,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #D6B878;" +
                     "-fx-border-width: 1.5;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             }
@@ -3323,8 +3409,8 @@ scrambledWordLabel.setText(scrambledWord);
                     "-fx-background-radius: 6;" +
                     "-fx-border-color: #A88B5A;" +
                     "-fx-border-width: 1.5;" +
-                    "-fx-border-radius: 6;" +
-                    "-fx-cursor: hand;"
+                    "-fx-border-radius: 6;" 
+                    
                 );
 
             }
@@ -3359,6 +3445,8 @@ scrambledWordLabel.setText(scrambledWord);
             }
         );
 
+        addButtonSounds(playAgainButton);        
+
 
         // =====================================================
         // MAIN MENU ACTION
@@ -3387,6 +3475,7 @@ scrambledWordLabel.setText(scrambledWord);
             }
         );
 
+        addButtonSounds(menuButton);
 
         // =====================================================
         // BUILD BUTTON AREA
@@ -3432,6 +3521,7 @@ scrambledWordLabel.setText(scrambledWord);
                 600
             );
 
+            CursorManager.setCustomCursor(endScene);
 
         stage.setScene(
             endScene
