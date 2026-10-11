@@ -3,10 +3,16 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Run Word Game",
+            "name": "Run Wizard's Escape",
             "request": "launch",
             "mainClass": "Main",
-            "vmArgs": "--module-path lib --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.web"
+            "classPaths": [
+                "${workspaceFolder}/bin"
+            ],
+            "modulePaths": [
+                "${workspaceFolder}/lib"
+            ],
+            "vmArgs": "--add-modules javafx.controls,javafx.fxml,javafx.media,javafx.web --enable-native-access=javafx.graphics -Djava.library.path=${workspaceFolder}/native"
         }
     ]
 }

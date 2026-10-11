@@ -14,6 +14,10 @@ import javafx.scene.shape.Circle;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 import java.util.Random;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.FontPosture;
+import javafx.animation.ScaleTransition;
+import javafx.animation.FadeTransition;
 
 
 public class MainMenu {
@@ -24,14 +28,14 @@ public class MainMenu {
         this.stage = stage;
     }
 
-
     public void show() {
 
+        MusicManager.playMenuMusic();
 
         // TITLE
         Label title = new Label("WIZARD'S ESCAPE");
 
-        title.setFont(Font.font("Serif", 50));
+        title.setFont(Font.font("Palatino Linotype", FontWeight.BOLD, 50));
 
         title.setTextFill(Color.web("#E8D8FF"));
         
@@ -44,7 +48,7 @@ public class MainMenu {
 
         // SUBTITLE
         Label subtitle = new Label("A Word-Scramble Adventure");
-        subtitle.setFont(Font.font("Serif", 20));
+        subtitle.setFont(Font.font("Garamond", FontPosture.ITALIC, 19));
 
         subtitle.setTextFill(
             Color.web("#D8C7FF")
@@ -58,20 +62,21 @@ public class MainMenu {
 
         // BUTTON STYLE
         String buttonStyle =
-            "-fx-background-color: rgba(35,20,75,0.85);" +
-            "-fx-text-fill: #F5EFFF;" +
-            "-fx-font-size: 18px;" +
-            "-fx-background-radius: 18;" +
-            "-fx-border-color: #B98CFF;" +
-            "-fx-border-radius: 18;" +
-            "-fx-border-width: 2;" +
-            "-fx-cursor: hand;";
+            "-fx-background-color: rgba(20, 15, 45, 0.88);" +
+            "-fx-text-fill: #F3E8FF;" +
+            "-fx-font-family: 'Georgia';" +
+            "-fx-font-size: 21px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 12;" +
+            "-fx-border-color: #9C7AC7;" +
+            "-fx-border-radius: 12;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-cursor: hand;" +
+            "-fx-padding: 8 25 8 25;";
 
-
-        Button playButton = new Button("✨ PLAY ✨");
-        Button scoreButton = new Button("📜 SCORE");
-        Button quitButton = new Button("🚪 QUIT");
-
+        Button playButton = new Button("PLAY");
+        Button scoreButton = new Button("SCORES");
+        Button quitButton = new Button("QUIT");
 
         Button[] buttons = {
             playButton,
@@ -79,56 +84,81 @@ public class MainMenu {
             quitButton
         };
 
-
-        for(Button button : buttons){
+        for (Button button : buttons) {
 
             button.setPrefWidth(250);
-            button.setPrefHeight(55);
-            button.setFont(Font.font("Arial",18));
+            button.setPrefHeight(54);
+            button.setFont(Font.font("Georgia", 21));
             button.setStyle(buttonStyle);
-
 
             button.setOnMouseEntered(e -> {
 
                 button.setStyle(
-                    buttonStyle +
-                    "-fx-background-color: rgba(120,80,200,0.95);" +
-                    "-fx-effect: dropshadow(gaussian,#B98CFF,20,0.7,0,0);"
+                    "-fx-background-color: rgba(63, 39, 105, 0.95);" +
+                    "-fx-text-fill: #FFFFFF;" +
+                    "-fx-font-family: 'Georgia';" +
+                    "-fx-font-size: 21px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-radius: 12;" +
+                    "-fx-border-color: #C9A7F2;" +
+                    "-fx-border-radius: 12;" +
+                    "-fx-border-width: 2;" +
+                    "-fx-cursor: hand;" +
+                    "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);"
                 );
 
-                button.setScaleX(1.05);
-                button.setScaleY(1.05);
+                ScaleTransition grow =
+                new ScaleTransition(
+                        Duration.millis(150),
+                        button
+                );
 
+                grow.setToX(1.06);
+                grow.setToY(1.06);
+                grow.playFromStart();
             });
-
 
             button.setOnMouseExited(e -> {
 
                 button.setStyle(buttonStyle);
 
-                button.setScaleX(1);
-                button.setScaleY(1);
+                ScaleTransition shrink =
+                        new ScaleTransition(
+                                Duration.millis(150),
+                                button
+                        );
 
+                shrink.setToX(1.0);
+                shrink.setToY(1.0);
+                shrink.playFromStart();
             });
-        }
+    }
 
 
 
         // BUTTON ACTIONS
 
         playButton.setOnAction(event -> {
+
+            transitionTo(()-> {
             DifficultySelection difficultySelection =
                     new DifficultySelection(stage);
 
             difficultySelection.show();
+            });
+
         });
 
 
         scoreButton.setOnAction(event -> {
+
+            transitionTo(()-> {
             ScoreScreen scoreScreen =
                     new ScoreScreen(stage);
 
             scoreScreen.show();
+            });
+
         });
 
 
@@ -158,7 +188,7 @@ public class MainMenu {
         logo.setPreserveRatio(true);
 
         // MENU CONTENT
-        VBox menuBox = new VBox(25);
+        VBox menuBox = new VBox(16);
 
         menuBox.setAlignment(Pos.CENTER);
 
@@ -174,7 +204,7 @@ public class MainMenu {
         // BACKGROUND IMAGE
 
         Image bgImage = new Image(
-                "file:assets/wizard_background.png",
+                "file:assets/mainmenubg.png",
                 900,
                 600,
                 false,
@@ -310,6 +340,47 @@ public class MainMenu {
 
         stage.setScene(scene);
 
+    }
+
+    private void transitionTo(Runnable nextScreen) {
+
+        Scene currentScene = stage.getScene();
+
+        if (currentScene == null) {
+            nextScreen.run();
+            return;
+        }
+
+        FadeTransition fadeOut =
+                new FadeTransition(
+                        Duration.millis(250),
+                        currentScene.getRoot()
+                );
+
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+
+        fadeOut.setOnFinished(event -> {
+
+            nextScreen.run();
+
+            Scene newScene = stage.getScene();
+
+            newScene.getRoot().setOpacity(0.0);
+
+            FadeTransition fadeIn =
+                    new FadeTransition(
+                            Duration.millis(300),
+                            newScene.getRoot()
+                    );
+
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+
+            fadeIn.play();
+        });
+
+        fadeOut.play();
     }
 
     private Circle createParticle() {
