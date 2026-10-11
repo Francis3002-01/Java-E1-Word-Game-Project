@@ -9,6 +9,8 @@ public class MusicManager {
     private static MediaPlayer gameMusic;
     private static MediaPlayer endMusic;
 
+    private static boolean muted = false;
+
     // =====================================================
     // MENU MUSIC
     // =====================================================
@@ -49,6 +51,9 @@ public class MusicManager {
         menuMusic.setCycleCount(MediaPlayer.INDEFINITE);
 
         menuMusic.setVolume(0.5);
+
+        // Keep current mute setting
+        menuMusic.setMute(muted);
 
         menuMusic.play();
     }
@@ -106,6 +111,9 @@ public class MusicManager {
         gameMusic.setCycleCount(MediaPlayer.INDEFINITE);
 
         gameMusic.setVolume(0.5);
+
+        // Keep current mute setting
+        gameMusic.setMute(muted);
 
         gameMusic.play();
     }
@@ -167,6 +175,9 @@ public class MusicManager {
 
         endMusic.setVolume(0.6);
 
+        // Keep current mute setting
+        endMusic.setMute(muted);
+
         endMusic.play();
     }
 
@@ -191,5 +202,26 @@ public class MusicManager {
         stopMenuMusic();
         stopGameMusic();
         stopEndMusic();
+    }
+
+    public static void toggleMute() {
+        muted = !muted;
+
+        if (menuMusic != null) {
+            menuMusic.setMute(muted);
+        }
+
+        if (gameMusic != null) {
+            gameMusic.setMute(muted);
+        }
+
+        if (endMusic != null) {
+            endMusic.setMute(muted);
+        }
+    }
+
+
+    public static boolean isMuted() {
+        return muted;
     }
 }

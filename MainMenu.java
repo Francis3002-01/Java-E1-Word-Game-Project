@@ -18,6 +18,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
 import javafx.animation.ScaleTransition;
 import javafx.animation.FadeTransition;
+import javafx.stage.Modality;
 
 
 public class MainMenu {
@@ -77,6 +78,142 @@ public class MainMenu {
         Button playButton = new Button("PLAY");
         Button scoreButton = new Button("SCORES");
         Button quitButton = new Button("QUIT");
+
+        Button helpButton = new Button("?");
+
+        helpButton.setPrefSize(54, 54);
+        helpButton.setMinSize(54, 54);
+        helpButton.setMaxSize(54, 54);
+
+        String helpButtonStyle =
+            "-fx-background-color: rgba(20, 15, 45, 0.88);" +
+            "-fx-text-fill: #F3E8FF;" +
+            "-fx-font-family: 'Georgia';" +
+            "-fx-font-size: 24px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 27;" +
+            "-fx-border-color: #9C7AC7;" +
+            "-fx-border-radius: 27;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-cursor: hand;";
+
+        String helpButtonHoverStyle =
+            "-fx-background-color: rgba(63, 39, 105, 0.95);" +
+            "-fx-text-fill: #FFFFFF;" +
+            "-fx-font-family: 'Georgia';" +
+            "-fx-font-size: 24px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 27;" +
+            "-fx-border-color: #C9A7F2;" +
+            "-fx-border-radius: 27;" +
+            "-fx-border-width: 2;" +
+            "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);" +
+            "-fx-cursor: hand;";
+
+        helpButton.setStyle(helpButtonStyle);
+
+        helpButton.setOnMouseEntered(e -> {
+            helpButton.setStyle(helpButtonHoverStyle);
+
+            ScaleTransition grow =
+                new ScaleTransition(Duration.millis(150), helpButton);
+
+            grow.setToX(1.08);
+            grow.setToY(1.08);
+            grow.playFromStart();
+        });
+
+        helpButton.setOnMouseExited(e -> {
+            helpButton.setStyle(helpButtonStyle);
+
+            ScaleTransition shrink =
+                new ScaleTransition(Duration.millis(150), helpButton);
+
+            shrink.setToX(1.0);
+            shrink.setToY(1.0);
+            shrink.playFromStart();
+        });
+
+        Button musicButton = new Button(
+            MusicManager.isMuted() ? "🔇" : "🔊"
+        );
+
+        musicButton.setTextOverrun(
+            javafx.scene.control.OverrunStyle.CLIP
+        );
+
+        musicButton.setEllipsisString("");
+
+        musicButton.setPrefSize(54, 54);
+        musicButton.setMinSize(54, 54);
+        musicButton.setMaxSize(54, 54);
+
+        String musicButtonStyle =
+            "-fx-background-color: rgba(20, 15, 45, 0.88);" +
+            "-fx-text-fill: #F3E8FF;" +
+            "-fx-font-size: 20px;" +
+            "-fx-background-radius: 25;" +
+            "-fx-border-color: #9C7AC7;" +
+            "-fx-border-radius: 25;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-cursor: hand;";
+
+        String musicButtonHoverStyle =
+            "-fx-background-color: rgba(63, 39, 105, 0.95);" +
+            "-fx-text-fill: #FFFFFF;" +
+            "-fx-font-size: 20px;" +
+            "-fx-background-radius: 25;" +
+            "-fx-border-color: #C9A7F2;" +
+            "-fx-border-radius: 25;" +
+            "-fx-border-width: 2;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);";
+
+        musicButton.setStyle(musicButtonStyle);
+
+        musicButton.setOnMouseEntered(e -> {
+
+            musicButton.setStyle(musicButtonHoverStyle);
+
+            ScaleTransition grow =
+                new ScaleTransition(
+                    Duration.millis(150),
+                    musicButton
+                );
+
+            grow.setToX(1.08);
+            grow.setToY(1.08);
+            grow.playFromStart();
+        });
+
+        musicButton.setOnMouseExited(e -> {
+
+            musicButton.setStyle(musicButtonStyle);
+
+            ScaleTransition shrink =
+                new ScaleTransition(
+                    Duration.millis(150),
+                    musicButton
+                );
+
+            shrink.setToX(1.0);
+            shrink.setToY(1.0);
+            shrink.playFromStart();
+        });
+
+        // MUSIC BUTTON ACTION
+        musicButton.setOnAction(event -> {
+
+            MusicManager.toggleMute();
+
+            musicButton.setText("");
+
+            if (MusicManager.isMuted()) {
+                musicButton.setText("🔇");
+            } else {
+                musicButton.setText("🔊");
+            }
+        });
 
         Button[] buttons = {
             playButton,
@@ -187,18 +324,42 @@ public class MainMenu {
 
         logo.setPreserveRatio(true);
 
+        StackPane playRow = new StackPane();
+
+        playRow.setPrefWidth(330);
+        playRow.setPrefHeight(54);
+        playRow.setMaxWidth(330);
+
+        // PLAY stays exactly in the center
+        StackPane.setAlignment(playButton, Pos.CENTER);
+
+        // ? button stays beside PLAY
+        StackPane.setAlignment(helpButton, Pos.CENTER);
+
+        // PLAY width = 250
+        // half = 125
+        // gap = 12
+        // help button half = 27
+        // 125 + 12 + 27 = 164
+        helpButton.setTranslateX(164);
+
+        playRow.getChildren().addAll(
+            playButton,
+            helpButton
+        );
+
         // MENU CONTENT
         VBox menuBox = new VBox(16);
 
         menuBox.setAlignment(Pos.CENTER);
 
         menuBox.getChildren().addAll(
-                logo,
-                title,
-                subtitle,
-                playButton,
-                scoreButton,
-                quitButton
+            logo,
+            title,
+            subtitle,
+            playRow,
+            scoreButton,
+            quitButton
         );
 
         // BACKGROUND IMAGE
@@ -334,6 +495,199 @@ public class MainMenu {
 
         root.getChildren().add(menuScaler);
 
+        // MUSIC BUTTON - TOP RIGHT
+
+        StackPane.setAlignment(
+            musicButton,
+            Pos.TOP_RIGHT
+        );
+
+        musicButton.setTranslateX(-20);
+        musicButton.setTranslateY(20);
+
+        root.getChildren().add(musicButton);
+
+
+        // HOW TO PLAY OVERLAY
+
+        Label helpTitle = new Label("Wizard’s Escape – How to Play");
+
+        helpTitle.setFont(
+            Font.font(
+                "Palatino Linotype",
+                FontWeight.BOLD,
+                30
+            )
+        );
+
+        helpTitle.setTextFill(Color.web("#E8D8FF"));
+
+        helpTitle.setStyle(
+            "-fx-effect: dropshadow(gaussian, #7FDBFF, 12, 0.5, 0, 0);"
+        );
+
+
+        Label instructions = new Label(
+            "Apprentice Mode: Find 4 words (4–6 letters) within 30 seconds.\n\n" +
+            "Sorcerer Mode: Find 6 words (6–8 letters) within 35 seconds.\n\n" +
+            "Hints: Each hint deducts 10 points.\n\n" +
+            "Wrong Words: Incorrect submissions deduct points.\n\n" +
+            "No Duplicates: Words can only be submitted once.\n\n" +
+            "Win or Lose: Find all required words before time runs out to win; otherwise, you lose."
+        );
+
+        instructions.setFont(
+            Font.font("Georgia", 16)
+        );
+
+        instructions.setTextFill(Color.web("#F3E8FF"));
+        instructions.setWrapText(true);
+        instructions.setMaxWidth(430);
+
+
+        Button closeHelpButton = new Button("CLOSE");
+
+        String closeButtonStyle =
+            "-fx-background-color: rgba(20, 15, 45, 0.88);" +
+            "-fx-text-fill: #F3E8FF;" +
+            "-fx-font-family: 'Georgia';" +
+            "-fx-font-size: 19px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 12;" +
+            "-fx-border-color: #9C7AC7;" +
+            "-fx-border-radius: 12;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-cursor: hand;" +
+            "-fx-padding: 8 25 8 25;";
+
+        String closeButtonHoverStyle =
+            "-fx-background-color: rgba(63, 39, 105, 0.95);" +
+            "-fx-text-fill: #FFFFFF;" +
+            "-fx-font-family: 'Georgia';" +
+            "-fx-font-size: 19px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-radius: 12;" +
+            "-fx-border-color: #C9A7F2;" +
+            "-fx-border-radius: 12;" +
+            "-fx-border-width: 2;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, #9B6DCE, 16, 0.65, 0, 0);" +
+            "-fx-padding: 8 25 8 25;";
+
+        closeHelpButton.setPrefWidth(220);
+        closeHelpButton.setPrefHeight(54);
+
+        closeHelpButton.setStyle(closeButtonStyle);
+
+        closeHelpButton.setOnMouseEntered(e -> {
+
+            closeHelpButton.setStyle(closeButtonHoverStyle);
+
+            ScaleTransition grow =
+                new ScaleTransition(
+                    Duration.millis(150),
+                    closeHelpButton
+                );
+
+            grow.setToX(1.06);
+            grow.setToY(1.06);
+
+            grow.playFromStart();
+        });
+
+
+        closeHelpButton.setOnMouseExited(e -> {
+
+            closeHelpButton.setStyle(closeButtonStyle);
+
+            ScaleTransition shrink =
+                new ScaleTransition(
+                    Duration.millis(150),
+                    closeHelpButton
+                );
+
+            shrink.setToX(1.0);
+            shrink.setToY(1.0);
+
+            shrink.playFromStart();
+        });
+
+
+        VBox helpCard = new VBox(
+            25,
+            helpTitle,
+            instructions,
+            closeHelpButton
+        );
+
+        helpCard.setAlignment(Pos.CENTER);
+
+        helpCard.setMaxWidth(520);
+        helpCard.setMaxHeight(500);
+
+        helpCard.setStyle(
+            "-fx-background-color: rgba(15, 13, 35, 0.97);" +
+            "-fx-background-radius: 20;" +
+            "-fx-border-radius: 20;" +
+            "-fx-border-color: #9C7AC7;" +
+            "-fx-border-width: 2;" +
+            "-fx-padding: 35;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 30, 0.5, 0, 0);"
+        );
+
+
+        StackPane helpOverlay = new StackPane();
+
+        helpOverlay.setStyle(
+            "-fx-background-color: rgba(0, 0, 0, 0.65);"
+        );
+
+        helpOverlay.getChildren().add(helpCard);
+
+        helpOverlay.setVisible(false);
+
+        root.getChildren().add(helpOverlay);
+
+
+        // OPEN HELP
+        helpButton.setOnAction(event -> {
+
+            helpOverlay.setOpacity(0);
+
+            helpOverlay.setVisible(true);
+
+            FadeTransition fadeIn =
+                new FadeTransition(
+                    Duration.millis(200),
+                    helpOverlay
+                );
+
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+
+            fadeIn.play();
+        });
+
+
+        // CLOSE HELP
+        closeHelpButton.setOnAction(event -> {
+
+            FadeTransition fadeOut =
+                new FadeTransition(
+                    Duration.millis(200),
+                    helpOverlay
+                );
+
+            fadeOut.setFromValue(1);
+            fadeOut.setToValue(0);
+
+            fadeOut.setOnFinished(e -> {
+                helpOverlay.setVisible(false);
+            });
+
+            fadeOut.play();
+        });
+
 
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
@@ -382,6 +736,7 @@ public class MainMenu {
 
         fadeOut.play();
     }
+
 
     private Circle createParticle() {
 
