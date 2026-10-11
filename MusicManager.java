@@ -41,9 +41,7 @@ public class MusicManager {
             return;
         }
 
-        Media media = new Media(
-            musicFile.toURI().toString()
-        );
+        Media media = new Media(musicFile.toURI().toString());
 
         menuMusic = new MediaPlayer(media);
 
@@ -61,9 +59,7 @@ public class MusicManager {
     // =====================================================
     // STOP MENU MUSIC
     // =====================================================
-
     public static void stopMenuMusic() {
-
         if (menuMusic != null) {
             menuMusic.stop();
             menuMusic.dispose();
@@ -74,7 +70,6 @@ public class MusicManager {
     // =====================================================
     // GAME MUSIC
     // =====================================================
-
     public static void playGameMusic() {
 
         // Stop menu/end music
@@ -101,9 +96,7 @@ public class MusicManager {
             return;
         }
 
-        Media media = new Media(
-            musicFile.toURI().toString()
-        );
+        Media media = new Media(musicFile.toURI().toString());
 
         gameMusic = new MediaPlayer(media);
 
@@ -121,10 +114,10 @@ public class MusicManager {
     // =====================================================
     // STOP GAME MUSIC
     // =====================================================
-
     public static void stopGameMusic() {
 
-        if (gameMusic != null) {
+        if (gameMusic != null) 
+        {
             gameMusic.stop();
             gameMusic.dispose();
             gameMusic = null;
@@ -134,7 +127,6 @@ public class MusicManager {
     // =====================================================
     // END SCREEN MUSIC
     // =====================================================
-
     public static void playEndMusic(boolean victory) {
 
         // Stop the gameplay music
@@ -150,7 +142,9 @@ public class MusicManager {
 
         if (victory) {
             fileName = "assets/victory.mp3";
-        } else {
+        } 
+        
+        else {
             fileName = "assets/lose.mp3";
         }
 
@@ -164,9 +158,7 @@ public class MusicManager {
             return;
         }
 
-        Media media = new Media(
-            musicFile.toURI().toString()
-        );
+        Media media = new Media(musicFile.toURI().toString());
 
         endMusic = new MediaPlayer(media);
 
@@ -184,7 +176,6 @@ public class MusicManager {
     // =====================================================
     // STOP END MUSIC
     // =====================================================
-
     public static void stopEndMusic() {
 
         if (endMusic != null) {
@@ -197,7 +188,6 @@ public class MusicManager {
     // =====================================================
     // STOP EVERYTHING
     // =====================================================
-
     public static void stopAllMusic() {
         stopMenuMusic();
         stopGameMusic();
@@ -219,7 +209,6 @@ public class MusicManager {
             endMusic.setMute(muted);
         }
     }
-
 
     public static boolean isMuted() {
         return muted;

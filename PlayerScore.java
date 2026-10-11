@@ -10,11 +10,6 @@ public class PlayerScore {
         this.score = Math.max(0, score);
     }
 
-    // Get player name
-    /*public String getPlayerName() {
-        return playerName;
-    }*/
-
     // Get difficulty
     public String getDifficulty() {
         return difficulty;

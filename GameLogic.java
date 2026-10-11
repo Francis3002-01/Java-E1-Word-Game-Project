@@ -38,30 +38,6 @@ public class GameLogic {
         }
     }
 
-    // Validate the player's guess
-    /*public boolean isValidGuess(String guess, String currentWord) {
-
-        if (guess == null || currentWord == null) {
-            return false;
-        }
-
-        guess = guess.trim().toLowerCase();
-        currentWord = currentWord.trim().toLowerCase();
-
-        
-        if (guess.isEmpty()) {
-            return false;
-        }
-
-        
-        if (!WordDictionary.contains(guess)) {
-            return false;
-        }
-
-        
-        return guess.equals(currentWord);
-    }*/
-
     public boolean isValidGuess(String guess, String currentWord) {
 
         if (guess == null || currentWord == null) {
@@ -79,46 +55,8 @@ public class GameLogic {
             return false;
         }
 
-        /*if (usedWords.contains(guess)) {
-            return false;
-        }*/
-
         return guess.equals(currentWord);
     }
-
-    // Check whether the guess can be created
-    // using only the scramble letters
-    /*private boolean canCreateWord(String guess, String scramble) {
-
-        int[] letterCount = new int[26];
-
-        // Count letters in the scramble
-        for (char letter : scramble.toCharArray()) {
-
-            if (letter >= 'a' && letter <= 'z') {
-                letterCount[letter - 'a']++;
-            }
-        }
-
-        // Use the scramble letters for the guess
-        for (char letter : guess.toCharArray()) {
-
-            if (letter < 'a' || letter > 'z') {
-                return false;
-            }
-
-            int index = letter - 'a';
-
-            if (letterCount[index] <= 0) {
-                return false;
-            }
-
-            letterCount[index]--;
-        }
-
-        return true;
-    }*/
-
 
     // Process a correct answer
     public int processCorrectGuess(String guess, double secondsTaken) {

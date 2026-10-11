@@ -18,10 +18,14 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
 import javafx.animation.ScaleTransition;
 import javafx.animation.FadeTransition;
+<<<<<<< HEAD
 import javafx.scene.media.AudioClip;
 import javafx.event.ActionEvent;
 import java.io.File;
 
+=======
+//import javafx.stage.Modality;
+>>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
 
 public class MainMenu {
 
@@ -61,25 +65,16 @@ public class MainMenu {
 
         title.setTextFill(Color.web("#E8D8FF"));
         
-
         // Add glow effect
-        title.setStyle(
-            "-fx-effect: dropshadow(gaussian, #7FDBFF, 15, 0.5, 0, 0);"
-        );
-
+        title.setStyle("-fx-effect: dropshadow(gaussian, #7FDBFF, 15, 0.5, 0, 0);");
 
         // SUBTITLE
         Label subtitle = new Label("A Word-Scramble Adventure");
         subtitle.setFont(Font.font("Garamond", FontPosture.ITALIC, 19));
 
-        subtitle.setTextFill(
-            Color.web("#D8C7FF")
-        );
+        subtitle.setTextFill(Color.web("#D8C7FF"));
 
-        subtitle.setStyle(
-            "-fx-effect: dropshadow(gaussian, #4B0082, 10, 0.5, 0, 0);"
-        );
-
+        subtitle.setStyle("-fx-effect: dropshadow(gaussian, #4B0082, 10, 0.5, 0, 0);");
 
 
         // BUTTON STYLE
@@ -135,8 +130,7 @@ public class MainMenu {
             playHoverSound();
             helpButton.setStyle(helpButtonHoverStyle);
 
-            ScaleTransition grow =
-                new ScaleTransition(Duration.millis(150), helpButton);
+            ScaleTransition grow = new ScaleTransition(Duration.millis(150), helpButton);
 
             grow.setToX(1.08);
             grow.setToY(1.08);
@@ -146,21 +140,16 @@ public class MainMenu {
         helpButton.setOnMouseExited(e -> {
             helpButton.setStyle(helpButtonStyle);
 
-            ScaleTransition shrink =
-                new ScaleTransition(Duration.millis(150), helpButton);
+            ScaleTransition shrink = new ScaleTransition(Duration.millis(150), helpButton);
 
             shrink.setToX(1.0);
             shrink.setToY(1.0);
             shrink.playFromStart();
         });
 
-        Button musicButton = new Button(
-            MusicManager.isMuted() ? "🔇" : "🔊"
-        );
+        Button musicButton = new Button(MusicManager.isMuted() ? "🔇" : "🔊");
 
-        musicButton.setTextOverrun(
-            javafx.scene.control.OverrunStyle.CLIP
-        );
+        musicButton.setTextOverrun(javafx.scene.control.OverrunStyle.CLIP);
 
         musicButton.setEllipsisString("");
 
@@ -229,7 +218,9 @@ public class MainMenu {
 
             if (MusicManager.isMuted()) {
                 musicButton.setText("🔇");
-            } else {
+            } 
+            
+            else {
                 musicButton.setText("🔊");
             }
         });
@@ -289,15 +280,11 @@ public class MainMenu {
             });
     }
 
-
-
         // BUTTON ACTIONS
-
         playButton.setOnAction(event -> {
 
             transitionTo(()-> {
-            DifficultySelection difficultySelection =
-                    new DifficultySelection(stage);
+            DifficultySelection difficultySelection =new DifficultySelection(stage);
 
             difficultySelection.show();
             });
@@ -332,10 +319,7 @@ public class MainMenu {
 
         ImageView logo = new ImageView(logoImage);
 
-        logo.setStyle(
-            "-fx-effect: dropshadow(gaussian,#7FDBFF,25,0.8,0,0);"
-        );
-
+        logo.setStyle("-fx-effect: dropshadow(gaussian,#7FDBFF,25,0.8,0,0);");
 
         logo.setFitWidth(95);
         logo.setFitHeight(95);
@@ -361,10 +345,7 @@ public class MainMenu {
         // 125 + 12 + 27 = 164
         helpButton.setTranslateX(164);
 
-        playRow.getChildren().addAll(
-            playButton,
-            helpButton
-        );
+        playRow.getChildren().addAll(playButton,helpButton);
 
         // MENU CONTENT
         VBox menuBox = new VBox(16);
@@ -381,7 +362,6 @@ public class MainMenu {
         );
 
         // BACKGROUND IMAGE
-
         Image bgImage = new Image(
                 "file:assets/mainmenubg.png",
                 900,
@@ -390,28 +370,21 @@ public class MainMenu {
                 true
         );
 
-
         ImageView backgroundView = new ImageView(bgImage);
 
+        backgroundView.fitWidthProperty().bind(stage.widthProperty());
 
-        backgroundView.fitWidthProperty()
-            .bind(stage.widthProperty());
+        backgroundView.fitHeightProperty().bind(stage.heightProperty());
 
-        backgroundView.fitHeightProperty()
-            .bind(stage.heightProperty());
         backgroundView.setPreserveRatio(false);
 
         Pane darkOverlay = new Pane();
 
-        darkOverlay.setStyle(
-                "-fx-background-color: rgba(0,0,0,0.25);"
-        );
+        darkOverlay.setStyle("-fx-background-color: rgba(0,0,0,0.25);");
 
-        darkOverlay.prefWidthProperty()
-                .bind(stage.widthProperty());
+        darkOverlay.prefWidthProperty().bind(stage.widthProperty());
 
-        darkOverlay.prefHeightProperty()
-                .bind(stage.heightProperty());
+        darkOverlay.prefHeightProperty().bind(stage.heightProperty());
 
         StackPane root = new StackPane();
 
@@ -421,30 +394,16 @@ public class MainMenu {
 
         root.setStyle("-fx-background-color: black;");
 
-        root.getChildren().addAll(
-                backgroundView,
-                darkOverlay
-        );
+        root.getChildren().addAll(backgroundView,darkOverlay);
 
         Random random = new Random();
 
 
         for(int i = 0; i < 25; i++) {
-
             Circle particle = createParticle();
-
-
-            particle.setTranslateX(
-                random.nextInt(900) - 450
-            );
-
-            particle.setTranslateY(
-                random.nextInt(600) - 300
-            );
-
-
+            particle.setTranslateX(random.nextInt(900) - 450);
+            particle.setTranslateY(random.nextInt(600) - 300);
             root.getChildren().add(particle);
-
 
             TranslateTransition animation =
                     new TranslateTransition(
@@ -454,18 +413,9 @@ public class MainMenu {
 
 
             animation.setByY(-120);
-
-            animation.setByX(
-                random.nextInt(80) - 40
-            );
-
+            animation.setByX(random.nextInt(80) - 40);
             animation.setAutoReverse(true);
-
-            animation.setCycleCount(
-                    TranslateTransition.INDEFINITE
-            );
-
-
+            animation.setCycleCount(TranslateTransition.INDEFINITE);
             animation.play();
         }
 
@@ -475,18 +425,9 @@ public class MainMenu {
         double designHeight = 600;
 
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-
-            double scaleX =
-                    newVal.doubleValue() / designWidth;
-
-            double scaleY =
-                    stage.getHeight() / designHeight;
-
-
-            double scale =
-                    Math.min(scaleX, scaleY);
-
-
+            double scaleX =newVal.doubleValue() / designWidth;
+            double scaleY =stage.getHeight() / designHeight;
+            double scale =Math.min(scaleX, scaleY);
             menuScaler.setScaleX(scale);
             menuScaler.setScaleY(scale);
 
@@ -494,31 +435,17 @@ public class MainMenu {
 
 
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-
-            double scaleX =
-                    stage.getWidth() / designWidth;
-
-            double scaleY =
-                    newVal.doubleValue() / designHeight;
-
-
-            double scale =
-                    Math.min(scaleX, scaleY);
-
-
+            double scaleX =stage.getWidth() / designWidth;
+            double scaleY =newVal.doubleValue() / designHeight;
+            double scale =Math.min(scaleX, scaleY);
             menuScaler.setScaleX(scale);
             menuScaler.setScaleY(scale);
-
         });
 
         root.getChildren().add(menuScaler);
 
         // MUSIC BUTTON - TOP RIGHT
-
-        StackPane.setAlignment(
-            musicButton,
-            Pos.TOP_RIGHT
-        );
+        StackPane.setAlignment(musicButton, Pos.TOP_RIGHT);
 
         musicButton.setTranslateX(-20);
         musicButton.setTranslateY(20);
@@ -539,15 +466,12 @@ public class MainMenu {
         );
 
         helpTitle.setTextFill(Color.web("#E8D8FF"));
-
-        helpTitle.setStyle(
-            "-fx-effect: dropshadow(gaussian, #7FDBFF, 12, 0.5, 0, 0);"
-        );
+        helpTitle.setStyle("-fx-effect: dropshadow(gaussian, #7FDBFF, 12, 0.5, 0, 0);");
 
 
         Label instructions = new Label(
-            "Apprentice Mode: Find 4 words (4–6 letters) within 30 seconds.\n\n" +
-            "Sorcerer Mode: Find 6 words (6–8 letters) within 35 seconds.\n\n" +
+            "Apprentice Mode: Find 6 words (4-6 letters) within 30 seconds.\n\n" +
+            "Sorcerer Mode: Find 8 words (6-8 letters) within 35 seconds.\n\n" +
             "Hints: Each hint deducts 10 points.\n\n" +
             "Wrong Words: Incorrect submissions deduct points.\n\n" +
             "No Duplicates: Words can only be submitted once.\n\n" +

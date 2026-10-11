@@ -57,11 +57,11 @@ public class GameScreen {
 
     private Stage stage;
     private String difficulty;
-
     private GameLogic gameLogic;
     private WordManager wordManager;
     private EnemyManager enemyManager;
 
+<<<<<<< HEAD
     // =========================
     // SOUND EFFECTS
     // =========================
@@ -71,6 +71,8 @@ public class GameScreen {
     private AudioClip correctAnswerSound;
     private AudioClip wrongAnswerSound;
 
+=======
+>>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
     // =========================
     // UI ELEMENTS
     // =========================
@@ -83,21 +85,11 @@ public class GameScreen {
     private Label messageLabel;
     private TextField answerField;
     private Button hintButton;
-
-    /*private String revealedLetters = "";
-    private StackPane answerInputContainer;
-    private HBox animatedLetters;*/
-
-
     private final Set<Integer> revealedPositions = new HashSet<>();
     private StackPane answerInputContainer;
     private HBox animatedLetters;
     private int activeBoxIndex = 0;
     private char[] typedLetters;
-
-
-    //private Timeline cursorTimeline;
-    //private boolean cursorVisible = true;
 
     // =========================
     // GAME TIMER
@@ -122,42 +114,34 @@ public class GameScreen {
     private SpriteAnimator enemyAttackAnimator;
     private Enemy currentEnemy;
 
-
     // =========================
     // BATTLE AREA
     // =========================
-
     private HBox battleArea;
-
     private StackPane battleAnimationLayer;
 
     // =========================
     // STATE
     // =========================
-
     private boolean animationPlaying = false;
-
     private boolean gamePaused = false;
 
     // =========================
     // ANIMATION SETTINGS
     // =========================
-
     private static final int WIZARD_ATTACK_FRAME_DURATION = 200;
-
     private static final int ENEMY_ATTACK_FRAME_DURATION = 100;
-
     private static final int HIT_TRIGGER_FRAMES = 2;
 
     // =========================
     // SPRITE DISPLAY SETTINGS
     // =========================
-
     private static final double SPRITE_SIZE = 240;
     private static final double END_CARD_SPRITE_SIZE = 220;
 
     private long wordStartTime;
 
+<<<<<<< HEAD
     
     private void loadSoundEffects() {
 
@@ -205,10 +189,11 @@ public class GameScreen {
     }
 
 
+=======
+>>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
     // =========================================================
     // CONSTRUCTOR
     // =========================================================
-
     public GameScreen(Stage stage, String difficulty) {
 
         this.stage = stage;
@@ -240,72 +225,44 @@ public class GameScreen {
     // =========================================================
     // SHOW GAME SCREEN
     // =========================================================
-
     public void show() {
 
         MusicManager.playGameMusic();
-
         // -------------------------
         // DIFFICULTY
         // -------------------------
+        difficultyLabel = new Label(difficulty.toUpperCase());
 
-        difficultyLabel = new Label(
-            difficulty.toUpperCase()
-        );
+        difficultyLabel.setFont(Font.font("Georgia", 24));
 
-        difficultyLabel.setFont(
-            Font.font("Georgia", 24)
-        );
+        difficultyLabel.setTextFill(Color.WHITE);
 
-        difficultyLabel.setTextFill(
-            Color.WHITE
-        );
-
-        difficultyLabel.setEffect(
-            createTextShadow()
-        );
-
+        difficultyLabel.setEffect(createTextShadow());
 
         // -------------------------
         // SCORE
         // -------------------------
+        scoreLabel = new Label("Score: 0");
 
-        scoreLabel = new Label(
-            "Score: 0"
-        );
+        scoreLabel.setFont(Font.font("Arial", 18));
 
-        scoreLabel.setFont(
-            Font.font("Arial", 18)
-        );
+        scoreLabel.setTextFill(Color.WHITE);
 
-        scoreLabel.setTextFill(
-            Color.WHITE
-        );
-
-        scoreLabel.setEffect(
-            createTextShadow()
-        );
+        scoreLabel.setEffect(createTextShadow());
 
         // -------------------------
         // WORDS
         // -------------------------
-
         wordsLabel = new Label(
             "Words Found: 0 / " +
             gameLogic.getGoal()
         );
 
-        wordsLabel.setFont(
-            Font.font("Arial", 18)
-        );
+        wordsLabel.setFont(Font.font("Arial", 18));
 
-        wordsLabel.setTextFill(
-            Color.WHITE
-        );
+        wordsLabel.setTextFill(Color.WHITE);
 
-        wordsLabel.setEffect(
-            createTextShadow()
-        );
+        wordsLabel.setEffect(createTextShadow());
 
         // -------------------------
         // TIMER
@@ -330,15 +287,11 @@ public class GameScreen {
 
         hintsLabel.setFont(Font.font("Arial", 18));
         hintsLabel.setTextFill(Color.WHITE);
-
-        hintsLabel.setEffect(
-            createTextShadow()
-        );
+        hintsLabel.setEffect(createTextShadow());
 
         // -------------------------
         // HINT BUTTON
         // -------------------------
-
         hintButton = new Button("HINT");
 
         hintButton.setPrefWidth(100);
@@ -424,17 +377,11 @@ public class GameScreen {
             )
         );
 
-        messageLabel.setTextFill(
-            Color.WHITE
-        );
+        messageLabel.setTextFill(Color.WHITE);
 
-        messageLabel.setEffect(
-            createTextShadow()
-        );
+        messageLabel.setEffect(createTextShadow());
 
-        messageLabel.setAlignment(
-            Pos.CENTER
-        );
+        messageLabel.setAlignment(Pos.CENTER);
 
         messageLabel.setTranslateY(60);
 
@@ -487,60 +434,6 @@ public class GameScreen {
             animatedLetters
         );
 
-
-       
-
-        /*hintButton.setOnAction(event -> {
-
-            if (gameLogic.useHint()) 
-            {
-                String currentWord = wordManager.getCurrentWord();
-
-                for (int i = 0; i < currentWord.length(); i++) 
-                {
-                    String letter = String.valueOf(currentWord.charAt(i));
-
-                    if (!revealedLetters.contains(letter)) 
-                    {
-                        revealedLetters += letter;
-                        StringBuilder hint = new StringBuilder();
-
-                        for (int j = 0; j < currentWord.length(); j++) 
-                        {
-
-                            String currentLetter =String.valueOf(currentWord.charAt(j));
-
-                            if (revealedLetters.contains(currentLetter)) {
-                                hint.append(currentLetter.toUpperCase());
-                            } 
-                            
-                            else {
-                                hint.append("_");
-                            }
-
-                            if (j < currentWord.length() - 1) {
-                                hint.append(" ");
-                            }
-                        }
-
-                        answerField.setText(hint.toString());
-                        messageLabel.setText("Hint used! -10 points.");
-
-                        updateLabels();
-
-                        hintsLabel.setText(
-                            "Hints: " +
-                            gameLogic.getHintsRemaining() +
-                            "/" +
-                            getTotalHints()
-                        );
-
-                        break;
-                    }
-                }
-            }
-        });*/
-
         hintButton.setOnAction(event -> 
         {
             String currentWord = wordManager.getCurrentWord();
@@ -573,8 +466,7 @@ public class GameScreen {
                 return;
             }
 
-            int actualHintPenalty =
-                scoreBeforeHint - gameLogic.getScore();
+            int actualHintPenalty =scoreBeforeHint - gameLogic.getScore();
 
             // Remember the exact position revealed
             revealedPositions.add(hintPosition);
@@ -599,11 +491,10 @@ public class GameScreen {
                     false
                 );
 
-            } else {
-
-                messageLabel.setText(
-                    "Hint used! No points deducted."
-                );
+            } 
+            
+            else {
+                messageLabel.setText("Hint used! No points deducted.");
             }
 
             updateLabels();
@@ -619,95 +510,7 @@ public class GameScreen {
             checkAnswer();
         });
 
-        // -------------------------
-        // INPUT LISTENER
-        // -------------------------
-
-        /*answerField.textProperty().addListener(
-            (observable, oldValue, newValue) -> {
-
-        if (typedLetters == null) {
-            return;
-        }
-
-        String currentWord = wordManager.getCurrentWord();
-
-        // Prevent more characters than the word length
-        if (newValue.length() > currentWord.length()) {
-
-            answerField.setText(
-                newValue.substring(
-                    0,
-                    currentWord.length()
-                )
-            );
-
-            return;
-        }
-
-        // -------------------------------------------------
-        // NEW CHARACTER ENTERED
-        // -------------------------------------------------
-
-        if (newValue.length() > oldValue.length()) {
-
-            char newCharacter =
-                newValue.charAt(
-                    newValue.length() - 1
-                );
-
-            // Find the next editable box
-            moveToNextAvailableBox();
-
-            if (activeBoxIndex < typedLetters.length) {
-
-                typedLetters[activeBoxIndex] =
-                    newCharacter;
-
-                activeBoxIndex++;
-
-                moveToNextAvailableBox();
-            }
-        }
-
-        // -------------------------------------------------
-        // CHARACTER DELETED
-        // -------------------------------------------------
-
-        else if (newValue.length() < oldValue.length()) {
-
-                    // Move backwards to an editable box
-                    int deleteIndex =
-                        activeBoxIndex - 1;
-
-                    while (
-                        deleteIndex >= 0 &&
-                        revealedPositions.contains(deleteIndex)
-                    ) {
-                        deleteIndex--;
-                    }
-
-                    if (deleteIndex >= 0) {
-
-                        typedLetters[deleteIndex] = '\0';
-
-                        activeBoxIndex = deleteIndex;
-                    }
-                }
-
-                // Clear the hidden TextField.
-                // It is only being used to detect keyboard input.
-                if (!newValue.isEmpty()) {
-                    answerField.clear();
-                }
-
-                updateLetterBoxes();
-                updateActiveBox();
-            }
-        );*/
-
-        answerField.addEventFilter(
-    KeyEvent.KEY_TYPED,
+        answerField.addEventFilter(KeyEvent.KEY_TYPED,
     event -> {
 
         if (typedLetters == null || animationPlaying || gamePaused) {
@@ -765,12 +568,7 @@ answerField.addEventFilter(
 
     // If the currently selected box already has a letter,
     // delete that letter first.
-    if (
-        deleteIndex >= 0 &&
-        deleteIndex < typedLetters.length &&
-        !revealedPositions.contains(deleteIndex) &&
-        typedLetters[deleteIndex] != '\0'
-    ) {
+    if (deleteIndex >= 0 &&deleteIndex < typedLetters.length &&!revealedPositions.contains(deleteIndex) &&typedLetters[deleteIndex] != '\0') {
 
         typedLetters[deleteIndex] = '\0';
 
@@ -783,10 +581,7 @@ answerField.addEventFilter(
     // Otherwise, move backward to the previous editable box.
     deleteIndex--;
 
-    while (
-        deleteIndex >= 0 &&
-        revealedPositions.contains(deleteIndex)
-    ) {
+    while (deleteIndex >= 0 &&revealedPositions.contains(deleteIndex)) {
         deleteIndex--;
     }
 
@@ -803,20 +598,13 @@ answerField.addEventFilter(
     return;
 }
 
-
         // =========================
         // DELETE
         // =========================
-
         if (event.getCode() == KeyCode.DELETE) {
 
-            if (
-                activeBoxIndex < typedLetters.length &&
-                !revealedPositions.contains(activeBoxIndex)
-            ) {
-
+            if (activeBoxIndex < typedLetters.length &&!revealedPositions.contains(activeBoxIndex)) {
                 typedLetters[activeBoxIndex] = '\0';
-
                 updateLetterBoxes();
             }
 
@@ -824,19 +612,14 @@ answerField.addEventFilter(
             return;
         }
 
-
         // =========================
         // LEFT ARROW
         // =========================
-
         if (event.getCode() == KeyCode.LEFT) {
 
             int index = activeBoxIndex - 1;
 
-            while (
-                index >= 0 &&
-                revealedPositions.contains(index)
-            ) {
+            while (index >= 0 &&revealedPositions.contains(index)) {
                 index--;
             }
 
@@ -849,19 +632,14 @@ answerField.addEventFilter(
             return;
         }
 
-
         // =========================
         // RIGHT ARROW
         // =========================
-
         if (event.getCode() == KeyCode.RIGHT) {
 
             int index = activeBoxIndex + 1;
 
-            while (
-                index < typedLetters.length &&
-                revealedPositions.contains(index)
-            ) {
+            while (index < typedLetters.length &&revealedPositions.contains(index)) {
                 index++;
             }
 
@@ -878,49 +656,34 @@ answerField.addEventFilter(
         // =========================
         // ENTER
         // =========================
-
         if (event.getCode() == KeyCode.ENTER) {
-
             checkAnswer();
-
             event.consume();
         }
     }
 );
-
         // -------------------------
         // CHARACTER ANIMATIONS
         // -------------------------
-
         setupWizardAnimations();
-
-
         setupEnemy();
-
 
         // -------------------------
         // FIRST WORD
         // -------------------------
-
         generateNewWord();
-
 
         // -------------------------
         // HUD
         // -------------------------
-
         HBox hud = createHUD();
-
 
         // -------------------------
         // BATTLE AREA
         // -------------------------
-
         battleArea = new HBox();
 
-        battleArea.setAlignment(
-            Pos.CENTER
-        );
+        battleArea.setAlignment(Pos.CENTER);
 
         battleArea.setPadding(
             new Insets(
@@ -961,22 +724,13 @@ answerField.addEventFilter(
         // -------------------------
         // BATTLE ANIMATION LAYER
         // -------------------------
+        battleAnimationLayer =new StackPane();
 
-        battleAnimationLayer =
-            new StackPane();
+        battleAnimationLayer.setMouseTransparent(true);
 
-        battleAnimationLayer.setMouseTransparent(
-            true
-        );
+        battleAnimationLayer.setPickOnBounds(false);
 
-        battleAnimationLayer.setPickOnBounds(
-            false
-        );
-
-        battleAnimationLayer.setAlignment(
-            Pos.CENTER
-        );
-
+        battleAnimationLayer.setAlignment(Pos.CENTER);
 
         StackPane battleContainer = new StackPane();
         battleContainer.setAlignment(Pos.CENTER);
@@ -992,7 +746,6 @@ answerField.addEventFilter(
         // -------------------------
         // INPUT + HINT
         // -------------------------
-
         HBox inputRow = new HBox(15);
         inputRow.setAlignment(Pos.CENTER);
 
@@ -1025,12 +778,9 @@ answerField.addEventFilter(
         // -------------------------
         // BOTTOM BAR
         // -------------------------
-
         BorderPane bottomBar = new BorderPane();
 
-        bottomBar.setPadding(
-            new Insets(0, 30, 25, 30)
-        );
+        bottomBar.setPadding(new Insets(0, 30, 25, 30));
 
         Button quitButton = createQuitButton();
 
@@ -1038,7 +788,6 @@ answerField.addEventFilter(
         // -------------------------
         // ROOT
         // -------------------------
-
         BorderPane gameLayout = new BorderPane();
 
         gameLayout.setTop(hud);
@@ -1047,35 +796,22 @@ answerField.addEventFilter(
 
         gameLayout.setBottom(bottomBar);
 
-        gameLayout.setStyle(
-            "-fx-background-color: transparent;"
-        );
-
+        gameLayout.setStyle("-fx-background-color: transparent;");
 
         StackPane root = new StackPane();
 
-        ImageView backgroundImage = new ImageView(
-                new Image(
-                        getClass()
-                                .getResource("/assets/ingamebg.png")
-                                .toExternalForm()
-                )
-        );
+        ImageView backgroundImage = new ImageView(new Image(getClass().getResource("/assets/ingamebg.png").toExternalForm()));
 
         backgroundImage.setPreserveRatio(false);
         backgroundImage.setMouseTransparent(true);
 
-        backgroundImage.fitWidthProperty()
-                .bind(root.widthProperty());
+        backgroundImage.fitWidthProperty().bind(root.widthProperty());
 
-        backgroundImage.fitHeightProperty()
-                .bind(root.heightProperty());
+        backgroundImage.fitHeightProperty().bind(root.heightProperty());
 
         root.getChildren().add(backgroundImage);
 
-        root.getChildren().add(
-            gameLayout
-        );
+        root.getChildren().add(gameLayout);
 
         // -------------------------
         // BACKGROUND
@@ -1089,7 +825,6 @@ answerField.addEventFilter(
         // -------------------------
         // SCENE
         // -------------------------
-
         Scene scene = new Scene(
             root,
             900,
@@ -1100,13 +835,10 @@ answerField.addEventFilter(
 
         stage.setScene(scene);
 
-
         // -------------------------
         // START TIMER
         // -------------------------
-
         startTimer();
-
 
         // -------------------------
         // FOCUS ANSWER FIELD
@@ -1118,7 +850,6 @@ answerField.addEventFilter(
     // =========================================================
     // TOTAL HINTS
     // =========================================================
-
     private int getTotalHints() {
 
         if (difficulty.equalsIgnoreCase("Apprentice")) {
@@ -1131,7 +862,6 @@ answerField.addEventFilter(
     // =========================================================
     // END CARD WIZARD ANIMATIONS
     // =========================================================
-
     private ImageView createEndCardWizard(boolean cleared) {
 
         ImageView endWizard =new ImageView();
@@ -1200,42 +930,24 @@ answerField.addEventFilter(
     // =========================================================
     // HUD
     // =========================================================
-
     private HBox createHUD() {
 
         VBox scoreBox = new VBox(5);
 
-        scoreBox.setAlignment(
-            Pos.CENTER_LEFT
-        );
+        scoreBox.setAlignment(Pos.CENTER_LEFT);
 
-        scoreBox.getChildren().addAll(
-            scoreLabel,
-            hintsLabel
-        );
-
+        scoreBox.getChildren().addAll(scoreLabel,hintsLabel);
 
         VBox wordsBox = new VBox(5);
 
-        wordsBox.setAlignment(
-            Pos.CENTER_RIGHT
-        );
+        wordsBox.setAlignment(Pos.CENTER_RIGHT);
 
-        wordsBox.getChildren().add(
-            wordsLabel
-        );
-
+        wordsBox.getChildren().add(wordsLabel);
 
         VBox timeBox = new VBox(5);
 
         timeBox.setAlignment(Pos.CENTER_RIGHT);
         timeBox.getChildren().add(timerLabel);
-
-        /*VBox hintsBox = new VBox(5);
-
-        hintsBox.setAlignment(Pos.CENTER_RIGHT);
-        hintsBox.getChildren().add(hintsLabel);*/
-
 
         HBox rightHUD = new HBox(35);
 
@@ -1274,13 +986,11 @@ answerField.addEventFilter(
     // =========================================================
     // WIZARD ANIMATIONS
     // =========================================================
-
     private void setupWizardAnimations() {
 
         // -------------------------
         // IDLE
         // -------------------------
-
         Image idleSheet = new Image(
             new java.io.File(
                 "assets/Wizard/Idle.png"
@@ -1308,7 +1018,6 @@ answerField.addEventFilter(
         // -------------------------
         // ATTACK
         // -------------------------
-
         Image attackSheet = new Image(
             new java.io.File(
                 "assets/Wizard/Attack1.png"
@@ -1328,7 +1037,6 @@ answerField.addEventFilter(
         // -------------------------
         // HIT
         // -------------------------
-
         Image hitSheet = new Image(
             new java.io.File(
                 "assets/Wizard/Hit.png"
@@ -1346,7 +1054,6 @@ answerField.addEventFilter(
 
 
         // Start idle.
-
         wizardIdleAnimator.playLoop();
     }
 
@@ -1354,7 +1061,6 @@ answerField.addEventFilter(
     // =========================================================
     // ENEMY SETUP
     // =========================================================
-
     private void setupEnemy() {
 
         // Stop previous animations.
@@ -1370,29 +1076,21 @@ answerField.addEventFilter(
 
         // Determine enemy.
 
-        if (
-            gameLogic.getWordsFound() + 1
-            >= gameLogic.getGoal()
-        ) {
-
-            currentEnemy =
-                enemyManager.getBoss();
-
-        } else {
-
-            currentEnemy =
-                enemyManager.getRandomEnemy();
+        if (gameLogic.getWordsFound() + 1>= gameLogic.getGoal()) {
+            currentEnemy =enemyManager.getBoss();
+        } 
+        
+        else {
+            currentEnemy =enemyManager.getRandomEnemy();
         }
 
 
         // -------------------------
         // CREATE IMAGE VIEW
         // -------------------------
-
         if (enemyImageView == null) {
 
-            enemyImageView =
-                new ImageView();
+            enemyImageView =new ImageView();
 
             enemyImageView.setFitWidth(SPRITE_SIZE);
 
@@ -1401,23 +1099,19 @@ answerField.addEventFilter(
             enemyImageView.setPreserveRatio(true);
 
             // Face wizard.
-
             enemyImageView.setScaleX(-1);
         }
 
 
         enemyImageView.setVisible(true);
 
-
         // Remove any previous effect.
-
         enemyImageView.setEffect(null);
 
 
         // -------------------------
         // IDLE
         // -------------------------
-
         Image idleSheet = new Image(
             new java.io.File(
                 currentEnemy.getIdlePath()
@@ -1437,7 +1131,6 @@ answerField.addEventFilter(
         // -------------------------
         // ATTACK
         // -------------------------
-
         Image attackSheet = new Image(
             new java.io.File(
                 currentEnemy.getAttackPath()
@@ -1455,7 +1148,6 @@ answerField.addEventFilter(
 
 
         // Start idle.
-
         enemyIdleAnimator.playLoop();
     }
 
@@ -1463,11 +1155,9 @@ answerField.addEventFilter(
     // =========================================================
     // GENERATE NEW WORD
     // =========================================================
-
     private void generateNewWord() {
 
         // Stop old enemy animations.
-
         if (enemyIdleAnimator != null) {
             enemyIdleAnimator.stop();
         }
@@ -1478,9 +1168,7 @@ answerField.addEventFilter(
 
 
         // Create new enemy.
-
         setupEnemy();
-
 
         // Generate word.
         /*String scrambledWord =wordManager.generateNewWord();
@@ -1521,14 +1209,9 @@ scrambledWordLabel.setText(scrambledWord);
 
         answerField.clear();
 
-
-
-
         answerField.requestFocus();
 
-
         // Reset state.
-
         animationPlaying = false;
     }
 
@@ -1536,7 +1219,6 @@ scrambledWordLabel.setText(scrambledWord);
     // =========================================================
     // CHECK ANSWER
     // =========================================================
-
     private void checkAnswer() {
 
         // Don't accept input during animation.
@@ -1559,60 +1241,19 @@ scrambledWordLabel.setText(scrambledWord);
             return;
         }
 
-
         // -------------------------
         // CHECK ANSWER
         // -------------------------
-
-        boolean valid =
-            gameLogic.isValidGuess(
-                guess,
-                wordManager.getCurrentWord()
-            );
-
+        boolean valid = gameLogic.isValidGuess(guess,wordManager.getCurrentWord());
 
         // =====================================================
         // CORRECT
         // =====================================================
-
         if (valid) {
             
             playCorrectAnswerSound();
 
             double secondsTaken = (System.nanoTime() - wordStartTime) / 1_000_000_000.0;
-
-            /*int points = gameLogic.processCorrectGuess(guess, secondsTaken);
-
-            showFloatingScore(
-                "+" + points + " POINTS!",
-                true
-            );
-
-            messageLabel.setText(
-                "Correct! +" +
-                points +
-                " points! +10 seconds!"
-            );
-
-
-            updateLabels();
-
-
-            // Wizard attacks.
-            playWizardAttack(() -> {
-                // Enemy disappears after attack.
-                enemyImageView.setVisible(false);
-
-
-                // Level complete?
-                if (gameLogic.hasClearedLevel()) {
-                    endGame(true);
-                    return;
-                }
-
-                // Next word.
-                generateNewWord();
-            });*/
 
             int points = gameLogic.processCorrectGuess(guess, secondsTaken);
 
@@ -1672,11 +1313,10 @@ scrambledWordLabel.setText(scrambledWord);
                     " points."
                 );
 
-            } else {
-
-                messageLabel.setText(
-                    "Wrong answer! No points deducted."
-                );
+            } 
+            
+            else {
+                messageLabel.setText("Wrong answer! No points deducted.");
             }
 
             updateLabels();
@@ -1881,44 +1521,9 @@ scrambledWordLabel.setText(scrambledWord);
         }
     }
 
-    /*private void startCursorBlink() {
-
-        if (cursorTimeline != null) {
-            cursorTimeline.stop();
-        }
-
-        cursorVisible = true;
-
-        updateActiveBox();
-
-        cursorTimeline = new Timeline(
-            new KeyFrame(
-                Duration.millis(500),
-                event -> {
-
-                    cursorVisible = !cursorVisible;
-
-                    updateActiveBox();
-                }
-            )
-        );
-
-        cursorTimeline.setCycleCount(
-            Timeline.INDEFINITE
-        );
-
-        cursorTimeline.play();
-    }*/
-
-    /*private void startCursorBlink() {
-
-        updateActiveBox();
-    }*/
-
     private void moveToNextAvailableBox() {
 
-        String currentWord =
-            wordManager.getCurrentWord();
+        String currentWord =wordManager.getCurrentWord();
 
         while (
             activeBoxIndex < currentWord.length() &&
@@ -2012,31 +1617,23 @@ scrambledWordLabel.setText(scrambledWord);
             }
         );
 
-
         firstFlash.play();
     }
-
 
     // =========================================================
     // WIZARD ATTACK
     // =========================================================
 
-    private void playWizardAttack(
-        Runnable onFinished
-    ) {
+    private void playWizardAttack(Runnable onFinished) {
 
         animationPlaying = true;
 
-
         // Stop idle.
-
         if (wizardIdleAnimator != null) {
             wizardIdleAnimator.stop();
         }
 
-
         // Play attack.
-
         wizardAttackAnimator.playOnce(
             () -> {
 
@@ -2044,11 +1641,8 @@ scrambledWordLabel.setText(scrambledWord);
 
                 animationPlaying = false;
 
-
                 if (onFinished != null) {
-
                     onFinished.run();
-
                 }
 
             }
@@ -2058,11 +1652,7 @@ scrambledWordLabel.setText(scrambledWord);
         // -----------------------------------------------------
         // ENEMY HIT
         // -----------------------------------------------------
-
-        int attackDuration =
-            8 *
-            WIZARD_ATTACK_FRAME_DURATION;
-
+        int attackDuration = 8 *WIZARD_ATTACK_FRAME_DURATION;
 
         int hitDelay =
             attackDuration -
@@ -2099,28 +1689,21 @@ scrambledWordLabel.setText(scrambledWord);
             }
         );
 
-
         hit.play();
     }
 
     // =========================================================
     // ENEMY ATTACK
     // =========================================================
-
-    private void playEnemyAttack(
-        Runnable onFinished
-    ) {
+    private void playEnemyAttack(Runnable onFinished) {
 
         // Stop enemy idle.
-
         if (enemyIdleAnimator != null) {
             enemyIdleAnimator.stop();
         }
 
-
         // Track whether each animation
         // has completed.
-
         final boolean[] attackFinished = {
             false
         };
@@ -2136,26 +1719,15 @@ scrambledWordLabel.setText(scrambledWord);
         Runnable finishAttack =
             () -> {
 
-                if (
-                    attackFinished[0]
-                    && hitFinished[0]
-                ) {
+                if (attackFinished[0]&& hitFinished[0]) {
 
-                    if (
-                        enemyIdleAnimator != null
-                    ) {
-
+                    if (enemyIdleAnimator != null) {
                         enemyIdleAnimator.playLoop();
-
                     }
 
 
-                    if (
-                        onFinished != null
-                    ) {
-
+                    if (onFinished != null) {
                         onFinished.run();
-
                     }
                 }
             };
@@ -2164,14 +1736,10 @@ scrambledWordLabel.setText(scrambledWord);
         // -----------------------------------------------------
         // ENEMY ATTACK
         // -----------------------------------------------------
-
         enemyAttackAnimator.playOnce(
             () -> {
-
                 attackFinished[0] = true;
-
                 finishAttack.run();
-
             }
         );
 
@@ -2179,15 +1747,8 @@ scrambledWordLabel.setText(scrambledWord);
         // -----------------------------------------------------
         // HIT TIMING
         // -----------------------------------------------------
-
-        int attackFrames =
-            currentEnemy.getAttackFrames();
-
-
-        int attackDuration =
-            attackFrames *
-            ENEMY_ATTACK_FRAME_DURATION;
-
+        int attackFrames = currentEnemy.getAttackFrames();
+        int attackDuration = attackFrames *ENEMY_ATTACK_FRAME_DURATION;
 
         int hitDelay =
             attackDuration -
@@ -2216,34 +1777,20 @@ scrambledWordLabel.setText(scrambledWord);
             event -> {
 
                 // Flash wizard red.
-
-                flashRed(
-                    wizardImageView
-                );
-
+                flashRed(wizardImageView);
 
                 // Stop wizard idle.
-
-                if (
-                    wizardIdleAnimator != null
-                ) {
-
+                if (wizardIdleAnimator != null) {
                     wizardIdleAnimator.stop();
-
                 }
 
 
                 // Play wizard hit.
-
                 wizardHitAnimator.playOnce(
                     () -> {
 
                         wizardIdleAnimator.playLoop();
-
-
                         hitFinished[0] = true;
-
-
                         finishAttack.run();
 
                     }
@@ -2256,11 +1803,9 @@ scrambledWordLabel.setText(scrambledWord);
         hit.play();
     }
 
-
     // =========================================================
     // GAME TIMER
     // =========================================================
-
     private void startTimer() {
 
         timeline =
@@ -2273,11 +1818,7 @@ scrambledWordLabel.setText(scrambledWord);
 
                         updateTimer();
 
-
-                        if (
-                            gameLogic.isTimeUp()
-                        ) {
-
+                        if (gameLogic.isTimeUp()) {
                             endGame(false);
 
                         }
@@ -2285,13 +1826,7 @@ scrambledWordLabel.setText(scrambledWord);
                     }
                 )
             );
-
-
-        timeline.setCycleCount(
-            Timeline.INDEFINITE
-        );
-
-
+        timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
 
@@ -2299,7 +1834,6 @@ scrambledWordLabel.setText(scrambledWord);
     // =========================================================
     // UPDATE LABELS
     // =========================================================
-
     private void updateLabels() {
 
         scoreLabel.setText("Score: " +gameLogic.getScore());
@@ -2312,7 +1846,6 @@ scrambledWordLabel.setText(scrambledWord);
     // =========================================================
     // TEXT SHADOW
     // =========================================================
-
     private DropShadow createTextShadow() {
 
         DropShadow shadow = new DropShadow();
@@ -2321,13 +1854,9 @@ scrambledWordLabel.setText(scrambledWord);
         shadow.setSpread(0.35);
         shadow.setOffsetX(2);
         shadow.setOffsetY(2);
-        shadow.setColor(
-            Color.rgb(0, 0, 0, 0.85)
-        );
-
+        shadow.setColor(Color.rgb(0, 0, 0, 0.85));
         return shadow;
     }
-
 
     // =========================================================
     // FLOATING DAMAGE TEXT
@@ -2341,7 +1870,6 @@ scrambledWordLabel.setText(scrambledWord);
         // -------------------------
         // TEXT STYLE
         // -------------------------
-
         floatingLabel.setFont(
             Font.font(
                 "Georgia",
@@ -2371,28 +1899,14 @@ scrambledWordLabel.setText(scrambledWord);
         // -------------------------
         // INITIAL STATE
         // -------------------------
-
-        floatingLabel.setOpacity(
-            0
-        );
-
-        floatingLabel.setScaleX(
-            0.7
-        );
-
-        floatingLabel.setScaleY(
-            0.7
-        );
-
-        floatingLabel.setTranslateY(
-            10
-        );
-
+        floatingLabel.setOpacity(0);
+        floatingLabel.setScaleX(0.7);
+        floatingLabel.setScaleY(0.7);
+        floatingLabel.setTranslateY(10);
 
         // -------------------------
         // ADD TO BATTLE AREA
         // -------------------------
-
         battleAnimationLayer
             .getChildren()
             .add(
@@ -2410,14 +1924,8 @@ scrambledWordLabel.setText(scrambledWord);
                 floatingLabel
             );
 
-        fadeIn.setFromValue(
-            0
-        );
-
-        fadeIn.setToValue(
-            1
-        );
-
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
 
         ScaleTransition scaleUp =
             new ScaleTransition(
@@ -2425,22 +1933,10 @@ scrambledWordLabel.setText(scrambledWord);
                 floatingLabel
             );
 
-        scaleUp.setFromX(
-            0.7
-        );
-
-        scaleUp.setFromY(
-            0.7
-        );
-
-        scaleUp.setToX(
-            1.0
-        );
-
-        scaleUp.setToY(
-            1.0
-        );
-
+        scaleUp.setFromX(0.7);
+        scaleUp.setFromY(0.7);
+        scaleUp.setToX(1.0);
+        scaleUp.setToY(1.0);
 
         // -------------------------
         // FLOAT UPWARD
@@ -2452,14 +1948,8 @@ scrambledWordLabel.setText(scrambledWord);
                 floatingLabel
             );
 
-        rise.setFromY(
-            10
-        );
-
-        rise.setToY(
-            -70
-        );
-
+        rise.setFromY(10);
+        rise.setToY(-70);
 
         // -------------------------
         // FADE OUT
@@ -2471,18 +1961,11 @@ scrambledWordLabel.setText(scrambledWord);
                 floatingLabel
             );
 
-        fadeOut.setFromValue(
-            1
-        );
+        fadeOut.setFromValue(1);
 
-        fadeOut.setToValue(
-            0
-        );
+        fadeOut.setToValue(0);
 
-        fadeOut.setDelay(
-            Duration.millis(400)
-        );
-
+        fadeOut.setDelay(Duration.millis(400));
 
         // -------------------------
         // APPEAR ANIMATION
@@ -2498,7 +1981,6 @@ scrambledWordLabel.setText(scrambledWord);
         // -------------------------
         // FLOAT + FADE
         // -------------------------
-
         ParallelTransition floatAndFade =
             new ParallelTransition(
                 rise,
@@ -2509,7 +1991,6 @@ scrambledWordLabel.setText(scrambledWord);
         // -------------------------
         // START FLOATING
         // -------------------------
-
         appear.setOnFinished(
             event -> {
 
@@ -2540,18 +2021,12 @@ scrambledWordLabel.setText(scrambledWord);
     }
 
     private void updateTimer() {
-
-        timerLabel.setText(
-            "Time: " +
-            gameLogic.getRemainingTime()
-        );
+        timerLabel.setText("Time: " +gameLogic.getRemainingTime());
     }
-
 
     // =========================================================
     // QUIT BUTTON
     // =========================================================
-
         private Button createQuitButton() {
 
             Button quitButton = new Button("QUIT");
@@ -2616,14 +2091,11 @@ scrambledWordLabel.setText(scrambledWord);
             return quitButton;
         }
 
-
         // =========================================================
         // QUIT CONFIRMATION
         // =========================================================
-
         private void showQuitConfirmation() {
-
-                if (gamePaused) {
+            if (gamePaused) {
             return;
 
         }
@@ -2657,24 +2129,18 @@ scrambledWordLabel.setText(scrambledWord);
             enemyAttackAnimator.pause();
         }
 
-        
             // =========================================
             // OVERLAY
             // =========================================
-
             StackPane overlayRoot = new StackPane();
 
             overlayRoot.setPickOnBounds(true);
 
-            overlayRoot.setStyle(
-                "-fx-background-color: rgba(0, 0, 0, 0.65);"
-            );
-
+            overlayRoot.setStyle("-fx-background-color: rgba(0, 0, 0, 0.65);");
 
             // =========================================
             // POPUP
             // =========================================
-
             VBox popup = new VBox(18);
 
             popup.setAlignment(Pos.CENTER);
@@ -2703,10 +2169,7 @@ scrambledWordLabel.setText(scrambledWord);
             // =========================================
             // TITLE
             // =========================================
-
-            Label titleLabel = new Label(
-                "QUIT THE RUN?"
-            );
+            Label titleLabel = new Label("QUIT THE RUN?");
 
             titleLabel.setFont(
                 Font.font(
@@ -2716,10 +2179,7 @@ scrambledWordLabel.setText(scrambledWord);
                 )
             );
 
-            titleLabel.setTextFill(
-                Color.web("#F5E6C8")
-            );
-
+            titleLabel.setTextFill(Color.web("#F5E6C8"));
 
             // =========================================
             // MESSAGE
@@ -2737,25 +2197,14 @@ scrambledWordLabel.setText(scrambledWord);
                 )
             );
 
-            messageLabel.setTextFill(
-                Color.LIGHTGRAY
-            );
-
-            messageLabel.setAlignment(
-                Pos.CENTER
-            );
-
-            messageLabel.setTextAlignment(
-                javafx.scene.text.TextAlignment.CENTER
-            );
-
+            messageLabel.setTextFill(Color.LIGHTGRAY);
+            messageLabel.setAlignment(Pos.CENTER);
+            messageLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
             // =========================================
             // CANCEL
             // =========================================
-
-            Button cancelButton =
-                new Button("CANCEL");
+            Button cancelButton =new Button("CANCEL");
 
             cancelButton.setPrefWidth(125);
             cancelButton.setPrefHeight(42);
@@ -2768,9 +2217,7 @@ scrambledWordLabel.setText(scrambledWord);
                 )
             );
 
-            cancelButton.setTextFill(
-                Color.web("#F5E6C8")
-            );
+            cancelButton.setTextFill(Color.web("#F5E6C8"));
 
             cancelButton.setStyle(
                 "-fx-background-color: #3A4863;" +
@@ -2784,9 +2231,7 @@ scrambledWordLabel.setText(scrambledWord);
             // =========================================
             // QUIT
             // =========================================
-
-            Button confirmQuitButton =
-                new Button("QUIT");
+            Button confirmQuitButton = new Button("QUIT");
 
             confirmQuitButton.setPrefWidth(125);
             confirmQuitButton.setPrefHeight(42);
@@ -2867,7 +2312,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             });
 
-
             // =========================================
             // BUTTON ACTIONS
             // =========================================
@@ -2878,9 +2322,7 @@ scrambledWordLabel.setText(scrambledWord);
                 StackPane root =
                     (StackPane) stage.getScene().getRoot();
 
-                root.getChildren().remove(
-                    overlayRoot
-                );
+                root.getChildren().remove(overlayRoot);
 
                  // Resume the game
                     gamePaused = false;
@@ -2919,12 +2361,13 @@ scrambledWordLabel.setText(scrambledWord);
 
             });
 
+<<<<<<< HEAD
             addButtonSounds(cancelButton);
 
+=======
+>>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
             confirmQuitButton.setOnAction(event -> {
-
                 quitGame();
-
             });
 
             addButtonSounds(confirmQuitButton);
@@ -2932,12 +2375,9 @@ scrambledWordLabel.setText(scrambledWord);
             // =========================================
             // BUILD POPUP
             // =========================================
-
             HBox buttonBox = new HBox(15);
 
-            buttonBox.setAlignment(
-                Pos.CENTER
-            );
+            buttonBox.setAlignment(Pos.CENTER);
 
             buttonBox.getChildren().addAll(
                 cancelButton,
@@ -2954,19 +2394,12 @@ scrambledWordLabel.setText(scrambledWord);
                 popup
             );
 
-
             // =========================================
             // SHOW
             // =========================================
-
-            StackPane root =
-                (StackPane) stage.getScene().getRoot();
-
-            root.getChildren().add(
-                overlayRoot
-            );
+            StackPane root =(StackPane) stage.getScene().getRoot();
+            root.getChildren().add(overlayRoot);
         }
-
 
     // =========================================================
     // QUIT GAME
@@ -3003,12 +2436,7 @@ scrambledWordLabel.setText(scrambledWord);
             enemyAttackAnimator.stop();
         }
 
-
-        MainMenu mainMenu =
-            new MainMenu(
-                stage
-            );
-
+        MainMenu mainMenu =new MainMenu(stage);
 
         mainMenu.show();
     }
@@ -3018,12 +2446,9 @@ scrambledWordLabel.setText(scrambledWord);
     // END GAME
     // =========================================================
 
-    private void endGame(
-        boolean cleared
-    ) {
+    private void endGame(boolean cleared) {
 
         MusicManager.playEndMusic(cleared);
-
         // =====================================================
         // STOP GAME TIMER
         // =====================================================
@@ -3061,50 +2486,33 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // PREVENT FURTHER INPUT
         // =====================================================
-
         animationPlaying = true;
-
 
         // =====================================================
         // CALCULATE FINAL SCORE
         // =====================================================
-
-        int finalScore =
-            gameLogic.calculateFinalScore();
-
+        int finalScore = gameLogic.calculateFinalScore();
 
         // =====================================================
         // SAVE SCORE
         // =====================================================
-
         PlayerScore playerScore =
             new PlayerScore(
                 difficulty,
                 finalScore
             );
 
-
-        ScoreManager scoreManager =
-            new ScoreManager();
-
-
-        scoreManager.saveScore(
-            playerScore
-        );
-
+        ScoreManager scoreManager = new ScoreManager();
+        scoreManager.saveScore(playerScore);
 
         // =====================================================
         // END CARD ROOT
         // =====================================================
-
-        StackPane endRoot =
-            new StackPane();
-
+        StackPane endRoot =new StackPane();
 
         // =====================================================
         // END CARD BACKGROUND
         // =====================================================
-
         Image endBackgroundImage;
 
         if (cleared) {
@@ -3128,70 +2536,40 @@ scrambledWordLabel.setText(scrambledWord);
                 );
         }
 
-
-        ImageView endBackground =
-            new ImageView(
-                endBackgroundImage
-            );
+        ImageView endBackground =new ImageView(endBackgroundImage);
 
         endBackground.setPreserveRatio(false);
         endBackground.setMouseTransparent(true);
 
         // Make background fill the entire end screen
-        endBackground.fitWidthProperty().bind(
-            endRoot.widthProperty()
-        );
-
-        endBackground.fitHeightProperty().bind(
-            endRoot.heightProperty()
-        );
-
+        endBackground.fitWidthProperty().bind(endRoot.widthProperty());
+        endBackground.fitHeightProperty().bind(endRoot.heightProperty());
 
         // =====================================================
         // DARK OVERLAY
         // =====================================================
+        Region overlay =new Region();
 
-        Region overlay =
-            new Region();
-
-        overlay.setStyle(
-            "-fx-background-color: rgba(0, 0, 0, 0.30);"
-        );
-
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.30);");
 
         // =====================================================
         // END CARD CONTENT
         // =====================================================
-
-        VBox endContent =
-            new VBox(20);
-
-        endContent.setAlignment(
-            Pos.CENTER
-        );
-
+        VBox endContent =new VBox(20);
+        endContent.setAlignment(Pos.CENTER);
 
         // =====================================================
         // TITLE
         // =====================================================
-
         Label titleLabel;
 
         if (cleared) {
-
-            titleLabel =
-                new Label(
-                    "ESCAPED THE DUNGEON!"
-                );
-
-        } else {
-
-            titleLabel =
-                new Label(
-                    "TIME HAS RUN OUT!"
-                );
+            titleLabel =new Label("ESCAPED THE DUNGEON!");
+        } 
+        
+        else {
+            titleLabel =new Label("TIME HAS RUN OUT!");
         }
-
 
         titleLabel.setFont(
             Font.font(
@@ -3201,11 +2579,7 @@ scrambledWordLabel.setText(scrambledWord);
             )
         );
 
-
-        titleLabel.setTextFill(
-            Color.web("#F5E6C8")
-        );
-
+        titleLabel.setTextFill(Color.web("#F5E6C8"));
 
         titleLabel.setEffect(
             new DropShadow(
@@ -3223,7 +2597,6 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // WIZARD
         // =====================================================
-
         ImageView endWizard =
             createEndCardWizard(
                 cleared
@@ -3233,7 +2606,6 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // FINAL SCORE
         // =====================================================
-
         Label finalScoreLabel =
             new Label(
                 "Final Score: " +
@@ -3250,40 +2622,26 @@ scrambledWordLabel.setText(scrambledWord);
         );
 
 
-        finalScoreLabel.setTextFill(
-            Color.WHITE
-        );
-
+        finalScoreLabel.setTextFill(Color.WHITE);
 
         // =====================================================
         // BUTTON CONTAINER
         // =====================================================
+        VBox buttonBox =new VBox(12);
 
-        VBox buttonBox =
-            new VBox(12);
-
-        buttonBox.setAlignment(
-            Pos.CENTER
-        );
-
+        buttonBox.setAlignment(Pos.CENTER);
 
         // =====================================================
         // PLAY AGAIN
         // =====================================================
-
         Button playAgainButton =
             new Button(
                 "PLAY AGAIN"
             );
 
+        playAgainButton.setPrefWidth(200);
 
-        playAgainButton.setPrefWidth(
-            200
-        );
-
-        playAgainButton.setPrefHeight(
-            45
-        );
+        playAgainButton.setPrefHeight(45);
 
         playAgainButton.setFont(
             Font.font(
@@ -3293,10 +2651,7 @@ scrambledWordLabel.setText(scrambledWord);
             )
         );
 
-        playAgainButton.setTextFill(
-            Color.web("#F5E6C8")
-        );
-
+        playAgainButton.setTextFill(Color.web("#F5E6C8"));
 
         playAgainButton.setStyle(
             "-fx-background-color: #3A263F;" +
@@ -3307,24 +2662,14 @@ scrambledWordLabel.setText(scrambledWord);
             
         );
 
-
         // =====================================================
         // MAIN MENU
         // =====================================================
+        Button menuButton =new Button("MAIN MENU");
 
-        Button menuButton =
-            new Button(
-                "MAIN MENU"
-            );
+        menuButton.setPrefWidth(200);
 
-
-        menuButton.setPrefWidth(
-            200
-        );
-
-        menuButton.setPrefHeight(
-            45
-        );
+        menuButton.setPrefHeight(45);
 
         menuButton.setFont(
             Font.font(
@@ -3334,10 +2679,7 @@ scrambledWordLabel.setText(scrambledWord);
             )
         );
 
-        menuButton.setTextFill(
-            Color.web("#F5E6C8")
-        );
-
+        menuButton.setTextFill(Color.web("#F5E6C8"));
 
         menuButton.setStyle(
             "-fx-background-color: #3A263F;" +
@@ -3352,7 +2694,6 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // BUTTON HOVER
         // =====================================================
-
         playAgainButton.setOnMouseEntered(
             event -> {
 
@@ -3368,7 +2709,6 @@ scrambledWordLabel.setText(scrambledWord);
             }
         );
 
-
         playAgainButton.setOnMouseExited(
             event -> {
 
@@ -3383,7 +2723,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             }
         );
-
 
         menuButton.setOnMouseEntered(
             event -> {
@@ -3420,7 +2759,6 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // PLAY AGAIN ACTION
         // =====================================================
-
         playAgainButton.setOnAction(
             event -> {
 
@@ -3480,17 +2818,11 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // BUILD BUTTON AREA
         // =====================================================
-
-        buttonBox.getChildren().addAll(
-            playAgainButton,
-            menuButton
-        );
-
+        buttonBox.getChildren().addAll(playAgainButton,menuButton);
 
         // =====================================================
         // BUILD END CARD
         // =====================================================
-
         endContent.getChildren().addAll(
             titleLabel,
             endWizard,
@@ -3498,22 +2830,18 @@ scrambledWordLabel.setText(scrambledWord);
             buttonBox
         );
 
-
         // =====================================================
         // ADD TO ROOT
         // =====================================================
-
         endRoot.getChildren().addAll(
             endBackground,
             overlay,
             endContent
         );
 
-
         // =====================================================
         // REPLACE ENTIRE GAME SCREEN
         // =====================================================
-
         Scene endScene =
             new Scene(
                 endRoot,
@@ -3521,10 +2849,14 @@ scrambledWordLabel.setText(scrambledWord);
                 600
             );
 
+<<<<<<< HEAD
             CursorManager.setCustomCursor(endScene);
 
         stage.setScene(
             endScene
         );
+=======
+        stage.setScene(endScene);
+>>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
     }
 }

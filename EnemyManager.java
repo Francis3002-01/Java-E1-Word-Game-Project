@@ -1,23 +1,18 @@
 import java.util.Random;
 
 public class EnemyManager {
-
+    
     private Enemy[] enemies;
-
     private Enemy boss;
-
     private Random random;
-
 
     public EnemyManager() {
 
         random = new Random();
 
-
         // ==========================================
         // NORMAL ENEMIES
         // ==========================================
-
         Enemy bat = new Enemy(
             "Bat",
             "assets/Enemies/Bat/fly.png",
@@ -101,7 +96,6 @@ public class EnemyManager {
 
         };
 
-
         // ==========================================
         // BOSS
         // ==========================================
@@ -119,22 +113,15 @@ public class EnemyManager {
     // ==========================================
     // GET RANDOM NORMAL ENEMY
     // ==========================================
-
     public Enemy getRandomEnemy() {
-
-        int index =
-                random.nextInt(enemies.length);
-
+        int index = random.nextInt(enemies.length);
         return enemies[index];
     }
-
 
     // ==========================================
     // GET BOSS
     // ==========================================
-
     public Enemy getBoss() {
-
         return boss;
     }
 }

@@ -24,11 +24,8 @@ public class ScoreManager {
             try {
 
                 // Load existing high scores
-                PlayerScore apprenticeScore =
-                        getHighScore("Apprentice");
-
-                PlayerScore sorcererScore =
-                        getHighScore("Sorcerer");
+                PlayerScore apprenticeScore =getHighScore("Apprentice");
+                PlayerScore sorcererScore =getHighScore("Sorcerer");
 
                 // Replace the appropriate high score
                 if (playerScore.getDifficulty()
@@ -36,9 +33,9 @@ public class ScoreManager {
 
                     apprenticeScore = playerScore;
 
-                } else if (playerScore.getDifficulty()
-                        .equalsIgnoreCase("Sorcerer")) {
-
+                } 
+                
+                else if (playerScore.getDifficulty().equalsIgnoreCase("Sorcerer")) {
                     sorcererScore = playerScore;
                 }
 
@@ -48,33 +45,20 @@ public class ScoreManager {
                         );
 
                 if (apprenticeScore != null) {
-
-                    writer.write(
-                            "Apprentice|"
-                            + apprenticeScore.getScore()
-                    );
-
+                    writer.write("Apprentice|"+ apprenticeScore.getScore());
                     writer.newLine();
                 }
 
                 if (sorcererScore != null) {
-
-                    writer.write(
-                            "Sorcerer|"
-                            + sorcererScore.getScore()
-                    );
-
+                    writer.write("Sorcerer|"+ sorcererScore.getScore());
                     writer.newLine();
                 }
 
                 writer.close();
-
-            } catch (IOException e) {
-
-                System.out.println(
-                        "Error saving score: "
-                        + e.getMessage()
-                );
+            } 
+            
+            catch (IOException e) {
+                System.out.println("Error saving score: "+ e.getMessage());
             }
         }
     }
@@ -122,18 +106,15 @@ public class ScoreManager {
 
             reader.close();
 
-        } catch (IOException e) {
+        } 
+        
+        catch (IOException e) {
+            System.out.println("Error loading score: "+ e.getMessage());
 
-            System.out.println(
-                    "Error loading score: "
-                    + e.getMessage()
-            );
-
-        } catch (NumberFormatException e) {
-
-            System.out.println(
-                    "Invalid score found in scores.txt."
-            );
+        } 
+        
+        catch (NumberFormatException e) {
+            System.out.println("Invalid score found in scores.txt.");
         }
 
         return null;
