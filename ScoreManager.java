@@ -32,12 +32,12 @@ public class ScoreManager {
 
                 // Replace the appropriate high score
                 if (playerScore.getDifficulty()
-                        .equals("Apprentice")) {
+                        .equalsIgnoreCase("Apprentice")) {
 
                     apprenticeScore = playerScore;
 
                 } else if (playerScore.getDifficulty()
-                        .equals("Sorcerer")) {
+                        .equalsIgnoreCase("Sorcerer")) {
 
                     sorcererScore = playerScore;
                 }
@@ -104,17 +104,19 @@ public class ScoreManager {
                         line.split("\\|");
 
                 if (parts.length == 2 &&
-                        parts[0].equals(difficulty)) {
+                        parts[0].equalsIgnoreCase(difficulty)) {
 
-                    int score =
-                            Integer.parseInt(parts[1]);
+                        int score = Math.max(
+                                0,
+                                Integer.parseInt(parts[1])
+                        );
 
-                    reader.close();
+                        reader.close();
 
-                    return new PlayerScore(
-                            difficulty,
-                            score
-                    );
+                        return new PlayerScore(
+                                difficulty,
+                                score
+                        );
                 }
             }
 

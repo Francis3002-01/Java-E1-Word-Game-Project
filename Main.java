@@ -2,14 +2,18 @@ import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.image.Image;
 
 
 public class Main extends Application {
-
+    
     @Override
     public void start(Stage stage) {
 
         stage.setTitle("Wizard's Escape");
+        stage.getIcons().add(
+            new Image("file:assets/wizard_logo.png")
+        );
 
         stage.setResizable(true);
 
@@ -47,5 +51,6 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+
     }
 }

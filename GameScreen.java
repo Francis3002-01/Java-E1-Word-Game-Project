@@ -1,24 +1,52 @@
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorInput;
+import javafx.scene.effect.DropShadow;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
 import javafx.scene.paint.Color;
+
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
 import javafx.stage.Stage;
+
 import javafx.util.Duration;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
 
 public class GameScreen {
 
@@ -29,46 +57,58 @@ public class GameScreen {
     private WordManager wordManager;
     private EnemyManager enemyManager;
 
+
     // =========================
     // UI ELEMENTS
     // =========================
-
     private Label difficultyLabel;
     private Label scoreLabel;
     private Label wordsLabel;
     private Label timerLabel;
+    private Label hintsLabel;
     private Label scrambledWordLabel;
     private Label messageLabel;
-
     private TextField answerField;
-    private Button submitButton;
+    private Button hintButton;
+
+    /*private String revealedLetters = "";
+    private StackPane answerInputContainer;
+    private HBox animatedLetters;*/
+
+
+    private final Set<Integer> revealedPositions = new HashSet<>();
+    private StackPane answerInputContainer;
+    private HBox animatedLetters;
+    private int activeBoxIndex = 0;
+    private char[] typedLetters;
+
+
+    //private Timeline cursorTimeline;
+    //private boolean cursorVisible = true;
 
     // =========================
     // GAME TIMER
     // =========================
-
     private Timeline timeline;
 
     // =========================
     // WIZARD
     // =========================
-
     private ImageView wizardImageView;
-
     private SpriteAnimator wizardIdleAnimator;
     private SpriteAnimator wizardAttackAnimator;
     private SpriteAnimator wizardHitAnimator;
+    private SpriteAnimator wizardDeathAnimator;
+    private SpriteAnimator wizardRunAnimator;
 
     // =========================
     // ENEMY
     // =========================
-
     private ImageView enemyImageView;
-
     private SpriteAnimator enemyIdleAnimator;
     private SpriteAnimator enemyAttackAnimator;
-
     private Enemy currentEnemy;
+
 
     // =========================
     // BATTLE AREA
@@ -76,11 +116,39 @@ public class GameScreen {
 
     private HBox battleArea;
 
+    private StackPane battleAnimationLayer;
+
     // =========================
     // STATE
     // =========================
 
     private boolean animationPlaying = false;
+
+    private boolean gamePaused = false;
+
+    // =========================
+    // ANIMATION SETTINGS
+    // =========================
+
+    private static final int WIZARD_ATTACK_FRAME_DURATION = 200;
+
+    private static final int ENEMY_ATTACK_FRAME_DURATION = 100;
+
+    private static final int HIT_TRIGGER_FRAMES = 2;
+
+    // =========================
+    // SPRITE DISPLAY SETTINGS
+    // =========================
+
+    private static final double SPRITE_SIZE = 240;
+    private static final double END_CARD_SPRITE_SIZE = 220;
+
+    private long wordStartTime;
+
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
 
     public GameScreen(Stage stage, String difficulty) {
 
@@ -92,11 +160,14 @@ public class GameScreen {
         enemyManager = new EnemyManager();
     }
 
+
     // =========================================================
     // SHOW GAME SCREEN
     // =========================================================
 
     public void show() {
+
+        MusicManager.playGameMusic();
 
         // -------------------------
         // DIFFICULTY
@@ -107,24 +178,37 @@ public class GameScreen {
         );
 
         difficultyLabel.setFont(
-            Font.font("Serif", 24)
+            Font.font("Georgia", 24)
         );
 
-        difficultyLabel.setTextFill(Color.WHITE);
+        difficultyLabel.setTextFill(
+            Color.WHITE
+        );
+
+        difficultyLabel.setEffect(
+            createTextShadow()
+        );
 
 
         // -------------------------
         // SCORE
         // -------------------------
 
-        scoreLabel = new Label("Score: 0");
+        scoreLabel = new Label(
+            "Score: 0"
+        );
 
         scoreLabel.setFont(
             Font.font("Arial", 18)
         );
 
-        scoreLabel.setTextFill(Color.WHITE);
+        scoreLabel.setTextFill(
+            Color.WHITE
+        );
 
+        scoreLabel.setEffect(
+            createTextShadow()
+        );
 
         // -------------------------
         // WORDS
@@ -139,113 +223,605 @@ public class GameScreen {
             Font.font("Arial", 18)
         );
 
-        wordsLabel.setTextFill(Color.WHITE);
+        wordsLabel.setTextFill(
+            Color.WHITE
+        );
 
+        wordsLabel.setEffect(
+            createTextShadow()
+        );
 
         // -------------------------
         // TIMER
         // -------------------------
-
-        timerLabel = new Label(
-            "Time: " +
-            gameLogic.getRemainingTime()
-        );
-
-        timerLabel.setFont(
-            Font.font("Arial", 18)
-        );
-
+        timerLabel = new Label("Time: " +gameLogic.getRemainingTime());
+        timerLabel.setFont(Font.font("Arial", 18));
         timerLabel.setTextFill(Color.WHITE);
 
+        timerLabel.setEffect(
+            createTextShadow()
+        );
+
+        // -------------------------
+        // HINTS
+        // -------------------------
+        hintsLabel = new Label(
+            "Hints: " +
+            gameLogic.getHintsRemaining() +
+            "/" +
+            getTotalHints()
+        );
+
+        hintsLabel.setFont(Font.font("Arial", 18));
+        hintsLabel.setTextFill(Color.WHITE);
+
+        hintsLabel.setEffect(
+            createTextShadow()
+        );
+
+        // -------------------------
+        // HINT BUTTON
+        // -------------------------
+
+        hintButton = new Button("HINT");
+
+        hintButton.setPrefWidth(100);
+        hintButton.setPrefHeight(40);
+
+        hintButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                14
+            )
+        );
+
+        hintButton.setTextFill(
+            Color.web("#F5E6C8")
+        );
+
+        hintButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
+
+        hintButton.setOnMouseEntered(event -> {
+
+            hintButton.setStyle(
+                "-fx-background-color: #503451;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #D6B878;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+        });
+
+        hintButton.setOnMouseExited(event -> {
+
+            hintButton.setStyle(
+                "-fx-background-color: #3A263F;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+        });
 
         // -------------------------
         // SCRAMBLED WORD
         // -------------------------
-
         scrambledWordLabel = new Label();
+        scrambledWordLabel.setFont(Font.font("Palatino Linotype", 42));
+        scrambledWordLabel.setTextFill(Color.WHITE);
+        scrambledWordLabel.setTranslateY(60);
 
-        scrambledWordLabel.setFont(
-            Font.font("Serif", 42)
+        DropShadow wordShadow = new DropShadow();
+
+            wordShadow.setRadius(8);
+            wordShadow.setSpread(0.45);
+            wordShadow.setOffsetX(3);
+            wordShadow.setOffsetY(3);
+            wordShadow.setColor(
+                Color.rgb(0, 0, 0, 0.9)
+            );
+
+            scrambledWordLabel.setEffect(wordShadow);
+
+        // -------------------------
+        // MESSAGE LABEL
+        // -------------------------
+
+        messageLabel = new Label();
+
+        messageLabel.setFont(
+            Font.font(
+                "Arial",
+                16
+            )
         );
 
-        scrambledWordLabel.setTextFill(Color.WHITE);
+        messageLabel.setTextFill(
+            Color.WHITE
+        );
 
+        messageLabel.setEffect(
+            createTextShadow()
+        );
+
+        messageLabel.setAlignment(
+            Pos.CENTER
+        );
+
+        messageLabel.setTranslateY(60);
+
+        messageLabel.setMinHeight(25);
 
         // -------------------------
         // ANSWER FIELD
         // -------------------------
-
         answerField = new TextField();
-
-        answerField.setPromptText(
-            "Enter your answer"
-        );
-
-        answerField.setMaxWidth(300);
-
-        answerField.setPrefHeight(45);
-
-        answerField.setFont(
-            Font.font("Arial", 18)
-        );
-
+        answerField.setMaxWidth(1);
+        answerField.setPrefWidth(1);
+        answerField.setPrefHeight(1);
+        answerField.setOpacity(0);
 
         // -------------------------
-        // SUBMIT BUTTON
+        // ANIMATED LETTER DISPLAY
         // -------------------------
-
-        submitButton = new Button("SUBMIT");
-
-        submitButton.setPrefWidth(200);
-
-        submitButton.setPrefHeight(45);
-
-        submitButton.setFont(
-            Font.font("Arial", 18)
-        );
-
+        animatedLetters = new HBox(3);
+        animatedLetters.setAlignment(Pos.CENTER);
+        animatedLetters.setMouseTransparent(false);
 
         // -------------------------
-        // MESSAGE
+        // INPUT CONTAINER
         // -------------------------
+        answerInputContainer = new StackPane();
+        answerInputContainer.setMaxWidth(300);
+        answerInputContainer.setPrefHeight(45);
 
-        messageLabel = new Label(
-            "Unscramble the word!"
-        );
+        // Dark transparent TextField.
 
-        messageLabel.setFont(
-            Font.font("Arial", 16)
-        );
-
-        messageLabel.setTextFill(
-            Color.LIGHTGRAY
+        answerField.setStyle(
+            "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+            "-fx-background-insets: 0;" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-color: rgba(255, 255, 255, 0.25);" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 8;" +
+            "-fx-text-fill: transparent;" +
+            "-fx-prompt-text-fill: rgba(255, 255, 255, 0.45);" +
+            "-fx-highlight-fill: transparent;" +
+            "-fx-highlight-text-fill: transparent;" +
+            "-fx-cursor: text;"
         );
 
 
-        // -------------------------
-        // BUTTON ACTIONS
-        // -------------------------
+        // Put animated letters above TextField.
 
-        submitButton.setOnAction(event -> {
-            checkAnswer();
+        answerInputContainer.getChildren().addAll(
+            answerField,
+            animatedLetters
+        );
+
+
+       
+
+        /*hintButton.setOnAction(event -> {
+
+            if (gameLogic.useHint()) 
+            {
+                String currentWord = wordManager.getCurrentWord();
+
+                for (int i = 0; i < currentWord.length(); i++) 
+                {
+                    String letter = String.valueOf(currentWord.charAt(i));
+
+                    if (!revealedLetters.contains(letter)) 
+                    {
+                        revealedLetters += letter;
+                        StringBuilder hint = new StringBuilder();
+
+                        for (int j = 0; j < currentWord.length(); j++) 
+                        {
+
+                            String currentLetter =String.valueOf(currentWord.charAt(j));
+
+                            if (revealedLetters.contains(currentLetter)) {
+                                hint.append(currentLetter.toUpperCase());
+                            } 
+                            
+                            else {
+                                hint.append("_");
+                            }
+
+                            if (j < currentWord.length() - 1) {
+                                hint.append(" ");
+                            }
+                        }
+
+                        answerField.setText(hint.toString());
+                        messageLabel.setText("Hint used! -10 points.");
+
+                        updateLabels();
+
+                        hintsLabel.setText(
+                            "Hints: " +
+                            gameLogic.getHintsRemaining() +
+                            "/" +
+                            getTotalHints()
+                        );
+
+                        break;
+                    }
+                }
+            }
+        });*/
+
+        hintButton.setOnAction(event -> 
+        {
+            String currentWord = wordManager.getCurrentWord();
+            List<Integer> availablePositions = new ArrayList<>();
+
+            for (int i = 0; i < currentWord.length(); i++) {
+                if (!revealedPositions.contains(i)) {
+                    availablePositions.add(i);
+                }
+            }
+
+            if (availablePositions.isEmpty()) {
+                return;
+            }
+
+            int hintPosition =
+                availablePositions.get(
+                    new Random().nextInt(availablePositions.size())
+                );
+
+            // No available position
+            if (hintPosition == -1) {
+                return;
+            }
+
+            // Use the hint
+            int scoreBeforeHint = gameLogic.getScore();
+
+            if (!gameLogic.useHint()) {
+                return;
+            }
+
+            int actualHintPenalty =
+                scoreBeforeHint - gameLogic.getScore();
+
+            // Remember the exact position revealed
+            revealedPositions.add(hintPosition);
+
+            // Refresh the visible boxes.
+            // Do NOT add the hinted letter to answerField.
+            updateLetterBoxes();
+
+            // Move cursor to the next available box
+            moveToNextAvailableBox();
+
+            if (actualHintPenalty > 0) {
+
+                messageLabel.setText(
+                    "Hint used! -" +
+                    actualHintPenalty +
+                    " points."
+                );
+
+                showFloatingScore(
+                    "-" + actualHintPenalty + " POINTS!",
+                    false
+                );
+
+            } else {
+
+                messageLabel.setText(
+                    "Hint used! No points deducted."
+                );
+            }
+
+            updateLabels();
+
+            // Return keyboard focus to the answer field
+            answerField.requestFocus();
         });
+        
 
         answerField.setOnAction(event -> {
             checkAnswer();
         });
 
+        // -------------------------
+        // INPUT LISTENER
+        // -------------------------
+
+        /*answerField.textProperty().addListener(
+            (observable, oldValue, newValue) -> {
+
+        if (typedLetters == null) {
+            return;
+        }
+
+        String currentWord = wordManager.getCurrentWord();
+
+        // Prevent more characters than the word length
+        if (newValue.length() > currentWord.length()) {
+
+            answerField.setText(
+                newValue.substring(
+                    0,
+                    currentWord.length()
+                )
+            );
+
+            return;
+        }
+
+        // -------------------------------------------------
+        // NEW CHARACTER ENTERED
+        // -------------------------------------------------
+
+        if (newValue.length() > oldValue.length()) {
+
+            char newCharacter =
+                newValue.charAt(
+                    newValue.length() - 1
+                );
+
+            // Find the next editable box
+            moveToNextAvailableBox();
+
+            if (activeBoxIndex < typedLetters.length) {
+
+                typedLetters[activeBoxIndex] =
+                    newCharacter;
+
+                activeBoxIndex++;
+
+                moveToNextAvailableBox();
+            }
+        }
+
+        // -------------------------------------------------
+        // CHARACTER DELETED
+        // -------------------------------------------------
+
+        else if (newValue.length() < oldValue.length()) {
+
+                    // Move backwards to an editable box
+                    int deleteIndex =
+                        activeBoxIndex - 1;
+
+                    while (
+                        deleteIndex >= 0 &&
+                        revealedPositions.contains(deleteIndex)
+                    ) {
+                        deleteIndex--;
+                    }
+
+                    if (deleteIndex >= 0) {
+
+                        typedLetters[deleteIndex] = '\0';
+
+                        activeBoxIndex = deleteIndex;
+                    }
+                }
+
+                // Clear the hidden TextField.
+                // It is only being used to detect keyboard input.
+                if (!newValue.isEmpty()) {
+                    answerField.clear();
+                }
+
+                updateLetterBoxes();
+                updateActiveBox();
+            }
+        );*/
+
+        answerField.addEventFilter(
+    KeyEvent.KEY_TYPED,
+    event -> {
+
+        if (typedLetters == null || animationPlaying || gamePaused) {
+            return;
+        }
+
+        String character = event.getCharacter();
+
+        if (character == null || character.isEmpty()) {
+            return;
+        }
+
+        char newCharacter = character.charAt(0);
+
+        // Only allow letters.
+        if (!Character.isLetter(newCharacter)) {
+            event.consume();
+            return;
+        }
+
+        moveToNextAvailableBox();
+
+        if (activeBoxIndex < typedLetters.length) {
+
+            typedLetters[activeBoxIndex] =
+                Character.toLowerCase(newCharacter);
+
+            activeBoxIndex++;
+
+            moveToNextAvailableBox();
+
+            updateLetterBoxes();
+        }
+
+        event.consume();
+    }
+);
+
+
+answerField.addEventFilter(
+    KeyEvent.KEY_PRESSED,
+    event -> {
+
+        if (typedLetters == null || animationPlaying || gamePaused) {
+            return;
+        }
+
+        // =========================
+        // BACKSPACE
+        // =========================
+
+        if (event.getCode() == KeyCode.BACK_SPACE) {
+
+    int deleteIndex = activeBoxIndex;
+
+    // If the currently selected box already has a letter,
+    // delete that letter first.
+    if (
+        deleteIndex >= 0 &&
+        deleteIndex < typedLetters.length &&
+        !revealedPositions.contains(deleteIndex) &&
+        typedLetters[deleteIndex] != '\0'
+    ) {
+
+        typedLetters[deleteIndex] = '\0';
+
+        updateLetterBoxes();
+
+        event.consume();
+        return;
+    }
+
+    // Otherwise, move backward to the previous editable box.
+    deleteIndex--;
+
+    while (
+        deleteIndex >= 0 &&
+        revealedPositions.contains(deleteIndex)
+    ) {
+        deleteIndex--;
+    }
+
+    if (deleteIndex >= 0) {
+
+        typedLetters[deleteIndex] = '\0';
+
+        activeBoxIndex = deleteIndex;
+
+        updateLetterBoxes();
+    }
+
+    event.consume();
+    return;
+}
+
+
+        // =========================
+        // DELETE
+        // =========================
+
+        if (event.getCode() == KeyCode.DELETE) {
+
+            if (
+                activeBoxIndex < typedLetters.length &&
+                !revealedPositions.contains(activeBoxIndex)
+            ) {
+
+                typedLetters[activeBoxIndex] = '\0';
+
+                updateLetterBoxes();
+            }
+
+            event.consume();
+            return;
+        }
+
+
+        // =========================
+        // LEFT ARROW
+        // =========================
+
+        if (event.getCode() == KeyCode.LEFT) {
+
+            int index = activeBoxIndex - 1;
+
+            while (
+                index >= 0 &&
+                revealedPositions.contains(index)
+            ) {
+                index--;
+            }
+
+            if (index >= 0) {
+                activeBoxIndex = index;
+                updateActiveBox();
+            }
+
+            event.consume();
+            return;
+        }
+
+
+        // =========================
+        // RIGHT ARROW
+        // =========================
+
+        if (event.getCode() == KeyCode.RIGHT) {
+
+            int index = activeBoxIndex + 1;
+
+            while (
+                index < typedLetters.length &&
+                revealedPositions.contains(index)
+            ) {
+                index++;
+            }
+
+            if (index < typedLetters.length) {
+                activeBoxIndex = index;
+                updateActiveBox();
+            }
+
+            event.consume();
+            return;
+        }
+
+
+        // =========================
+        // ENTER
+        // =========================
+
+        if (event.getCode() == KeyCode.ENTER) {
+
+            checkAnswer();
+
+            event.consume();
+        }
+    }
+);
 
         // -------------------------
-        // CREATE CHARACTER ANIMATIONS
+        // CHARACTER ANIMATIONS
         // -------------------------
 
         setupWizardAnimations();
+
 
         setupEnemy();
 
 
         // -------------------------
-        // GENERATE FIRST WORD
+        // FIRST WORD
         // -------------------------
 
         generateNewWord();
@@ -269,14 +845,32 @@ public class GameScreen {
         );
 
         battleArea.setPadding(
-            new Insets(10, 50, 10, 50)
+            new Insets(
+                10,
+                50,
+                10,
+                50
+            )
         );
 
         Region battleSpacer = new Region();
 
-        HBox.setHgrow(
-            battleSpacer,
-            Priority.ALWAYS
+        // Dynamically control the distance between wizard and enemy
+        battleArea.widthProperty().addListener(
+            (observable, oldWidth, newWidth) -> {
+
+                double gap = newWidth.doubleValue() * 0.12;
+
+                // Minimum gap
+                gap = Math.max(gap, 70);
+
+                // Maximum gap
+                gap = Math.min(gap, 160);
+
+                battleSpacer.setPrefWidth(gap);
+                battleSpacer.setMinWidth(gap);
+                battleSpacer.setMaxWidth(gap);
+            }
         );
 
         battleArea.getChildren().addAll(
@@ -287,56 +881,123 @@ public class GameScreen {
 
 
         // -------------------------
+        // BATTLE ANIMATION LAYER
+        // -------------------------
+
+        battleAnimationLayer =
+            new StackPane();
+
+        battleAnimationLayer.setMouseTransparent(
+            true
+        );
+
+        battleAnimationLayer.setPickOnBounds(
+            false
+        );
+
+        battleAnimationLayer.setAlignment(
+            Pos.CENTER
+        );
+
+
+        StackPane battleContainer = new StackPane();
+        battleContainer.setAlignment(Pos.CENTER);
+
+        battleContainer.setTranslateY(180);
+
+        battleContainer.getChildren().addAll(
+            battleArea,
+            battleAnimationLayer
+        );
+
+
+        // -------------------------
+        // INPUT + HINT
+        // -------------------------
+
+        HBox inputRow = new HBox(15);
+        inputRow.setAlignment(Pos.CENTER);
+
+        inputRow.setTranslateY(70);
+
+        inputRow.getChildren().addAll(
+            answerInputContainer,
+            hintButton
+        );
+
+
+        // -------------------------
         // CENTER LAYOUT
         // -------------------------
 
         VBox centerLayout = new VBox(20);
-
-        centerLayout.setAlignment(
-            Pos.CENTER
+        centerLayout.setAlignment(Pos.CENTER);
+        centerLayout.setPadding(
+            new Insets(20, 0, 20, 0)
         );
 
         centerLayout.getChildren().addAll(
-            difficultyLabel,
-            battleArea,
+            battleContainer,
             scrambledWordLabel,
-            answerField,
-            submitButton,
+            inputRow,
             messageLabel
         );
-
-
-        // -------------------------
-        // ROOT
-        // -------------------------
-
-        BorderPane root = new BorderPane();
-
-        root.setTop(hud);
-
-        root.setCenter(centerLayout);
 
 
         // -------------------------
         // BOTTOM BAR
         // -------------------------
 
-        HBox bottomBar = new HBox();
-
-        bottomBar.setAlignment(
-            Pos.BOTTOM_LEFT
-        );
+        BorderPane bottomBar = new BorderPane();
 
         bottomBar.setPadding(
-            new Insets(15, 20, 15, 20)
+            new Insets(0, 30, 25, 30)
         );
 
-        bottomBar.getChildren().add(
-            createQuitButton()
+        Button quitButton = createQuitButton();
+
+        bottomBar.setLeft(quitButton);
+        // -------------------------
+        // ROOT
+        // -------------------------
+
+        BorderPane gameLayout = new BorderPane();
+
+        gameLayout.setTop(hud);
+
+        gameLayout.setCenter(centerLayout);
+
+        gameLayout.setBottom(bottomBar);
+
+        gameLayout.setStyle(
+            "-fx-background-color: transparent;"
         );
 
-        root.setBottom(bottomBar);
 
+        StackPane root = new StackPane();
+
+        ImageView backgroundImage = new ImageView(
+                new Image(
+                        getClass()
+                                .getResource("/assets/ingamebg.png")
+                                .toExternalForm()
+                )
+        );
+
+        backgroundImage.setPreserveRatio(false);
+        backgroundImage.setMouseTransparent(true);
+
+        backgroundImage.fitWidthProperty()
+                .bind(root.widthProperty());
+
+        backgroundImage.fitHeightProperty()
+                .bind(root.heightProperty());
+
+        root.getChildren().add(backgroundImage);
+
+        root.getChildren().add(
+            gameLayout
+        );
 
         // -------------------------
         // BACKGROUND
@@ -357,6 +1018,7 @@ public class GameScreen {
             600
         );
 
+
         stage.setScene(scene);
 
 
@@ -374,6 +1036,87 @@ public class GameScreen {
         answerField.requestFocus();
     }
 
+    // =========================================================
+    // TOTAL HINTS
+    // =========================================================
+
+    private int getTotalHints() {
+
+        if (difficulty.equalsIgnoreCase("Apprentice")) {
+            return GameConfig.APPRENTICE_HINTS;
+        }
+
+        return GameConfig.SORCERER_HINTS;
+    }
+
+    // =========================================================
+    // END CARD WIZARD ANIMATIONS
+    // =========================================================
+
+    private ImageView createEndCardWizard(boolean cleared) {
+
+        ImageView endWizard =new ImageView();
+        endWizard.setFitWidth(END_CARD_SPRITE_SIZE);
+        endWizard.setFitHeight(END_CARD_SPRITE_SIZE);
+        endWizard.setPreserveRatio(true);
+
+        // =====================================================
+        // SUCCESS
+        // =====================================================
+        if (cleared) {
+
+            Image runSheet =
+                new Image(
+                    new java.io.File(
+                        "assets/Wizard/Run.png"
+                    ).toURI().toString()
+                );
+
+
+            wizardRunAnimator =
+                new SpriteAnimator(
+                    endWizard,
+                    runSheet,
+                    8,
+                    150
+                );
+
+
+            wizardRunAnimator.playLoop();
+
+
+        // =====================================================
+        // FAILURE
+        // =====================================================
+
+        } else {
+
+            Image deathSheet =
+                new Image(
+                    new java.io.File(
+                        "assets/Wizard/Death.png"
+                    ).toURI().toString()
+                );
+
+
+            wizardDeathAnimator =
+                new SpriteAnimator(
+                    endWizard,
+                    deathSheet,
+                    7,
+                    180
+                );
+
+
+            wizardDeathAnimator.playOnce(
+                null
+            );
+        }
+
+
+        return endWizard;
+    }
+
 
     // =========================================================
     // HUD
@@ -387,8 +1130,9 @@ public class GameScreen {
             Pos.CENTER_LEFT
         );
 
-        scoreBox.getChildren().add(
-            scoreLabel
+        scoreBox.getChildren().addAll(
+            scoreLabel,
+            hintsLabel
         );
 
 
@@ -405,50 +1149,44 @@ public class GameScreen {
 
         VBox timeBox = new VBox(5);
 
-        timeBox.setAlignment(
-            Pos.CENTER_RIGHT
-        );
+        timeBox.setAlignment(Pos.CENTER_RIGHT);
+        timeBox.getChildren().add(timerLabel);
 
-        timeBox.getChildren().add(
-            timerLabel
-        );
+        /*VBox hintsBox = new VBox(5);
+
+        hintsBox.setAlignment(Pos.CENTER_RIGHT);
+        hintsBox.getChildren().add(hintsLabel);*/
 
 
         HBox rightHUD = new HBox(35);
 
-        rightHUD.setAlignment(
-            Pos.CENTER_RIGHT
-        );
-
-        rightHUD.getChildren().addAll(
-            wordsBox,
-            timeBox
-        );
-
+        rightHUD.getChildren().addAll(wordsBox,timeBox);
 
         Region spacer = new Region();
 
-        HBox.setHgrow(
-            spacer,
-            Priority.ALWAYS
-        );
-
+        HBox.setHgrow(spacer,Priority.ALWAYS);
 
         HBox hud = new HBox(20);
-
-        hud.setAlignment(
-            Pos.CENTER_LEFT
-        );
+        hud.setAlignment(Pos.CENTER_LEFT);
 
         hud.setPadding(
-            new Insets(20, 30, 20, 30)
+            new Insets(
+                20,
+                30,
+                20,
+                30
+            )
         );
+
 
         hud.getChildren().addAll(
             scoreBox,
+            difficultyLabel,
             spacer,
             rightHUD
+            
         );
+
 
         return hud;
     }
@@ -473,22 +1211,18 @@ public class GameScreen {
 
         wizardImageView = new ImageView();
 
-        wizardImageView.setFitWidth(192);
+        wizardImageView.setFitWidth(SPRITE_SIZE);
 
-        wizardImageView.setFitHeight(192);
+        wizardImageView.setFitHeight(SPRITE_SIZE);
 
         wizardImageView.setPreserveRatio(true);
-
-        // Wizard faces right.
-        wizardImageView.setScaleX(1);
-
 
         wizardIdleAnimator =
             new SpriteAnimator(
                 wizardImageView,
                 idleSheet,
                 6,
-                500
+                150
             );
 
 
@@ -508,7 +1242,7 @@ public class GameScreen {
                 wizardImageView,
                 attackSheet,
                 8,
-                500
+                WIZARD_ATTACK_FRAME_DURATION
             );
 
 
@@ -528,11 +1262,11 @@ public class GameScreen {
                 wizardImageView,
                 hitSheet,
                 4,
-                500
+                200
             );
 
 
-        // Start idle animation.
+        // Start idle.
 
         wizardIdleAnimator.playLoop();
     }
@@ -544,108 +1278,107 @@ public class GameScreen {
 
     private void setupEnemy() {
 
-    // Stop the previous enemy animations.
+        // Stop previous animations.
 
-    if (enemyIdleAnimator != null) {
-        enemyIdleAnimator.stop();
-    }
+        if (enemyIdleAnimator != null) {
+            enemyIdleAnimator.stop();
+        }
 
-    if (enemyAttackAnimator != null) {
-        enemyAttackAnimator.stop();
-    }
-
-
-    // Determine which enemy should appear.
-
-    if (
-        gameLogic.getWordsFound() + 1
-        >= gameLogic.getGoal()
-    ) {
-
-        // Last word = boss
-
-        currentEnemy =
-            enemyManager.getBoss();
-
-    } else {
-
-        // Normal word = random enemy
-
-        currentEnemy =
-            enemyManager.getRandomEnemy();
-    }
+        if (enemyAttackAnimator != null) {
+            enemyAttackAnimator.stop();
+        }
 
 
-    // =====================================================
-    // CREATE IMAGE VIEW ONLY ONCE
-    // =====================================================
+        // Determine enemy.
 
-    if (enemyImageView == null) {
+        if (
+            gameLogic.getWordsFound() + 1
+            >= gameLogic.getGoal()
+        ) {
 
-        enemyImageView = new ImageView();
+            currentEnemy =
+                enemyManager.getBoss();
 
-        enemyImageView.setFitWidth(192);
+        } else {
 
-        enemyImageView.setFitHeight(192);
-
-        enemyImageView.setPreserveRatio(true);
-
-        // Enemy sprites face right by default.
-        // Flip them so they face the wizard.
-
-        enemyImageView.setScaleX(-1);
-    }
+            currentEnemy =
+                enemyManager.getRandomEnemy();
+        }
 
 
-    // Make the new enemy visible.
+        // -------------------------
+        // CREATE IMAGE VIEW
+        // -------------------------
 
-    enemyImageView.setVisible(true);
+        if (enemyImageView == null) {
+
+            enemyImageView =
+                new ImageView();
+
+            enemyImageView.setFitWidth(SPRITE_SIZE);
+
+            enemyImageView.setFitHeight(SPRITE_SIZE);
+
+            enemyImageView.setPreserveRatio(true);
+
+            // Face wizard.
+
+            enemyImageView.setScaleX(-1);
+        }
 
 
-    // =====================================================
-    // LOAD IDLE SPRITE
-    // =====================================================
-
-    Image idleSheet = new Image(
-        new java.io.File(
-            currentEnemy.getIdlePath()
-        ).toURI().toString()
-    );
+        enemyImageView.setVisible(true);
 
 
-    enemyIdleAnimator =
-        new SpriteAnimator(
-            enemyImageView,
-            idleSheet,
-            currentEnemy.getIdleFrames(),
-            500
+        // Remove any previous effect.
+
+        enemyImageView.setEffect(null);
+
+
+        // -------------------------
+        // IDLE
+        // -------------------------
+
+        Image idleSheet = new Image(
+            new java.io.File(
+                currentEnemy.getIdlePath()
+            ).toURI().toString()
         );
 
 
-    // =====================================================
-    // LOAD ATTACK SPRITE
-    // =====================================================
-
-    Image attackSheet = new Image(
-        new java.io.File(
-            currentEnemy.getAttackPath()
-        ).toURI().toString()
-    );
+        enemyIdleAnimator =
+            new SpriteAnimator(
+                enemyImageView,
+                idleSheet,
+                currentEnemy.getIdleFrames(),
+                200
+            );
 
 
-    enemyAttackAnimator =
-        new SpriteAnimator(
-            enemyImageView,
-            attackSheet,
-            currentEnemy.getAttackFrames(),
-            500
+        // -------------------------
+        // ATTACK
+        // -------------------------
+
+        Image attackSheet = new Image(
+            new java.io.File(
+                currentEnemy.getAttackPath()
+            ).toURI().toString()
         );
 
 
-    // Start the new enemy's idle animation.
+        enemyAttackAnimator =
+            new SpriteAnimator(
+                enemyImageView,
+                attackSheet,
+                currentEnemy.getAttackFrames(),
+                ENEMY_ATTACK_FRAME_DURATION
+            );
 
-    enemyIdleAnimator.playLoop();
-}
+
+        // Start idle.
+
+        enemyIdleAnimator.playLoop();
+    }
 
 
     // =========================================================
@@ -665,30 +1398,57 @@ public class GameScreen {
         }
 
 
-        // Create a new enemy.
+        // Create new enemy.
 
         setupEnemy();
 
 
-        // Generate the word.
+        // Generate word.
+        /*String scrambledWord =wordManager.generateNewWord();
 
-        String scrambledWord =
-            wordManager.generateNewWord();
+        scrambledWordLabel.setText(scrambledWord);
+        wordStartTime = System.nanoTime();*/
+        
+        String scrambledWord = wordManager.generateNewWord();
 
+        /*revealedPositions.clear();
+        activeBoxIndex = 0;
+        scrambledWordLabel.setText(scrambledWord);*/
+        revealedPositions.clear();
+        activeBoxIndex = 0;
 
-        scrambledWordLabel.setText(
-            scrambledWord
-        );
+        typedLetters = new char[wordManager.getCurrentWord().length()];
+
+        /*for (int i = 0; i < typedLetters.length; i++) {
+            typedLetters[i] = '\0';
+        }*/
+
+scrambledWordLabel.setText(scrambledWord);
+
+        createLetterBoxes();
+
+        wordStartTime = System.nanoTime();
+                
 
 
         // Reset answer.
+        for (int i = 0; i < typedLetters.length; i++) {
+            typedLetters[i] = '\0';
+        }
+
+        activeBoxIndex = 0;
+
+        moveToNextAvailableBox();
 
         answerField.clear();
+
+
+
 
         answerField.requestFocus();
 
 
-        // Reset battle state.
+        // Reset state.
 
         animationPlaying = false;
     }
@@ -700,45 +1460,35 @@ public class GameScreen {
 
     private void checkAnswer() {
 
-        // Don't accept input while an animation is playing.
-
-        if (animationPlaying) {
+        // Don't accept input during animation.
+        if (animationPlaying || gamePaused) {
             return;
         }
-
 
         // Don't accept input after game ends.
-
-        if (
-            gameLogic.isTimeUp()
-            || gameLogic.hasClearedLevel()
-        ) {
+        if (gameLogic.isTimeUp()|| gameLogic.hasClearedLevel()) {
             return;
         }
 
+        String guess =buildCurrentGuess().trim();
 
-        String guess =
-            answerField.getText().trim();
-
-
-        // Empty answer.
-
+        // -------------------------
+        // EMPTY ANSWER
+        // -------------------------
         if (guess.isEmpty()) {
-
-            messageLabel.setText(
-                "Please enter a word."
-            );
-
+            messageLabel.setText("Please enter a word.");
             return;
         }
 
 
-        // Check answer.
+        // -------------------------
+        // CHECK ANSWER
+        // -------------------------
 
         boolean valid =
             gameLogic.isValidGuess(
                 guess,
-                wordManager.getScrambledWord()
+                wordManager.getCurrentWord()
             );
 
 
@@ -747,12 +1497,15 @@ public class GameScreen {
         // =====================================================
 
         if (valid) {
+            
+            double secondsTaken = (System.nanoTime() - wordStartTime) / 1_000_000_000.0;
 
-            int points =
-                gameLogic.processCorrectGuess(
-                    guess
-                );
+            /*int points = gameLogic.processCorrectGuess(guess, secondsTaken);
 
+            showFloatingScore(
+                "+" + points + " POINTS!",
+                true
+            );
 
             messageLabel.setText(
                 "Correct! +" +
@@ -764,30 +1517,54 @@ public class GameScreen {
             updateLabels();
 
 
-            // Play wizard attack.
-
+            // Wizard attacks.
             playWizardAttack(() -> {
-
-                // The enemy disappears immediately
-                // after the attack.
-
+                // Enemy disappears after attack.
                 enemyImageView.setVisible(false);
 
 
-                // Check if level is complete.
-
-                if (
-                    gameLogic.hasClearedLevel()
-                ) {
-
+                // Level complete?
+                if (gameLogic.hasClearedLevel()) {
                     endGame(true);
-
                     return;
                 }
 
+                // Next word.
+                generateNewWord();
+            });*/
 
-                // Next word + new enemy.
+            int points = gameLogic.processCorrectGuess(guess, secondsTaken);
 
+            showFloatingScore(
+                "+" + points + " POINTS!",
+                true
+            );
+
+            messageLabel.setText(
+                "Correct! +" +
+                points +
+                " points! +10 seconds!"
+            );
+
+            updateLabels();
+
+            // Level complete?
+            if (gameLogic.hasClearedLevel()) {
+                if (timeline != null) {
+                    timeline.stop();
+                }
+
+                playWizardAttack(() -> {
+                    enemyImageView.setVisible(false);
+                    endGame(true);
+                });
+
+                return;
+            }
+
+            // Wizard attacks.
+            playWizardAttack(() -> {
+                enemyImageView.setVisible(false);
                 generateNewWord();
             });
 
@@ -795,44 +1572,365 @@ public class GameScreen {
         // =====================================================
         // WRONG
         // =====================================================
-
         } else {
 
-            int penalty =
-                gameLogic.processWrongGuess();
+            int penalty = gameLogic.processWrongGuess();
 
+            if (penalty > 0) {
 
-            messageLabel.setText(
-                "Wrong answer! -" +
-                penalty +
-                " points."
-            );
+                showFloatingScore(
+                    "-" + penalty + " POINTS!",
+                    false
+                );
 
+                messageLabel.setText(
+                    "Wrong answer! -" +
+                    penalty +
+                    " points."
+                );
+
+            } else {
+
+                messageLabel.setText(
+                    "Wrong answer! No points deducted."
+                );
+            }
 
             updateLabels();
 
-
             answerField.clear();
 
-
-            // Play wizard hit animation first.
-
-            playWizardHit(() -> {
-
-                // Enemy attacks after wizard is hit.
-
-                playEnemyAttack(() -> {
-
-                    // Return enemy to idle.
-
-                    enemyIdleAnimator.playLoop();
-
-                    animationPlaying = false;
-
-                    answerField.requestFocus();
-                });
+            // Wizard gets hit.
+            // Enemy attacks.
+            playEnemyAttack(() -> {
+                enemyIdleAnimator.playLoop();
+                animationPlaying = false;
+                answerField.requestFocus();
             });
         }
+    }
+
+    private String buildCurrentGuess() {
+    String currentWord = wordManager.getCurrentWord();
+
+    StringBuilder guess = new StringBuilder();
+    for (int i = 0; i < currentWord.length(); i++) {
+
+        // Hinted letter
+        if (revealedPositions.contains(i)) {
+            guess.append(currentWord.charAt(i));
+        }
+
+        // Player letter
+        else if (typedLetters != null &&typedLetters[i] != '\0') {
+            guess.append(typedLetters[i]);
+        }
+
+        // Empty box
+        else {
+            return "";
+        }
+    }
+
+    return guess.toString();
+}
+
+    private void createLetterBoxes() {
+
+        animatedLetters.getChildren().clear();
+
+        String currentWord = wordManager.getCurrentWord();
+
+        for (int i = 0; i < currentWord.length(); i++) {
+
+            Label letterBox = new Label("_");
+
+            letterBox.setPrefSize(45, 50);
+            letterBox.setAlignment(Pos.CENTER);
+
+            letterBox.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    22
+                )
+            );
+
+            letterBox.setTextFill(Color.WHITE);
+
+            letterBox.setEffect(
+                createTextShadow()
+            );
+
+            letterBox.setStyle(
+                "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-background-radius: 6;"
+            );
+
+            final int boxIndex = i;
+
+            letterBox.setOnMouseEntered(event -> {
+
+            if (!revealedPositions.contains(boxIndex)) {
+
+                activeBoxIndex = boxIndex;
+
+                updateLetterBoxes();
+
+                answerField.requestFocus();
+            }
+        });
+
+        letterBox.setOnMouseClicked(event -> {
+
+            if (!revealedPositions.contains(boxIndex)) {
+
+                activeBoxIndex = boxIndex;
+
+                updateActiveBox();
+
+                answerField.requestFocus();
+            }
+        });
+
+            animatedLetters.getChildren().add(letterBox);
+        }
+
+        updateActiveBox();
+    }
+
+    private void updateLetterBoxes() {
+
+    String currentWord = wordManager.getCurrentWord();
+
+    for (int i = 0; i < currentWord.length(); i++) {
+
+        Label letterBox =
+            (Label) animatedLetters.getChildren().get(i);
+
+        // -----------------------------------------
+        // HINTED / LOCKED BOX
+        // -----------------------------------------
+
+        if (revealedPositions.contains(i)) {
+
+            letterBox.setText(
+                String.valueOf(
+                    currentWord.charAt(i)
+                ).toUpperCase()
+            );
+        }
+
+        // -----------------------------------------
+        // PLAYER TYPED LETTER
+        // -----------------------------------------
+
+        else if (
+            typedLetters != null &&
+            typedLetters[i] != '\0'
+        ) {
+
+            letterBox.setText(
+                String.valueOf(
+                    typedLetters[i]
+                ).toUpperCase()
+            );
+        }
+
+        // -----------------------------------------
+        // EMPTY BOX
+        // -----------------------------------------
+
+        else {
+
+            letterBox.setText("_");
+        }
+    }
+
+    updateActiveBox();
+}
+
+    private void updateActiveBox() {
+
+        for (int i = 0; i < animatedLetters.getChildren().size(); i++) {
+
+            Label letterBox =
+                (Label) animatedLetters.getChildren().get(i);
+
+            // HINTED / LOCKED BOX
+            if (revealedPositions.contains(i)) {
+
+                letterBox.setStyle(
+                    "-fx-background-color: rgba(168, 139, 90, 0.45);" +
+                    "-fx-border-color: #F5E6C8;" +
+                    "-fx-border-width: 2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;"
+                );
+            }
+
+            // ACTIVE KEYBOARD BOX
+            else if (i == activeBoxIndex) {
+
+                letterBox.setStyle(
+                    "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                    "-fx-border-color: #4CAF50;" +
+                    "-fx-border-width: 2.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;"
+                );
+            }
+
+            // NORMAL BOX
+            else {
+
+                letterBox.setStyle(
+                    "-fx-background-color: rgba(0, 0, 0, 0.35);" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-background-radius: 6;"
+                );
+            }
+        }
+    }
+
+    /*private void startCursorBlink() {
+
+        if (cursorTimeline != null) {
+            cursorTimeline.stop();
+        }
+
+        cursorVisible = true;
+
+        updateActiveBox();
+
+        cursorTimeline = new Timeline(
+            new KeyFrame(
+                Duration.millis(500),
+                event -> {
+
+                    cursorVisible = !cursorVisible;
+
+                    updateActiveBox();
+                }
+            )
+        );
+
+        cursorTimeline.setCycleCount(
+            Timeline.INDEFINITE
+        );
+
+        cursorTimeline.play();
+    }*/
+
+    /*private void startCursorBlink() {
+
+        updateActiveBox();
+    }*/
+
+    private void moveToNextAvailableBox() {
+
+        String currentWord =
+            wordManager.getCurrentWord();
+
+        while (
+            activeBoxIndex < currentWord.length() &&
+            (
+                revealedPositions.contains(activeBoxIndex) ||
+                typedLetters[activeBoxIndex] != '\0'
+            )
+        ) {
+            activeBoxIndex++;
+        }
+
+        updateActiveBox();
+    }
+
+    // =========================================================
+    // RED HIT FLASH
+    // =========================================================
+    private void flashRed(ImageView imageView) {
+
+        if (imageView == null) {
+            return;
+        }
+
+        // Create red overlay.
+        ColorInput redColor =
+            new ColorInput(
+                0,
+                0,
+                imageView.getFitWidth(),
+                imageView.getFitHeight(),
+                Color.RED
+            );
+
+        Blend redBlend =
+            new Blend(
+                BlendMode.SRC_ATOP,
+                null,
+                redColor
+            );
+
+
+        // First flash.
+        imageView.setEffect(redBlend);
+        PauseTransition firstFlash =new PauseTransition(Duration.millis(80));
+
+        firstFlash.setOnFinished(
+            event -> {
+                imageView.setEffect(
+                    null
+                );
+
+
+                // Small gap before second flash.
+                PauseTransition gap =
+                    new PauseTransition(
+                        Duration.millis(50)
+                    );
+
+
+                gap.setOnFinished(
+                    event2 -> {
+                        // Second flash.
+                        imageView.setEffect(redBlend);
+
+
+                        PauseTransition secondFlash =
+                            new PauseTransition(
+                                Duration.millis(80)
+                            );
+
+
+                        secondFlash.setOnFinished(
+                            event3 -> {
+
+                                imageView.setEffect(
+                                    null
+                                );
+
+                            }
+                        );
+
+
+                        secondFlash.play();
+
+                    }
+                );
+
+
+                gap.play();
+
+            }
+        );
+
+
+        firstFlash.play();
     }
 
 
@@ -856,56 +1954,71 @@ public class GameScreen {
 
         // Play attack.
 
-        wizardAttackAnimator.playOnce(() -> {
+        wizardAttackAnimator.playOnce(
+            () -> {
 
-            // Return to idle.
+                wizardIdleAnimator.playLoop();
 
-            wizardIdleAnimator.playLoop();
-
-
-            animationPlaying = false;
+                animationPlaying = false;
 
 
-            if (onFinished != null) {
-                onFinished.run();
+                if (onFinished != null) {
+
+                    onFinished.run();
+
+                }
+
             }
-        });
-    }
+        );
 
 
-    // =========================================================
-    // WIZARD HIT
-    // =========================================================
+        // -----------------------------------------------------
+        // ENEMY HIT
+        // -----------------------------------------------------
 
-    private void playWizardHit(
-        Runnable onFinished
-    ) {
-
-        animationPlaying = true;
+        int attackDuration =
+            8 *
+            WIZARD_ATTACK_FRAME_DURATION;
 
 
-        // Stop idle.
-
-        if (wizardIdleAnimator != null) {
-            wizardIdleAnimator.stop();
-        }
-
-
-        // Play hit.
-
-        wizardHitAnimator.playOnce(() -> {
-
-            // Return to idle.
-
-            wizardIdleAnimator.playLoop();
+        int hitDelay =
+            attackDuration -
+            (
+                HIT_TRIGGER_FRAMES *
+                WIZARD_ATTACK_FRAME_DURATION
+            );
 
 
-            if (onFinished != null) {
-                onFinished.run();
+        hitDelay =
+            Math.max(
+                0,
+                hitDelay
+            );
+
+
+        PauseTransition hit =
+            new PauseTransition(
+                Duration.millis(
+                    hitDelay
+                )
+            );
+
+
+        hit.setOnFinished(
+            event -> {
+
+                // Enemy flashes red.
+
+                flashRed(
+                    enemyImageView
+                );
+
             }
-        });
-    }
+        );
 
+
+        hit.play();
+    }
 
     // =========================================================
     // ENEMY ATTACK
@@ -915,26 +2028,149 @@ public class GameScreen {
         Runnable onFinished
     ) {
 
-        // Stop idle.
+        // Stop enemy idle.
 
         if (enemyIdleAnimator != null) {
             enemyIdleAnimator.stop();
         }
 
 
-        // Play attack.
+        // Track whether each animation
+        // has completed.
 
-        enemyAttackAnimator.playOnce(() -> {
+        final boolean[] attackFinished = {
+            false
+        };
 
-            // Return to idle.
+        final boolean[] hitFinished = {
+            false
+        };
 
-            enemyIdleAnimator.playLoop();
+
+        // Finish only when both animations
+        // have completed.
+
+        Runnable finishAttack =
+            () -> {
+
+                if (
+                    attackFinished[0]
+                    && hitFinished[0]
+                ) {
+
+                    if (
+                        enemyIdleAnimator != null
+                    ) {
+
+                        enemyIdleAnimator.playLoop();
+
+                    }
 
 
-            if (onFinished != null) {
-                onFinished.run();
+                    if (
+                        onFinished != null
+                    ) {
+
+                        onFinished.run();
+
+                    }
+                }
+            };
+
+
+        // -----------------------------------------------------
+        // ENEMY ATTACK
+        // -----------------------------------------------------
+
+        enemyAttackAnimator.playOnce(
+            () -> {
+
+                attackFinished[0] = true;
+
+                finishAttack.run();
+
             }
-        });
+        );
+
+
+        // -----------------------------------------------------
+        // HIT TIMING
+        // -----------------------------------------------------
+
+        int attackFrames =
+            currentEnemy.getAttackFrames();
+
+
+        int attackDuration =
+            attackFrames *
+            ENEMY_ATTACK_FRAME_DURATION;
+
+
+        int hitDelay =
+            attackDuration -
+            (
+                HIT_TRIGGER_FRAMES *
+                ENEMY_ATTACK_FRAME_DURATION
+            );
+
+
+        hitDelay =
+            Math.max(
+                0,
+                hitDelay
+            );
+
+
+        PauseTransition hit =
+            new PauseTransition(
+                Duration.millis(
+                    hitDelay
+                )
+            );
+
+
+        hit.setOnFinished(
+            event -> {
+
+                // Flash wizard red.
+
+                flashRed(
+                    wizardImageView
+                );
+
+
+                // Stop wizard idle.
+
+                if (
+                    wizardIdleAnimator != null
+                ) {
+
+                    wizardIdleAnimator.stop();
+
+                }
+
+
+                // Play wizard hit.
+
+                wizardHitAnimator.playOnce(
+                    () -> {
+
+                        wizardIdleAnimator.playLoop();
+
+
+                        hitFinished[0] = true;
+
+
+                        finishAttack.run();
+
+                    }
+                );
+
+            }
+        );
+
+
+        hit.play();
     }
 
 
@@ -944,30 +2180,34 @@ public class GameScreen {
 
     private void startTimer() {
 
-        timeline = new Timeline(
-            new KeyFrame(
-                Duration.seconds(1),
-                event -> {
+        timeline =
+            new Timeline(
+                new KeyFrame(
+                    Duration.seconds(1),
+                    event -> {
 
-                    gameLogic.decreaseTime();
+                        gameLogic.decreaseTime();
 
-                    updateTimer();
+                        updateTimer();
 
 
-                    if (
-                        gameLogic.isTimeUp()
-                    ) {
+                        if (
+                            gameLogic.isTimeUp()
+                        ) {
 
-                        endGame(false);
+                            endGame(false);
+
+                        }
+
                     }
-                }
-            )
-        );
+                )
+            );
 
 
         timeline.setCycleCount(
             Timeline.INDEFINITE
         );
+
 
         timeline.play();
     }
@@ -979,23 +2219,242 @@ public class GameScreen {
 
     private void updateLabels() {
 
-        scoreLabel.setText(
-            "Score: " +
-            gameLogic.getScore()
-        );
-
-
-        wordsLabel.setText(
-            "Words Found: " +
-            gameLogic.getWordsFound() +
-            " / " +
-            gameLogic.getGoal()
-        );
-
-
+        scoreLabel.setText("Score: " +gameLogic.getScore());
+        wordsLabel.setText("Words Found: " +gameLogic.getWordsFound() +" / " +gameLogic.getGoal());
+        hintsLabel.setText("Hints: " +gameLogic.getHintsRemaining() +"/" +getTotalHints());
         updateTimer();
+
     }
 
+    // =========================================================
+    // TEXT SHADOW
+    // =========================================================
+
+    private DropShadow createTextShadow() {
+
+        DropShadow shadow = new DropShadow();
+
+        shadow.setRadius(5);
+        shadow.setSpread(0.35);
+        shadow.setOffsetX(2);
+        shadow.setOffsetY(2);
+        shadow.setColor(
+            Color.rgb(0, 0, 0, 0.85)
+        );
+
+        return shadow;
+    }
+
+
+    // =========================================================
+    // FLOATING DAMAGE TEXT
+    // =========================================================
+    private void showFloatingScore(String text,boolean positive) {
+
+        Label floatingLabel =
+            new Label(text);
+
+
+        // -------------------------
+        // TEXT STYLE
+        // -------------------------
+
+        floatingLabel.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                22
+            )
+        );
+
+
+        floatingLabel.setTextFill(
+            positive
+                ? Color.LIGHTGREEN
+                : Color.SALMON
+        );
+
+
+        floatingLabel.setEffect(
+            new DropShadow(
+                8,
+                positive
+                    ? Color.rgb(120, 255, 120, 0.65)
+                    : Color.rgb(255, 80, 80, 0.65)
+            )
+        );
+
+
+        // -------------------------
+        // INITIAL STATE
+        // -------------------------
+
+        floatingLabel.setOpacity(
+            0
+        );
+
+        floatingLabel.setScaleX(
+            0.7
+        );
+
+        floatingLabel.setScaleY(
+            0.7
+        );
+
+        floatingLabel.setTranslateY(
+            10
+        );
+
+
+        // -------------------------
+        // ADD TO BATTLE AREA
+        // -------------------------
+
+        battleAnimationLayer
+            .getChildren()
+            .add(
+                floatingLabel
+            );
+
+
+        // -------------------------
+        // APPEAR
+        // -------------------------
+
+        FadeTransition fadeIn =
+            new FadeTransition(
+                Duration.millis(180),
+                floatingLabel
+            );
+
+        fadeIn.setFromValue(
+            0
+        );
+
+        fadeIn.setToValue(
+            1
+        );
+
+
+        ScaleTransition scaleUp =
+            new ScaleTransition(
+                Duration.millis(180),
+                floatingLabel
+            );
+
+        scaleUp.setFromX(
+            0.7
+        );
+
+        scaleUp.setFromY(
+            0.7
+        );
+
+        scaleUp.setToX(
+            1.0
+        );
+
+        scaleUp.setToY(
+            1.0
+        );
+
+
+        // -------------------------
+        // FLOAT UPWARD
+        // -------------------------
+
+        TranslateTransition rise =
+            new TranslateTransition(
+                Duration.millis(900),
+                floatingLabel
+            );
+
+        rise.setFromY(
+            10
+        );
+
+        rise.setToY(
+            -70
+        );
+
+
+        // -------------------------
+        // FADE OUT
+        // -------------------------
+
+        FadeTransition fadeOut =
+            new FadeTransition(
+                Duration.millis(500),
+                floatingLabel
+            );
+
+        fadeOut.setFromValue(
+            1
+        );
+
+        fadeOut.setToValue(
+            0
+        );
+
+        fadeOut.setDelay(
+            Duration.millis(400)
+        );
+
+
+        // -------------------------
+        // APPEAR ANIMATION
+        // -------------------------
+
+        ParallelTransition appear =
+            new ParallelTransition(
+                fadeIn,
+                scaleUp
+            );
+
+
+        // -------------------------
+        // FLOAT + FADE
+        // -------------------------
+
+        ParallelTransition floatAndFade =
+            new ParallelTransition(
+                rise,
+                fadeOut
+            );
+
+
+        // -------------------------
+        // START FLOATING
+        // -------------------------
+
+        appear.setOnFinished(
+            event -> {
+
+                floatAndFade.play();
+
+            }
+        );
+
+
+        // -------------------------
+        // REMOVE AFTER ANIMATION
+        // -------------------------
+
+        floatAndFade.setOnFinished(
+            event -> {
+
+                battleAnimationLayer
+                    .getChildren()
+                    .remove(
+                        floatingLabel
+                    );
+
+            }
+        );
+
+
+        appear.play();
+    }
 
     private void updateTimer() {
 
@@ -1010,69 +2469,417 @@ public class GameScreen {
     // QUIT BUTTON
     // =========================================================
 
-    private Button createQuitButton() {
+        private Button createQuitButton() {
 
-        Button quitButton =
-            new Button("QUIT");
+            Button quitButton = new Button("QUIT");
+
+            quitButton.setPrefWidth(100);
+            quitButton.setPrefHeight(40);
+
+            quitButton.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    14
+                )
+            );
+
+            quitButton.setTextFill(
+                Color.web("#F5E6C8")
+            );
+
+            // Normal
+            quitButton.setStyle(
+                "-fx-background-color: #3A263F;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+            // Hover
+            quitButton.setOnMouseEntered(event -> {
+
+                quitButton.setStyle(
+                    "-fx-background-color: #503451;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #D6B878;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+            // Mouse leaves
+            quitButton.setOnMouseExited(event -> {
+
+                quitButton.setStyle(
+                    "-fx-background-color: #3A263F;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+            quitButton.setOnAction(event -> {
+                showQuitConfirmation();
+            });
+
+            return quitButton;
+        }
 
 
-        quitButton.setPrefWidth(100);
+        // =========================================================
+        // QUIT CONFIRMATION
+        // =========================================================
 
-        quitButton.setPrefHeight(40);
+        private void showQuitConfirmation() {
 
-        quitButton.setFont(
-            Font.font("Arial", 14)
-        );
+                if (gamePaused) {
+            return;
+        }
 
+        gamePaused = true;
 
-        quitButton.setOnAction(event -> {
+        if (timeline != null) {
+            timeline.pause();
+        }
 
-            showQuitConfirmation();
-        });
+        if (wizardIdleAnimator != null) {
+            wizardIdleAnimator.pause();
+        }
 
+        if (wizardAttackAnimator != null) {
+            wizardAttackAnimator.pause();
+        }
 
-        return quitButton;
-    }
+        if (wizardHitAnimator != null) {
+            wizardHitAnimator.pause();
+        }
 
+        if (enemyIdleAnimator != null) {
+            enemyIdleAnimator.pause();
+        }
 
-    // =========================================================
-    // QUIT CONFIRMATION
-    // =========================================================
+        if (enemyAttackAnimator != null) {
+            enemyAttackAnimator.pause();
+        }
 
-    private void showQuitConfirmation() {
+        
+            // =========================================
+            // OVERLAY
+            // =========================================
 
-        Alert confirmation =
-            new Alert(
-                Alert.AlertType.CONFIRMATION
+            StackPane overlayRoot = new StackPane();
+
+            overlayRoot.setPickOnBounds(true);
+
+            overlayRoot.setStyle(
+                "-fx-background-color: rgba(0, 0, 0, 0.65);"
             );
 
 
-        confirmation.setTitle(
-            "Quit Game"
-        );
+            // =========================================
+            // POPUP
+            // =========================================
+
+            VBox popup = new VBox(18);
+
+            popup.setAlignment(Pos.CENTER);
+
+            popup.setMaxWidth(400);
+            popup.setMaxHeight(230);
+
+            popup.setPadding(
+                new Insets(
+                    30,
+                    40,
+                    30,
+                    40
+                )
+            );
+
+            popup.setStyle(
+                "-fx-background-color: #202D48;" +
+                "-fx-background-radius: 14;" +
+                "-fx-border-color: #A88B5A;" +
+                "-fx-border-width: 1.5;" +
+                "-fx-border-radius: 14;"
+            );
 
 
-        confirmation.setHeaderText(
-            "Return to Main Menu?"
-        );
+            // =========================================
+            // TITLE
+            // =========================================
+
+            Label titleLabel = new Label(
+                "QUIT THE RUN?"
+            );
+
+            titleLabel.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    28
+                )
+            );
+
+            titleLabel.setTextFill(
+                Color.web("#F5E6C8")
+            );
 
 
-        confirmation.setContentText(
-            "Your current game progress will be lost."
-        );
+            // =========================================
+            // MESSAGE
+            // =========================================
+
+            Label messageLabel = new Label(
+                "Are you sure you want to leave?\n" +
+                "Your current progress will be lost."
+            );
+
+            messageLabel.setFont(
+                Font.font(
+                    "Arial",
+                    15
+                )
+            );
+
+            messageLabel.setTextFill(
+                Color.LIGHTGRAY
+            );
+
+            messageLabel.setAlignment(
+                Pos.CENTER
+            );
+
+            messageLabel.setTextAlignment(
+                javafx.scene.text.TextAlignment.CENTER
+            );
 
 
-        confirmation.showAndWait()
-            .ifPresent(response -> {
+            // =========================================
+            // CANCEL
+            // =========================================
 
-                if (
-                    response == ButtonType.OK
-                ) {
+            Button cancelButton =
+                new Button("CANCEL");
 
-                    quitGame();
-                }
+            cancelButton.setPrefWidth(125);
+            cancelButton.setPrefHeight(42);
+
+            cancelButton.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    14
+                )
+            );
+
+            cancelButton.setTextFill(
+                Color.web("#F5E6C8")
+            );
+
+            cancelButton.setStyle(
+                "-fx-background-color: #3A4863;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #71809C;" +
+                "-fx-border-width: 1.2;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+
+            // =========================================
+            // QUIT
+            // =========================================
+
+            Button confirmQuitButton =
+                new Button("QUIT");
+
+            confirmQuitButton.setPrefWidth(125);
+            confirmQuitButton.setPrefHeight(42);
+
+            confirmQuitButton.setFont(
+                Font.font(
+                    "Georgia",
+                    FontWeight.BOLD,
+                    14
+                )
+            );
+
+            confirmQuitButton.setTextFill(
+                Color.web("#F5E6C8")
+            );
+
+            confirmQuitButton.setStyle(
+                "-fx-background-color: #8B3030;" +
+                "-fx-background-radius: 6;" +
+                "-fx-border-color: #C66A5A;" +
+                "-fx-border-width: 1.2;" +
+                "-fx-border-radius: 6;" +
+                "-fx-cursor: hand;"
+            );
+
+
+            // =========================================
+            // HOVER
+            // =========================================
+
+            cancelButton.setOnMouseEntered(event -> {
+
+                cancelButton.setStyle(
+                    "-fx-background-color: #4B5B78;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A8B4C9;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
             });
-    }
+
+            cancelButton.setOnMouseExited(event -> {
+
+                cancelButton.setStyle(
+                    "-fx-background-color: #3A4863;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #71809C;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+
+            confirmQuitButton.setOnMouseEntered(event -> {
+
+                confirmQuitButton.setStyle(
+                    "-fx-background-color: #A83A3A;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #E08A78;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+            confirmQuitButton.setOnMouseExited(event -> {
+
+                confirmQuitButton.setStyle(
+                    "-fx-background-color: #8B3030;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #C66A5A;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            });
+
+
+            // =========================================
+            // BUTTON ACTIONS
+            // =========================================
+
+            cancelButton.setOnAction(event -> {
+
+                StackPane root =
+                    (StackPane) stage.getScene().getRoot();
+
+                root.getChildren().remove(
+                    overlayRoot
+                );
+
+                 // Resume the game
+                    gamePaused = false;
+
+                    // Resume timer
+                    if (timeline != null) {
+                        timeline.play();
+                    }
+
+                    // Resume wizard animations
+                    if (wizardIdleAnimator != null) {
+                        wizardIdleAnimator.resume();
+                    }
+
+                    if (wizardAttackAnimator != null) {
+                        wizardAttackAnimator.resume();
+                    }
+
+                    if (wizardHitAnimator != null) {
+                        wizardHitAnimator.resume();
+                    }
+
+                    // Resume enemy animations
+                    if (enemyIdleAnimator != null) {
+                        enemyIdleAnimator.resume();
+                    }
+
+                    if (enemyAttackAnimator != null) {
+                        enemyAttackAnimator.resume();
+                    }
+
+                    // Return focus to the answer field
+                    if (answerField != null) {
+                        answerField.requestFocus();
+                    }
+
+            });
+
+
+            confirmQuitButton.setOnAction(event -> {
+
+                quitGame();
+
+            });
+
+
+            // =========================================
+            // BUILD POPUP
+            // =========================================
+
+            HBox buttonBox = new HBox(15);
+
+            buttonBox.setAlignment(
+                Pos.CENTER
+            );
+
+            buttonBox.getChildren().addAll(
+                cancelButton,
+                confirmQuitButton
+            );
+
+            popup.getChildren().addAll(
+                titleLabel,
+                messageLabel,
+                buttonBox
+            );
+
+            overlayRoot.getChildren().add(
+                popup
+            );
+
+
+            // =========================================
+            // SHOW
+            // =========================================
+
+            StackPane root =
+                (StackPane) stage.getScene().getRoot();
+
+            root.getChildren().add(
+                overlayRoot
+            );
+        }
 
 
     // =========================================================
@@ -1112,7 +2919,9 @@ public class GameScreen {
 
 
         MainMenu mainMenu =
-            new MainMenu(stage);
+            new MainMenu(
+                stage
+            );
 
 
         mainMenu.show();
@@ -1127,14 +2936,20 @@ public class GameScreen {
         boolean cleared
     ) {
 
-        // Stop timer.
+        MusicManager.playEndMusic(cleared);
+
+        // =====================================================
+        // STOP GAME TIMER
+        // =====================================================
 
         if (timeline != null) {
             timeline.stop();
         }
 
 
-        // Stop all animations.
+        // =====================================================
+        // STOP GAME ANIMATIONS
+        // =====================================================
 
         if (wizardIdleAnimator != null) {
             wizardIdleAnimator.stop();
@@ -1157,41 +2972,24 @@ public class GameScreen {
         }
 
 
-        // Disable input.
-
-        submitButton.setDisable(true);
-
-        answerField.setDisable(true);
-
-
-        // Stop accepting animation actions.
+        // =====================================================
+        // PREVENT FURTHER INPUT
+        // =====================================================
 
         animationPlaying = true;
 
 
-        // Game result message.
-
-        if (cleared) {
-
-            messageLabel.setText(
-                "LEVEL CLEARED!"
-            );
-
-        } else {
-
-            messageLabel.setText(
-                "TIME'S UP!"
-            );
-        }
-
-
-        // -------------------------
-        // FINAL SCORE
-        // -------------------------
+        // =====================================================
+        // CALCULATE FINAL SCORE
+        // =====================================================
 
         int finalScore =
             gameLogic.calculateFinalScore();
 
+
+        // =====================================================
+        // SAVE SCORE
+        // =====================================================
 
         PlayerScore playerScore =
             new PlayerScore(
@@ -1209,9 +3007,146 @@ public class GameScreen {
         );
 
 
-        // -------------------------
-        // RESULT UI
-        // -------------------------
+        // =====================================================
+        // END CARD ROOT
+        // =====================================================
+
+        StackPane endRoot =
+            new StackPane();
+
+
+        // =====================================================
+        // END CARD BACKGROUND
+        // =====================================================
+
+        Image endBackgroundImage;
+
+        if (cleared) {
+
+            // Successful completion
+            endBackgroundImage =
+                new Image(
+                    new java.io.File(
+                        "assets/escapebg.png"
+                    ).toURI().toString()
+                );
+
+        } else {
+
+            // Time ran out
+            endBackgroundImage =
+                new Image(
+                    new java.io.File(
+                        "assets/ingamebg.png"
+                    ).toURI().toString()
+                );
+        }
+
+
+        ImageView endBackground =
+            new ImageView(
+                endBackgroundImage
+            );
+
+        endBackground.setPreserveRatio(false);
+        endBackground.setMouseTransparent(true);
+
+        // Make background fill the entire end screen
+        endBackground.fitWidthProperty().bind(
+            endRoot.widthProperty()
+        );
+
+        endBackground.fitHeightProperty().bind(
+            endRoot.heightProperty()
+        );
+
+
+        // =====================================================
+        // DARK OVERLAY
+        // =====================================================
+
+        Region overlay =
+            new Region();
+
+        overlay.setStyle(
+            "-fx-background-color: rgba(0, 0, 0, 0.30);"
+        );
+
+
+        // =====================================================
+        // END CARD CONTENT
+        // =====================================================
+
+        VBox endContent =
+            new VBox(20);
+
+        endContent.setAlignment(
+            Pos.CENTER
+        );
+
+
+        // =====================================================
+        // TITLE
+        // =====================================================
+
+        Label titleLabel;
+
+        if (cleared) {
+
+            titleLabel =
+                new Label(
+                    "ESCAPED THE DUNGEON!"
+                );
+
+        } else {
+
+            titleLabel =
+                new Label(
+                    "TIME HAS RUN OUT!"
+                );
+        }
+
+
+        titleLabel.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                40
+            )
+        );
+
+
+        titleLabel.setTextFill(
+            Color.web("#F5E6C8")
+        );
+
+
+        titleLabel.setEffect(
+            new DropShadow(
+                12,
+                Color.rgb(
+                    0,
+                    0,
+                    0,
+                    0.65
+                )
+            )
+        );
+
+
+        // =====================================================
+        // WIZARD
+        // =====================================================
+
+        ImageView endWizard =
+            createEndCardWizard(
+                cleared
+            );
+
+
+        // =====================================================
+        // FINAL SCORE
+        // =====================================================
 
         Label finalScoreLabel =
             new Label(
@@ -1221,7 +3156,11 @@ public class GameScreen {
 
 
         finalScoreLabel.setFont(
-            Font.font("Serif", 28)
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                26
+            )
         );
 
 
@@ -1230,73 +3169,272 @@ public class GameScreen {
         );
 
 
+        // =====================================================
+        // BUTTON CONTAINER
+        // =====================================================
+
+        VBox buttonBox =
+            new VBox(12);
+
+        buttonBox.setAlignment(
+            Pos.CENTER
+        );
+
+
+        // =====================================================
+        // PLAY AGAIN
+        // =====================================================
+
         Button playAgainButton =
-            new Button("PLAY AGAIN");
+            new Button(
+                "PLAY AGAIN"
+            );
 
 
-        playAgainButton.setPrefWidth(180);
+        playAgainButton.setPrefWidth(
+            200
+        );
 
-        playAgainButton.setPrefHeight(40);
+        playAgainButton.setPrefHeight(
+            45
+        );
 
+        playAgainButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                16
+            )
+        );
+
+        playAgainButton.setTextFill(
+            Color.web("#F5E6C8")
+        );
+
+
+        playAgainButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
+
+
+        // =====================================================
+        // MAIN MENU
+        // =====================================================
 
         Button menuButton =
-            new Button("MAIN MENU");
+            new Button(
+                "MAIN MENU"
+            );
 
 
-        menuButton.setPrefWidth(180);
+        menuButton.setPrefWidth(
+            200
+        );
 
-        menuButton.setPrefHeight(40);
+        menuButton.setPrefHeight(
+            45
+        );
+
+        menuButton.setFont(
+            Font.font(
+                "Georgia",
+                FontWeight.BOLD,
+                16
+            )
+        );
+
+        menuButton.setTextFill(
+            Color.web("#F5E6C8")
+        );
 
 
-        // -------------------------
-        // PLAY AGAIN
-        // -------------------------
+        menuButton.setStyle(
+            "-fx-background-color: #3A263F;" +
+            "-fx-background-radius: 6;" +
+            "-fx-border-color: #A88B5A;" +
+            "-fx-border-width: 1.5;" +
+            "-fx-border-radius: 6;" +
+            "-fx-cursor: hand;"
+        );
 
-        playAgainButton.setOnAction(event -> {
 
-            GameScreen gameScreen =
-                new GameScreen(
-                    stage,
-                    difficulty
+        // =====================================================
+        // BUTTON HOVER
+        // =====================================================
+
+        playAgainButton.setOnMouseEntered(
+            event -> {
+
+                playAgainButton.setStyle(
+                    "-fx-background-color: #503451;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #D6B878;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
                 );
 
-
-            gameScreen.show();
-        });
-
-
-        // -------------------------
-        // MAIN MENU
-        // -------------------------
-
-        menuButton.setOnAction(event -> {
-
-            MainMenu mainMenu =
-                new MainMenu(stage);
+            }
+        );
 
 
-            mainMenu.show();
-        });
+        playAgainButton.setOnMouseExited(
+            event -> {
+
+                playAgainButton.setStyle(
+                    "-fx-background-color: #3A263F;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
 
 
-        // -------------------------
-        // ADD RESULT CONTROLS
-        // -------------------------
+        menuButton.setOnMouseEntered(
+            event -> {
 
-        BorderPane root =
-            (BorderPane)
-            stage.getScene().getRoot();
+                menuButton.setStyle(
+                    "-fx-background-color: #503451;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #D6B878;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
 
 
-        VBox centerLayout =
-            (VBox)
-            root.getCenter();
+        menuButton.setOnMouseExited(
+            event -> {
+
+                menuButton.setStyle(
+                    "-fx-background-color: #3A263F;" +
+                    "-fx-background-radius: 6;" +
+                    "-fx-border-color: #A88B5A;" +
+                    "-fx-border-width: 1.5;" +
+                    "-fx-border-radius: 6;" +
+                    "-fx-cursor: hand;"
+                );
+
+            }
+        );
 
 
-        centerLayout.getChildren().addAll(
-            finalScoreLabel,
+        // =====================================================
+        // PLAY AGAIN ACTION
+        // =====================================================
+
+        playAgainButton.setOnAction(
+            event -> {
+
+                if (wizardRunAnimator != null) {
+                    wizardRunAnimator.stop();
+                }
+
+                if (wizardDeathAnimator != null) {
+                    wizardDeathAnimator.stop();
+                }
+
+
+                GameScreen gameScreen =
+                    new GameScreen(
+                        stage,
+                        difficulty
+                    );
+
+
+                gameScreen.show();
+
+            }
+        );
+
+
+        // =====================================================
+        // MAIN MENU ACTION
+        // =====================================================
+
+        menuButton.setOnAction(
+            event -> {
+
+                if (wizardRunAnimator != null) {
+                    wizardRunAnimator.stop();
+                }
+
+                if (wizardDeathAnimator != null) {
+                    wizardDeathAnimator.stop();
+                }
+
+
+                MainMenu mainMenu =
+                    new MainMenu(
+                        stage
+                    );
+
+
+                mainMenu.show();
+
+            }
+        );
+
+
+        // =====================================================
+        // BUILD BUTTON AREA
+        // =====================================================
+
+        buttonBox.getChildren().addAll(
             playAgainButton,
             menuButton
+        );
+
+
+        // =====================================================
+        // BUILD END CARD
+        // =====================================================
+
+        endContent.getChildren().addAll(
+            titleLabel,
+            endWizard,
+            finalScoreLabel,
+            buttonBox
+        );
+
+
+        // =====================================================
+        // ADD TO ROOT
+        // =====================================================
+
+        endRoot.getChildren().addAll(
+            endBackground,
+            overlay,
+            endContent
+        );
+
+
+        // =====================================================
+        // REPLACE ENTIRE GAME SCREEN
+        // =====================================================
+
+        Scene endScene =
+            new Scene(
+                endRoot,
+                900,
+                600
+            );
+
+
+        stage.setScene(
+            endScene
         );
     }
 }
