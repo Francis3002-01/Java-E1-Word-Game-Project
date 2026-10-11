@@ -50,7 +50,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.media.AudioClip;
 import javafx.event.ActionEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.Cursor;
+//import javafx.scene.Cursor;
 
 
 public class GameScreen {
@@ -61,7 +61,6 @@ public class GameScreen {
     private WordManager wordManager;
     private EnemyManager enemyManager;
 
-<<<<<<< HEAD
     // =========================
     // SOUND EFFECTS
     // =========================
@@ -71,8 +70,6 @@ public class GameScreen {
     private AudioClip correctAnswerSound;
     private AudioClip wrongAnswerSound;
 
-=======
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
     // =========================
     // UI ELEMENTS
     // =========================
@@ -141,7 +138,6 @@ public class GameScreen {
 
     private long wordStartTime;
 
-<<<<<<< HEAD
     
     private void loadSoundEffects() {
 
@@ -189,8 +185,6 @@ public class GameScreen {
     }
 
 
-=======
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
     // =========================================================
     // CONSTRUCTOR
     // =========================================================
@@ -2361,11 +2355,8 @@ scrambledWordLabel.setText(scrambledWord);
 
             });
 
-<<<<<<< HEAD
             addButtonSounds(cancelButton);
 
-=======
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
             confirmQuitButton.setOnAction(event -> {
                 quitGame();
             });
@@ -2849,14 +2840,10 @@ scrambledWordLabel.setText(scrambledWord);
                 600
             );
 
-<<<<<<< HEAD
             CursorManager.setCustomCursor(endScene);
 
         stage.setScene(
             endScene
         );
-=======
-        stage.setScene(endScene);
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
     }
 }

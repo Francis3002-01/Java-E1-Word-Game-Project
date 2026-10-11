@@ -424,14 +424,10 @@ public class ScoreScreen {
 
         backButton.setStyle(backStyle);
         backButton.setOnMouseEntered(event -> {
-<<<<<<< HEAD
         playHoverSound();
         backButton.setStyle(
                 backHoverStyle
         );
-=======
-        backButton.setStyle(backHoverStyle);
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
 
         ScaleTransition grow =
                 new ScaleTransition(
@@ -563,16 +559,12 @@ public class ScoreScreen {
                         DESIGN_HEIGHT
                 );
 
-<<<<<<< HEAD
         CursorManager.setCustomCursor(scene);
 
         scene.setFill(
                 Color.web("#120D20")
         );
 
-=======
-        scene.setFill(Color.web("#120D20"));
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
         stage.setScene(scene);
         stage.setTitle("Wizard's Escape");
         stage.show();

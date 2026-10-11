@@ -18,14 +18,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
 import javafx.animation.ScaleTransition;
 import javafx.animation.FadeTransition;
-<<<<<<< HEAD
 import javafx.scene.media.AudioClip;
 import javafx.event.ActionEvent;
 import java.io.File;
 
-=======
-//import javafx.stage.Modality;
->>>>>>> e113c4b9b6fc30946c2707e755bc6357fc8f4276
 
 public class MainMenu {
 
