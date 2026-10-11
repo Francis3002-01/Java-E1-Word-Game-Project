@@ -26,12 +26,14 @@ public class WordManager {
             minLength = GameConfig.APPRENTICE_MIN_LENGTH;
             maxLength = GameConfig.APPRENTICE_MAX_LENGTH;
 
-        } else if (difficulty.equalsIgnoreCase("Sorcerer")) {
-
+        } 
+        
+        else if (difficulty.equalsIgnoreCase("Sorcerer")) {
             minLength = GameConfig.SORCERER_MIN_LENGTH;
             maxLength = GameConfig.SORCERER_MAX_LENGTH;
-
-        } else {
+        } 
+        
+        else {
             throw new IllegalArgumentException("Invalid difficulty.");
         }
 
@@ -40,7 +42,6 @@ public class WordManager {
 
         // Keep only words that fit the difficulty
         for (String word : dictionary) {
-
             if (word.length() >= minLength &&
                 word.length() <= maxLength) {
 
@@ -54,20 +55,6 @@ public class WordManager {
             );
         }
     }
-
-
-    // Select and scramble a new word
-    /*public String generateNewWord() {
-
-        // Randomly select a word
-        currentWord = availableWords.get(
-                (int) (Math.random() * availableWords.size())
-        );
-
-        scrambledWord = scrambleWord(currentWord);
-
-        return scrambledWord;
-    }*/
 
     public String generateNewWord() {
 
@@ -83,9 +70,7 @@ public class WordManager {
             throw new IllegalStateException("No unused words remaining.");
         }
 
-        currentWord = unusedWords.get(
-            (int) (Math.random() * unusedWords.size())
-        );
+        currentWord = unusedWords.get((int) (Math.random() * unusedWords.size()));
 
         usedWords.add(currentWord);
 
@@ -93,7 +78,6 @@ public class WordManager {
 
         return scrambledWord;
     }
-
 
     // Scramble the letters of a word
     private String scrambleWord(String word) {
@@ -126,7 +110,6 @@ public class WordManager {
 
         return scrambled.toString().toUpperCase();
     }
-
 
     // Get the original word
     public String getCurrentWord() {

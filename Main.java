@@ -11,9 +11,8 @@ public class Main extends Application {
     public void start(Stage stage) {
 
         stage.setTitle("Wizard's Escape");
-        stage.getIcons().add(
-            new Image("file:assets/wizard_logo.png")
-        );
+
+        stage.getIcons().add(new Image("file:assets/wizard_logo.png"));
 
         stage.setResizable(true);
 
@@ -25,13 +24,10 @@ public class Main extends Application {
 
         mainMenu.show();
 
-
         stage.show();
-
 
         // Opening fade animation
         stage.getScene().getRoot().setOpacity(0);
-
 
         FadeTransition fade =
                 new FadeTransition(
@@ -39,18 +35,13 @@ public class Main extends Application {
                         stage.getScene().getRoot()
                 );
 
-
         fade.setFromValue(0);
-
         fade.setToValue(1);
-
         fade.play();
 
     }
 
-
     public static void main(String[] args) {
         launch(args);
-
     }
 }
