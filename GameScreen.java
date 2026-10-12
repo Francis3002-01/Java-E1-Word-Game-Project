@@ -247,10 +247,7 @@ public class GameScreen {
         // -------------------------
         // WORDS
         // -------------------------
-        wordsLabel = new Label(
-            "Words Found: 0 / " +
-            gameLogic.getGoal()
-        );
+        wordsLabel = new Label("Words Found: 0 / " +gameLogic.getGoal());
 
         wordsLabel.setFont(Font.font("Arial", 18));
 
@@ -352,24 +349,16 @@ public class GameScreen {
             wordShadow.setSpread(0.45);
             wordShadow.setOffsetX(3);
             wordShadow.setOffsetY(3);
-            wordShadow.setColor(
-                Color.rgb(0, 0, 0, 0.9)
-            );
+            wordShadow.setColor(Color.rgb(0, 0, 0, 0.9));
 
             scrambledWordLabel.setEffect(wordShadow);
 
         // -------------------------
         // MESSAGE LABEL
         // -------------------------
-
         messageLabel = new Label();
 
-        messageLabel.setFont(
-            Font.font(
-                "Arial",
-                16
-            )
-        );
+        messageLabel.setFont(Font.font("Arial",16));
 
         messageLabel.setTextFill(Color.WHITE);
 
@@ -443,10 +432,7 @@ public class GameScreen {
                 return;
             }
 
-            int hintPosition =
-                availablePositions.get(
-                    new Random().nextInt(availablePositions.size())
-                );
+            int hintPosition = availablePositions.get(new Random().nextInt(availablePositions.size()));
 
             // No available position
             if (hintPosition == -1) {
@@ -810,20 +796,12 @@ answerField.addEventFilter(
         // -------------------------
         // BACKGROUND
         // -------------------------
-
-        root.setStyle(
-            "-fx-background-color: #17233C;"
-        );
-
+        root.setStyle("-fx-background-color: #17233C;");
 
         // -------------------------
         // SCENE
         // -------------------------
-        Scene scene = new Scene(
-            root,
-            900,
-            600
-        );
+        Scene scene = new Scene(root,900,600);
 
         CursorManager.setCustomCursor(scene);
 
@@ -1126,9 +1104,7 @@ answerField.addEventFilter(
         // ATTACK
         // -------------------------
         Image attackSheet = new Image(
-            new java.io.File(
-                currentEnemy.getAttackPath()
-            ).toURI().toString()
+            new java.io.File(currentEnemy.getAttackPath()).toURI().toString()
         );
 
 
@@ -1165,33 +1141,20 @@ answerField.addEventFilter(
         setupEnemy();
 
         // Generate word.
-        /*String scrambledWord =wordManager.generateNewWord();
-
-        scrambledWordLabel.setText(scrambledWord);
-        wordStartTime = System.nanoTime();*/
         
         String scrambledWord = wordManager.generateNewWord();
 
-        /*revealedPositions.clear();
-        activeBoxIndex = 0;
-        scrambledWordLabel.setText(scrambledWord);*/
         revealedPositions.clear();
         activeBoxIndex = 0;
 
         typedLetters = new char[wordManager.getCurrentWord().length()];
 
-        /*for (int i = 0; i < typedLetters.length; i++) {
-            typedLetters[i] = '\0';
-        }*/
-
-scrambledWordLabel.setText(scrambledWord);
+        scrambledWordLabel.setText(scrambledWord);
 
         createLetterBoxes();
 
         wordStartTime = System.nanoTime();
                 
-
-
         // Reset answer.
         for (int i = 0; i < typedLetters.length; i++) {
             typedLetters[i] = '\0';
@@ -1444,12 +1407,7 @@ scrambledWordLabel.setText(scrambledWord);
         // -----------------------------------------
         // PLAYER TYPED LETTER
         // -----------------------------------------
-
-        else if (
-            typedLetters != null &&
-            typedLetters[i] != '\0'
-        ) {
-
+        else if (typedLetters != null &&typedLetters[i] != '\0') {
             letterBox.setText(
                 String.valueOf(
                     typedLetters[i]
@@ -1460,9 +1418,7 @@ scrambledWordLabel.setText(scrambledWord);
         // -----------------------------------------
         // EMPTY BOX
         // -----------------------------------------
-
         else {
-
             letterBox.setText("_");
         }
     }
@@ -1479,7 +1435,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             // HINTED / LOCKED BOX
             if (revealedPositions.contains(i)) {
-
                 letterBox.setStyle(
                     "-fx-background-color: rgba(168, 139, 90, 0.45);" +
                     "-fx-border-color: #F5E6C8;" +
@@ -1491,7 +1446,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             // ACTIVE KEYBOARD BOX
             else if (i == activeBoxIndex) {
-
                 letterBox.setStyle(
                     "-fx-background-color: rgba(0, 0, 0, 0.35);" +
                     "-fx-border-color: #4CAF50;" +
@@ -1503,7 +1457,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             // NORMAL BOX
             else {
-
                 letterBox.setStyle(
                     "-fx-background-color: rgba(0, 0, 0, 0.35);" +
                     "-fx-border-color: #A88B5A;" +
@@ -1519,8 +1472,7 @@ scrambledWordLabel.setText(scrambledWord);
 
         String currentWord =wordManager.getCurrentWord();
 
-        while (
-            activeBoxIndex < currentWord.length() &&
+        while (activeBoxIndex < currentWord.length() &&
             (
                 revealedPositions.contains(activeBoxIndex) ||
                 typedLetters[activeBoxIndex] != '\0'
@@ -1565,10 +1517,7 @@ scrambledWordLabel.setText(scrambledWord);
 
         firstFlash.setOnFinished(
             event -> {
-                imageView.setEffect(
-                    null
-                );
-
+                imageView.setEffect(null);
 
                 // Small gap before second flash.
                 PauseTransition gap =
@@ -1582,11 +1531,7 @@ scrambledWordLabel.setText(scrambledWord);
                         // Second flash.
                         imageView.setEffect(redBlend);
 
-
-                        PauseTransition secondFlash =
-                            new PauseTransition(
-                                Duration.millis(80)
-                            );
+                        PauseTransition secondFlash = new PauseTransition(Duration.millis(80));
 
 
                         secondFlash.setOnFinished(
@@ -1617,7 +1562,6 @@ scrambledWordLabel.setText(scrambledWord);
     // =========================================================
     // WIZARD ATTACK
     // =========================================================
-
     private void playWizardAttack(Runnable onFinished) {
 
         animationPlaying = true;
@@ -1675,10 +1619,7 @@ scrambledWordLabel.setText(scrambledWord);
             event -> {
 
                 // Enemy flashes red.
-
-                flashRed(
-                    enemyImageView
-                );
+                flashRed(enemyImageView);
 
             }
         );
@@ -2094,9 +2035,6 @@ scrambledWordLabel.setText(scrambledWord);
 
         }
 
-       
-
-
         gamePaused = true;
 
         if (timeline != null) {
@@ -2250,13 +2188,10 @@ scrambledWordLabel.setText(scrambledWord);
                 "-fx-border-radius: 6;"
             );
 
-
             // =========================================
             // HOVER
             // =========================================
-
             cancelButton.setOnMouseEntered(event -> {
-
                 cancelButton.setStyle(
                     "-fx-background-color: #4B5B78;" +
                     "-fx-background-radius: 6;" +
@@ -2268,7 +2203,6 @@ scrambledWordLabel.setText(scrambledWord);
             });
 
             cancelButton.setOnMouseExited(event -> {
-
                 cancelButton.setStyle(
                     "-fx-background-color: #3A4863;" +
                     "-fx-background-radius: 6;" +
@@ -2281,7 +2215,6 @@ scrambledWordLabel.setText(scrambledWord);
 
 
             confirmQuitButton.setOnMouseEntered(event -> {
-
                 confirmQuitButton.setStyle(
                     "-fx-background-color: #A83A3A;" +
                     "-fx-background-radius: 6;" +
@@ -2381,9 +2314,7 @@ scrambledWordLabel.setText(scrambledWord);
                 buttonBox
             );
 
-            overlayRoot.getChildren().add(
-                popup
-            );
+            overlayRoot.getChildren().add(popup);
 
             // =========================================
             // SHOW
@@ -2395,7 +2326,6 @@ scrambledWordLabel.setText(scrambledWord);
     // =========================================================
     // QUIT GAME
     // =========================================================
-
     private void quitGame() {
 
         if (timeline != null) {
@@ -2436,14 +2366,12 @@ scrambledWordLabel.setText(scrambledWord);
     // =========================================================
     // END GAME
     // =========================================================
-
     private void endGame(boolean cleared) {
 
         MusicManager.playEndMusic(cleared);
         // =====================================================
         // STOP GAME TIMER
         // =====================================================
-
         if (timeline != null) {
             timeline.stop();
         }
@@ -2452,7 +2380,6 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // STOP GAME ANIMATIONS
         // =====================================================
-
         if (wizardIdleAnimator != null) {
             wizardIdleAnimator.stop();
         }
@@ -2472,7 +2399,6 @@ scrambledWordLabel.setText(scrambledWord);
         if (enemyAttackAnimator != null) {
             enemyAttackAnimator.stop();
         }
-
 
         // =====================================================
         // PREVENT FURTHER INPUT
@@ -2517,7 +2443,6 @@ scrambledWordLabel.setText(scrambledWord);
                 );
 
         } else {
-
             // Time ran out
             endBackgroundImage =
                 new Image(
@@ -2584,15 +2509,10 @@ scrambledWordLabel.setText(scrambledWord);
             )
         );
 
-
         // =====================================================
         // WIZARD
         // =====================================================
-        ImageView endWizard =
-            createEndCardWizard(
-                cleared
-            );
-
+        ImageView endWizard = createEndCardWizard(cleared);
 
         // =====================================================
         // FINAL SCORE
@@ -2625,10 +2545,7 @@ scrambledWordLabel.setText(scrambledWord);
         // =====================================================
         // PLAY AGAIN
         // =====================================================
-        Button playAgainButton =
-            new Button(
-                "PLAY AGAIN"
-            );
+        Button playAgainButton = new Button("PLAY AGAIN");
 
         playAgainButton.setPrefWidth(200);
 
@@ -2681,7 +2598,6 @@ scrambledWordLabel.setText(scrambledWord);
             
         );
 
-
         // =====================================================
         // BUTTON HOVER
         // =====================================================
@@ -2730,10 +2646,8 @@ scrambledWordLabel.setText(scrambledWord);
             }
         );
 
-
         menuButton.setOnMouseExited(
             event -> {
-
                 menuButton.setStyle(
                     "-fx-background-color: #3A263F;" +
                     "-fx-background-radius: 6;" +
@@ -2745,7 +2659,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             }
         );
-
 
         // =====================================================
         // PLAY AGAIN ACTION
@@ -2776,11 +2689,9 @@ scrambledWordLabel.setText(scrambledWord);
 
         addButtonSounds(playAgainButton);        
 
-
         // =====================================================
         // MAIN MENU ACTION
         // =====================================================
-
         menuButton.setOnAction(
             event -> {
 
@@ -2842,8 +2753,6 @@ scrambledWordLabel.setText(scrambledWord);
 
             CursorManager.setCustomCursor(endScene);
 
-        stage.setScene(
-            endScene
-        );
+        stage.setScene(endScene);
     }
 }

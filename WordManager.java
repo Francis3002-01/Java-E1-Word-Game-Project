@@ -22,10 +22,8 @@ public class WordManager {
 
         // Set the word length based on difficulty
         if (difficulty.equalsIgnoreCase("Apprentice")) {
-
             minLength = GameConfig.APPRENTICE_MIN_LENGTH;
             maxLength = GameConfig.APPRENTICE_MAX_LENGTH;
-
         } 
         
         else if (difficulty.equalsIgnoreCase("Sorcerer")) {
@@ -50,9 +48,7 @@ public class WordManager {
         }
 
         if (availableWords.isEmpty()) {
-            throw new IllegalStateException(
-                    "No words available for this difficulty."
-            );
+            throw new IllegalStateException("No words available for this difficulty.");
         }
     }
 
@@ -116,12 +112,10 @@ public class WordManager {
         return currentWord;
     }
 
-
     // Get the current scrambled word
     public String getScrambledWord() {
         return scrambledWord;
     }
-
 
     // Get the available words for this difficulty
     public List<String> getAvailableWords() {

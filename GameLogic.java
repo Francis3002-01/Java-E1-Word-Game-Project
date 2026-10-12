@@ -77,8 +77,7 @@ public class GameLogic {
 
         double multiplier = getDifficultyMultiplier();
 
-        int totalPoints =
-            (int) Math.round(subtotal * multiplier);
+        int totalPoints =(int) Math.round(subtotal * multiplier);
 
         score += totalPoints;
 
@@ -91,17 +90,11 @@ public class GameLogic {
         return totalPoints;
     }
 
-
     // Process a wrong answer
     public int processWrongGuess() {
-
         currentStreak = 0;
-
-        return deductScore(
-            GameConfig.WRONG_WORD_PENALTY
-        );
+        return deductScore(GameConfig.WRONG_WORD_PENALTY);
     }
-
 
     // Calculate points based on word length
     public int calculateWordPoints(String word) {
@@ -259,9 +252,7 @@ public class GameLogic {
 
         hintsRemaining--;
 
-        deductScore(
-            GameConfig.HINT_PENALTY
-        );
+        deductScore(GameConfig.HINT_PENALTY);
 
         return true;
     }

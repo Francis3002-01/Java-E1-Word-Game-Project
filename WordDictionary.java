@@ -121,7 +121,6 @@ public class WordDictionary {
         "wizardry"
     );
 
-
     // Check if a word exists in the dictionary
     public static boolean contains(String word) {
 
@@ -131,7 +130,6 @@ public class WordDictionary {
 
         return WORDS.contains(word.toLowerCase());
     }
-
 
     // Return the complete dictionary
     public static Set<String> getWords() {

@@ -43,14 +43,18 @@ public class MainMenu {
         if (hoverFile.exists()) {
             hoverSound = new AudioClip(hoverFile.toURI().toString());
             hoverSound.setVolume(0.5);
-        } else {
+        } 
+        
+        else {
             System.out.println("Hover sound not found: " + hoverFile.getAbsolutePath());
         }
 
         if (clickFile.exists()) {
             clickSound = new AudioClip(clickFile.toURI().toString());
             clickSound.setVolume(0.7);
-        } else {
+        } 
+        
+        else {
             System.out.println("Click sound not found: " + clickFile.getAbsolutePath());
         }
 
@@ -700,7 +704,6 @@ public class MainMenu {
 
         fadeOut.play();
     }
-
 
     private Circle createParticle() {
 
