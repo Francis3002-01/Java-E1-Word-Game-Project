@@ -133,7 +133,7 @@ public class GameScreen {
     // =========================
     // SPRITE DISPLAY SETTINGS
     // =========================
-    private static final double SPRITE_SIZE = 240;
+    private static final double SPRITE_SIZE = 400;
     private static final double END_CARD_SPRITE_SIZE = 220;
 
     private long wordStartTime;
